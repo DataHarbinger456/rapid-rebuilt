@@ -1,0 +1,334 @@
+@extends('layouts.admin.master')
+
+@section('title')Case Details @endsection
+
+@section('content')
+    @component('components.breadcrumb')
+        @slot('breadcrumb_title')
+            <h3>Case #{{ $case->case_number }}</h3>
+        @endslot
+        <li class="breadcrumb-item">Admin</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.cases.index') }}">Cases</a></li>
+        <li class="breadcrumb-item active">{{ $case->case_number }}</li>
+    @endcomponent
+
+    <div class="container-fluid">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-xl-8">
+                <!-- Customer Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Customer Information</h5>
+                    </div>
+                    <div class="card-body">
+                        @if($case->user)
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ $case->user->name }}</p>
+                                    <p><strong>Email:</strong> {{ $case->user->email }}</p>
+                                    <p><strong>Phone:</strong> {{ $case->user->phone ?? 'N/A' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Address:</strong> {{ $case->user->address_1 ?? 'N/A' }}</p>
+                                    <p><strong>City/State:</strong> {{ $case->user->city ?? '' }}, {{ $case->user->states ?? '' }} {{ $case->user->zip ?? '' }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-muted">Customer information not available</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Vehicle Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Vehicle Information</h5>
+                    </div>
+                    <div class="card-body">
+                        @if($case->vehicle)
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr><td class="text-muted">VIN:</td><td><strong class="font-monospace">{{ $case->vehicle->vin }}</strong></td></tr>
+                                        <tr><td class="text-muted">Year:</td><td>{{ $case->vehicle->year }}</td></tr>
+                                        <tr><td class="text-muted">Make:</td><td>{{ $case->vehicle->make }}</td></tr>
+                                        <tr><td class="text-muted">Model:</td><td>{{ $case->vehicle->model }}</td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr><td class="text-muted">Body Type:</td><td>{{ $case->vehicle->body_type ?? 'N/A' }}</td></tr>
+                                        <tr><td class="text-muted">Color:</td><td>{{ $case->vehicle->color ?? 'N/A' }}</td></tr>
+                                        <tr><td class="text-muted">Odometer:</td><td>{{ number_format($case->vehicle->odometer_reading ?? 0) }} mi</td></tr>
+                                        <tr><td class="text-muted">Title Brand:</td><td>{{ ucfirst($case->vehicle->title_brand ?? 'N/A') }}</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-muted">Vehicle information not available</p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Documents</h5>
+                        @if(count($missing_documents) > 0)
+                            <span class="badge badge-warning">{{ count($missing_documents) }} missing</span>
+                        @else
+                            <span class="badge badge-success">All documents uploaded</span>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Document Type</th>
+                                        <th>Status</th>
+                                        <th>Uploaded</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($case->documents as $doc)
+                                        <tr>
+                                            <td>{{ ucfirst(str_replace('_', ' ', $doc->document_type)) }}</td>
+                                            <td>
+                                                <span class="badge badge-{{
+                                                    $doc->status === 'approved' ? 'success' :
+                                                    ($doc->status === 'rejected' ? 'danger' : 'warning')
+                                                }}">
+                                                    {{ ucfirst($doc->status) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $doc->created_at->format('M j, Y') }}</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                                                @if($doc->status === 'pending')
+                                                    <button class="btn btn-sm btn-success">Approve</button>
+                                                    <button class="btn btn-sm btn-danger">Reject</button>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">No documents uploaded</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Components -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Major Components</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Part Type</th>
+                                        <th>Condition</th>
+                                        <th>Source</th>
+                                        <th>Part #</th>
+                                        <th>Verified</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($case->components as $component)
+                                        <tr>
+                                            <td>{{ ucfirst(str_replace('_', ' ', $component->part_type)) }}</td>
+                                            <td><span class="badge badge-secondary">{{ ucfirst($component->condition) }}</span></td>
+                                            <td>{{ $component->source ?? 'N/A' }}</td>
+                                            <td><code>{{ $component->part_number ?? '-' }}</code></td>
+                                            <td>
+                                                @if($component->verified)
+                                                    <span class="text-success"><i data-feather="check-circle"></i></span>
+                                                @else
+                                                    <span class="text-muted"><i data-feather="circle"></i></span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No components registered</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Case Timeline</h5>
+                    </div>
+                    <div class="card-body">
+                        @forelse($case->timeline->sortByDesc('created_at') as $event)
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="bg-light rounded-circle p-2">
+                                        <i data-feather="{{ $event->event === 'status_changed' ? 'refresh-cw' : 'activity' }}" style="width: 16px; height: 16px;"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1"><strong>{{ $event->title }}</strong></p>
+                                    <p class="mb-1 text-muted">{{ $event->description }}</p>
+                                    <small class="text-muted">{{ $event->created_at->format('M j, Y g:i A') }}</small>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-muted text-center">No timeline events</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-xl-4">
+                <!-- Status Card -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Case Status</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <span class="badge badge-lg p-3" style="font-size: 1rem;">
+                            {{ ucfirst(str_replace('_', ' ', $case->status)) }}
+                        </span>
+                        <hr>
+                        <form action="{{ route('admin.cases.updateStatus', $case) }}" method="POST" class="mb-3">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label">Change Status</label>
+                                <select name="status" class="form-select">
+                                    @foreach($available_statuses as $status)
+                                        <option value="{{ $status }}" {{ $case->status === $status ? 'selected' : '' }}>
+                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Assignment -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Inspector Assignment</h5>
+                    </div>
+                    <div class="card-body">
+                        @if($case->assignedInspector)
+                            <p><strong>Assigned to:</strong> {{ $case->assignedInspector->name }}</p>
+                        @else
+                            <p class="text-muted">No inspector assigned</p>
+                        @endif
+                        <form action="{{ route('admin.cases.assign', $case) }}" method="POST">
+                            @csrf
+                            <select name="inspector_id" class="form-select mb-2" required>
+                                <option value="">Select Inspector...</option>
+                                @foreach(\App\Models\User::inspectors()->get() as $inspector)
+                                    <option value="{{ $inspector->id }}" {{ $case->assigned_inspector_id == $inspector->id ? 'selected' : '' }}>
+                                        {{ $inspector->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary w-100">Assign Inspector</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Payment Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total Amount:</span>
+                            <strong>US${{ number_format($case->total_amount ?? 0, 2, '.', ',') }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Status:</span>
+                            <span class="badge badge-{{ $case->is_paid ? 'success' : 'warning' }}">
+                                {{ $case->is_paid ? 'Paid' : 'Pending' }}
+                            </span>
+                        </div>
+                        @if($case->paid_at)
+                            <div class="d-flex justify-content-between">
+                                <span>Paid on:</span>
+                                <span>{{ $case->paid_at->format('M j, Y') }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Inspection -->
+                @if($case->inspection)
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Inspection</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Result:</span>
+                                <span class="badge badge-{{ $case->inspection->result === 'passed' ? 'success' : ($case->inspection->result === 'failed' ? 'danger' : 'warning') }}">
+                                    {{ ucfirst($case->inspection->result) }}
+                                </span>
+                            </div>
+                            @if($case->inspection->completed_at)
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Completed:</span>
+                                    <span>{{ $case->inspection->completed_at->format('M j, Y') }}</span>
+                                </div>
+                            @endif
+                            <div class="d-flex justify-content-between">
+                                <span>Photos:</span>
+                                <span>{{ $case->inspection->photos->count() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Add Note -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Add Note</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('admin.cases.addNote', $case) }}" method="POST">
+                            @csrf
+                            <textarea name="note" class="form-control mb-2" rows="3" placeholder="Add an internal note..." required></textarea>
+                            <button type="submit" class="btn btn-outline-primary w-100">Add Note</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endsection

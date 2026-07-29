@@ -1,0 +1,60 @@
+{
+  "public/assets/images/dashboard-2/target1.png": {
+    "file": "assets/target1-040ce5be.png",
+    "src": "public/assets/images/dashboard-2/target1.png"
+  },
+  "public/assets/images/dashboard/bg.jpg": {
+    "file": "assets/bg-d137394d.jpg",
+    "src": "public/assets/images/dashboard/bg.jpg"
+  },
+  "public/assets/images/details_close.png": {
+    "file": "assets/details_close-d54863d6.png",
+    "src": "public/assets/images/details_close.png"
+  },
+  "public/assets/images/details_open.png": {
+    "file": "assets/details_open-f848d63f.png",
+    "src": "public/assets/images/details_open.png"
+  },
+  "public/assets/images/hour.svg": {
+    "file": "assets/hour-34ba2a99.svg",
+    "src": "public/assets/images/hour.svg"
+  },
+  "public/assets/images/min.svg": {
+    "file": "assets/min-a650c1e5.svg",
+    "src": "public/assets/images/min.svg"
+  },
+  "public/assets/images/other-images/calender-bg.png": {
+    "file": "assets/calender-bg-b0f8caeb.png",
+    "src": "public/assets/images/other-images/calender-bg.png"
+  },
+  "public/assets/images/other-images/clock-face.png": {
+    "file": "assets/clock-face-dcecb01e.png",
+    "src": "public/assets/images/other-images/clock-face.png"
+  },
+  "public/assets/images/other-images/coming-soon-bg.jpg": {
+    "file": "assets/coming-soon-bg-f18f8eaf.jpg",
+    "src": "public/assets/images/other-images/coming-soon-bg.jpg"
+  },
+  "public/assets/images/other-images/maintenance-bg.jpg": {
+    "file": "assets/coming-soon-bg-f18f8eaf.jpg",
+    "src": "public/assets/images/other-images/coming-soon-bg.jpg"
+  },
+  "public/assets/images/other-images/mobile-clock-wallpaper.jpg": {
+    "file": "assets/mobile-clock-wallpaper-174e24cb.jpg",
+    "src": "public/assets/images/other-images/mobile-clock-wallpaper.jpg"
+  },
+  "public/assets/images/sec.svg": {
+    "file": "assets/sec-d22229f8.svg",
+    "src": "public/assets/images/sec.svg"
+  },
+  "public/assets/scss/style.scss": {
+    "file": "assets/style-0d1ea6bd.css",
+    "isEntry": true,
+    "src": "public/assets/scss/style.scss"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-e4a857d6.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  }
+}
