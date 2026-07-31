@@ -261,12 +261,16 @@ function loadTimeSlots(date) {
             if (response.success && response.data.length > 0) {
                 let html = '<div class="row g-2">';
                 response.data.forEach(function(slot) {
-                    const available = slot.available ? '' : 'unavailable';
+                    // The API omits `available` for open slots and exposes the
+                    // human-readable label as `formatted`.
+                    const isAvailable = slot.available ?? true;
+                    const unavailableClass = isAvailable ? '' : 'unavailable';
+                    const display = slot.display ?? slot.formatted;
                     html += `
                         <div class="col-6">
-                            <div class="card time-slot ${available}" data-time="${slot.time}" onclick="selectTimeSlot(this, '${slot.time}', ${slot.available})">
+                            <div class="card time-slot ${unavailableClass}" data-time="${slot.time}" onclick="selectTimeSlot(this, '${slot.time}', ${isAvailable})">
                                 <div class="card-body text-center py-2">
-                                    <strong>${slot.display}</strong>
+                                    <strong>${display}</strong>
                                 </div>
                             </div>
                         </div>
