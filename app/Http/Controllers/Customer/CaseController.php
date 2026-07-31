@@ -164,8 +164,10 @@ class CaseController extends Controller
                 ->route('customer.cases.show', $case)
                 ->with('success', 'Case submitted successfully!');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            report($e);
+
             return back()
                 ->withInput()
                 ->with('error', 'Failed to create case. Please try again.');
