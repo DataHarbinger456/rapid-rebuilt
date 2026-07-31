@@ -53,7 +53,7 @@
                     <div class="card-body">
                         <form action="{{ route('customer.appointments.store') }}" method="POST" id="scheduleForm">
                             @csrf
-                            <input type="hidden" name="case_id" value="{{ $case->id }}">
+                            <input type="hidden" name="user_case_id" value="{{ $case->id }}">
                             <input type="hidden" name="selected_date" id="selectedDate">
                             <input type="hidden" name="selected_time" id="selectedTime">
 

@@ -11,6 +11,7 @@ class UserFormScheduling extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'user_case_id',
         'inspector_id',
         'subject',

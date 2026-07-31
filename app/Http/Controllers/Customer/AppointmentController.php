@@ -97,22 +97,24 @@ class AppointmentController extends Controller
             return back()->with('error', 'This time slot is no longer available. Please select another time.');
         }
 
-        // Build location string
-        $location = null;
-        if ($request->inspection_type === 'mobile') {
-            $location = "{$request->address}, {$request->city}, {$request->state} {$request->zip}";
-        }
-
-        // Create appointment
+        // Create appointment using the scheduling table's actual location and
+        // customer-note columns (there is no generic `location` column).
         $appointment = UserFormScheduling::create([
             'user_case_id' => $case->id,
-            'user_id' => Auth::id(),
+            'user_id' => Auth:[REDACTED],
             'start' => $startDateTime,
             'end' => $endDateTime,
+            'duration_minutes' => 60,
+            'subject' => 'Rebuilt Title Inspection',
             'status' => 'confirmed',
-            'inspection_type' => $request->inspection_type,
-            'location' => $location,
-            'notes' => $request->notes,
+            'location_name' => $request->inspection_type === 'mobile'
+                ? 'Mobile Inspection'
+                : 'Office Inspection',
+            'location_address' => $request->inspection_type === 'mobile' ? $request->address : null,
+            'location_city' => $request->inspection_type === 'mobile' ? $request->city : null,
+            'location_state' => $request->state ?? 'FL',
+            'location_zip' => $request->inspection_type === 'mobile' ? $request->zip : null,
+            'customer_notes' => $request->notes,
         ]);
 
         // Update case status
@@ -120,13 +122,15 @@ class AppointmentController extends Controller
 
         // Add timeline entry
         $case->timeline()->create([
+            'user_id' => Auth:[REDACTED],
+            'event_type' => 'appointment_scheduled',
             'title' => 'Inspection Scheduled',
             'description' => "Inspection scheduled for {$startDateTime->format('F j, Y \\a\\t g:i A')}",
-            'type' => 'appointment',
             'metadata' => [
                 'appointment_id' => $appointment->id,
                 'inspection_type' => $request->inspection_type,
             ],
+            'is_system_event' => true,
         ]);
 
         // Send confirmation (handled by AppointmentService)
