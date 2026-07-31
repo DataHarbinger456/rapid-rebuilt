@@ -146,7 +146,9 @@ class Inspection extends Model
     public function getDurationMinutesAttribute(): ?int
     {
         if ($this->started_at && $this->completed_at) {
-            return $this->started_at->diffInMinutes($this->completed_at);
+            // Carbon 3 returns a signed float; duration is start->end so it is
+            // positive — truncate to whole minutes for the int contract.
+            return (int) $this->started_at->diffInMinutes($this->completed_at);
         }
         return null;
     }
