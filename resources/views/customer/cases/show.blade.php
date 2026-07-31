@@ -90,11 +90,11 @@
                                         </tr>
                                         <tr>
                                             <td class="text-muted">Body Style:</td>
-                                            <td>{{ $case->vehicle->body_style ?? '-' }}</td>
+                                            <td>{{ $case->vehicle->body_type ?? '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td class="text-muted">Odometer:</td>
-                                            <td>{{ number_format($case->vehicle->odometer ?? 0) }} miles</td>
+                                            <td>{{ number_format($case->vehicle->odometer_reading ?? 0) }} miles</td>
                                         </tr>
                                         <tr>
                                             <td class="text-muted">Title State:</td>
@@ -129,15 +129,15 @@
                                 @forelse($case->components as $component)
                                     <tr>
                                         <td>
-                                            <strong>{{ ucfirst(str_replace('_', ' ', $component->type)) }}</strong>
-                                            @if($component->description)
-                                                <br><small class="text-muted">{{ $component->description }}</small>
+                                            <strong>{{ $component->part_type_label }}</strong>
+                                            @if($component->other_description)
+                                                <br><small class="text-muted">{{ $component->other_description }}</small>
                                             @endif
                                         </td>
-                                        <td>{{ ucfirst(str_replace('_', ' ', $component->source)) }}</td>
+                                        <td>{{ $component->serial_number ?? $component->receipt_number ?? '—' }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $component->condition === 'good' ? 'success' : ($component->condition === 'damaged' ? 'danger' : 'secondary') }}">
-                                                {{ ucfirst($component->condition ?? 'Pending') }}
+                                            <span class="badge badge-secondary">
+                                                {{ $component->condition_label }}
                                             </span>
                                         </td>
                                         <td>
@@ -346,7 +346,7 @@
                             </div>
                         @else
                             <p class="text-muted text-center mb-0">
-                                Estimated: US${{ number_format($case->estimated_amount ?? 150, 2, '.', ',') }}
+                                Estimated: US${{ number_format($case->total_amount ?? 0, 2, '.', ',') }}
                             </p>
                         @endif
                     </div>

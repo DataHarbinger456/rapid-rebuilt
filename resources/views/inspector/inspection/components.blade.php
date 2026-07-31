@@ -58,7 +58,7 @@
                                 </div>
                                 <div class="col-6">
                                     <small class="text-muted">Source</small>
-                                    <p class="mb-2">{{ $component->source ?? 'N/A' }}</p>
+                                    <p class="mb-2">{{ $component->serial_number ?? $component->receipt_number ?? 'N/A' }}</p>
                                 </div>
                             </div>
                             <div class="row">

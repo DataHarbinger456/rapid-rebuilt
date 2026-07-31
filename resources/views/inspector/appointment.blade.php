@@ -161,7 +161,7 @@
                                                         {{ ucfirst($component->condition) }}
                                                     </span>
                                                 </td>
-                                                <td>{{ $component->source ?? 'N/A' }}</td>
+                                                <td>{{ $component->serial_number ?? $component->receipt_number ?? 'N/A' }}</td>
                                                 <td><code>{{ $component->part_number ?? '-' }}</code></td>
                                                 <td>
                                                     @if($component->verified)

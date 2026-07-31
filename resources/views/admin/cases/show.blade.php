@@ -160,7 +160,7 @@
                                         <tr>
                                             <td>{{ ucfirst(str_replace('_', ' ', $component->part_type)) }}</td>
                                             <td><span class="badge badge-secondary">{{ ucfirst($component->condition) }}</span></td>
-                                            <td>{{ $component->source ?? 'N/A' }}</td>
+                                            <td>{{ $component->serial_number ?? $component->receipt_number ?? 'N/A' }}</td>
                                             <td><code>{{ $component->part_number ?? '-' }}</code></td>
                                             <td>
                                                 @if($component->verified)

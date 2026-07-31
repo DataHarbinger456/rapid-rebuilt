@@ -33,7 +33,7 @@ $.ajaxSetup({
 @endif
 
 {{-- Validation failures redirect back, so surface them instead of failing silently. --}}
-@if($errors->any())
+@if(isset($errors) && $errors->any())
     swal("Please check your entries", @json(implode("\n", $errors->all())), "warning");
 @endif
 </script>

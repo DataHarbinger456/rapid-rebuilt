@@ -92,7 +92,7 @@
                                         <tr>
                                             <td>{{ ucfirst(str_replace('_', ' ', $component->part_type)) }}</td>
                                             <td>{{ ucfirst($component->condition) }}</td>
-                                            <td>{{ $component->source ?? 'N/A' }}</td>
+                                            <td>{{ $component->serial_number ?? $component->receipt_number ?? 'N/A' }}</td>
                                             <td><code>{{ $component->part_number ?? '-' }}</code></td>
                                             <td>
                                                 @if($component->verified)
