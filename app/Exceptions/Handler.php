@@ -35,7 +35,8 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // Reporting is a no-op unless SENTRY_LARAVEL_DSN is configured.
+            \Sentry\Laravel\Integration::captureUnhandledException($e);
         });
     }
 }

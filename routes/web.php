@@ -111,3 +111,18 @@ Route::post('/forget-password', [PasswordResetController::class, 'sendResetLink'
 
 // Route to check Availability of the email, usename, and phone number
 Route::get('/check-availability', [UserController::class, 'checkAvailability']);
+
+// Health check for uptime monitoring: app is booted, verify DB connectivity.
+Route::get('/healthz', function () {
+    try {
+        \Illuminate\Support\Facades\DB::select('SELECT 1');
+        $db = 'ok';
+    } catch (\Throwable) {
+        $db = 'error';
+    }
+
+    return response()->json(
+        ['app' => 'ok', 'db' => $db],
+        $db === 'ok' ? 200 : 503
+    );
+})->name('healthz');
