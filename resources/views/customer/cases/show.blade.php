@@ -330,7 +330,7 @@
                         <h5>Payment</h5>
                     </div>
                     <div class="card-body">
-                        @if($case->payment_status === 'paid')
+                        @if($case->is_paid)
                             <div class="text-center text-success">
                                 <i data-feather="check-circle" style="width: 48px; height: 48px;"></i>
                                 <h5 class="mt-2">Paid</h5>
