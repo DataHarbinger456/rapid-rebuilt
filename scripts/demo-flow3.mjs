@@ -1,6 +1,7 @@
 // Part 3: retake fixed pages, perform a real upload, try payment, staff review (desktop).
 import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
+import { CASE_PENDING_DOCS, CASE_DOCS_COMPLETE, CASE_PENDING_PAYMENT } from './demo-ids.mjs';
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:8090';
 const OUT = '.gg/screenshots/s1';
@@ -21,7 +22,7 @@ const page = await ctx.newPage();
 await login(page, 'mike@example.com');
 
 // Documents page + real upload
-await page.goto(`${BASE}/customer/cases/41/documents`, { waitUntil: 'domcontentloaded' });
+await page.goto(`${BASE}/customer/cases/${CASE_PENDING_DOCS}/documents`, { waitUntil: 'domcontentloaded' });
 await page.screenshot({ path: `${OUT}/06-documents-upload.png` });
 
 writeFileSync('/tmp/demo-title.pdf', '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
@@ -32,14 +33,14 @@ await page.waitForLoadState('domcontentloaded');
 console.log('after upload:', page.url());
 await page.screenshot({ path: `${OUT}/06b-after-upload.png` });
 
-// Booking page (case 13 documents_complete, policy now allows)
-await page.goto(`${BASE}/customer/cases/13/schedule`, { waitUntil: 'domcontentloaded' });
+// Booking page (documents_complete case, policy allows)
+await page.goto(`${BASE}/customer/cases/${CASE_DOCS_COMPLETE}/schedule`, { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(1000);
 await page.screenshot({ path: `${OUT}/07-booking.png` });
 console.log('booking:', page.url());
 
-// Payment: submit the pay form on case 11 (placeholder Stripe key -> graceful error expected)
-await page.goto(`${BASE}/customer/cases/11/pay`, { waitUntil: 'domcontentloaded' });
+// Payment: submit the pay form (placeholder Stripe key -> graceful error expected)
+await page.goto(`${BASE}/customer/cases/${CASE_PENDING_PAYMENT}/pay`, { waitUntil: 'domcontentloaded' });
 const payForm = page.locator('form#payment-form');
 if (await payForm.count()) {
   await payForm.evaluate(f => f.submit());
@@ -55,7 +56,7 @@ const staffCtx = await browser.newContext({ viewport: { width: 1280, height: 800
 const staff = await staffCtx.newPage();
 await login(staff, 'staff@rapidrebuilt.com');
 console.log('staff at:', staff.url());
-await staff.goto(`${BASE}/admin/cases/41`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await staff.goto(`${BASE}/admin/cases/${CASE_PENDING_DOCS}`, { waitUntil: 'domcontentloaded' }).catch(() => {});
 await staff.waitForTimeout(800);
 await staff.screenshot({ path: `${OUT}/10-staff-review.png` });
 console.log('staff review:', staff.url());
