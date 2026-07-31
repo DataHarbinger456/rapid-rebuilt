@@ -83,6 +83,9 @@ class CaseController extends Controller
             'components.*.source' => ['required', Rule::in(array_keys(Component::CONDITIONS))],
             'components.*.source_vin' => 'nullable|string|max:255',
             'components.*.description' => 'nullable|string|max:255',
+        ], [
+            'components.*.type.in' => 'Please pick a component type from the list. Reload the page if the options look out of date.',
+            'components.*.source.in' => 'Please pick a source from the list. Reload the page if the options look out of date.',
         ]);
 
         DB::beginTransaction();
