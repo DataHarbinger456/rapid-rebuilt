@@ -23,7 +23,7 @@ await page.waitForLoadState('networkidle');
 console.log('after login:', page.url());
 
 // Dashboard
-await page.goto(`${BASE}/customer/dashboard`, { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/customer`, { waitUntil: 'networkidle' });
 await snap('02-dashboard');
 
 // Case create wizard
