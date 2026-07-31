@@ -230,7 +230,7 @@ let inspectionType = 'office';
 // Initialize date picker
 const datePicker = flatpickr("#datePicker", {
     inline: true,
-    minDate: "today",
+    minDate: new Date().fp_incr(1), // server validation requires after:today
     maxDate: new Date().fp_incr(60), // 60 days ahead
     disable: [
         function(date) {
