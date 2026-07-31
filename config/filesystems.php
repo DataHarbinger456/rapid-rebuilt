@@ -47,7 +47,7 @@ return [
                 'bucket' => env('PRIVATE_DISK_BUCKET', env('AWS_BUCKET')),
                 'endpoint' => env('PRIVATE_DISK_ENDPOINT', env('AWS_ENDPOINT')),
                 'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-                'visibility' => 'private',
+                // R2 visibility is bucket-level; sending object ACL headers is unsupported.
                 'throw' => false,
             ]
             : [
