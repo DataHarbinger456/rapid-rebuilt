@@ -36,7 +36,8 @@ class RegisterController extends Controller
             'states' => 'required|string|max:255',
             'zip' => 'required|string|max:20',
             'phone' => 'required|string|max:20|unique:users',
-            'g-recaptcha-response' => 'required',
+            // Only demanded when reCAPTCHA is configured for this domain.
+            'g-recaptcha-response' => config('services.recaptcha.enabled') ? 'required' : 'nullable',
         ]);
 
          
@@ -61,20 +62,21 @@ class RegisterController extends Controller
                 ->withInput();
         }
     
-        // Verify reCAPTCHA
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => "6Ld7mMIqAAAAANyqqwLez3i8S01D-XrYiuLm1x56",
-            'response' => $request->input('g-recaptcha-response'),
-        ]);
-        
-        $responseBody = json_decode($response->getBody());
-    
-        // Check if reCAPTCHA verification failed
-        if (!$responseBody->success) {
-            return redirect()
-                ->back()
-                ->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed.'])
-                ->withInput();
+        // Verify reCAPTCHA when it is enabled and its keys are configured.
+        if (config('services.recaptcha.enabled')) {
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => config('services.recaptcha.secret'),
+                'response' => $request->input('g-recaptcha-response'),
+            ]);
+
+            $responseBody = json_decode($response->getBody());
+
+            if (! ($responseBody->success ?? false)) {
+                return redirect()
+                    ->back()
+                    ->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed.'])
+                    ->withInput();
+            }
         }
     
         // Create the user

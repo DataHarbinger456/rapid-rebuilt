@@ -210,14 +210,16 @@
 						</div>
 
 						<div class="row">
-							<div class="col-md-6">
-								<div class="form-group">
-									<div class="g-recaptcha" data-sitekey="6Ld7mMIqAAAAAIoaeEhu4w9rJY-mmMqGmRKIRNNv"></div>
-									@error('g-recaptcha-response')
-									<span class="text-danger">{{ $message }}</span>
-									@enderror
+							@if (config('services.recaptcha.enabled'))
+								<div class="col-md-6">
+									<div class="form-group">
+										<div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+										@error('g-recaptcha-response')
+										<span class="text-danger">{{ $message }}</span>
+										@enderror
+									</div>
 								</div>
-							</div>
+							@endif
 							<div class="col-md-6">
 								<div class="form-group">
 									<button class="btn btn-primary btn-block" type="submit">Create Account</button>
@@ -235,7 +237,9 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+@if (config('services.recaptcha.enabled'))
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+@endif
 
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
