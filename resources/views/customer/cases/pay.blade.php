@@ -59,6 +59,12 @@
     @endcomponent
 
     <div class="container-fluid">
+        @if (session('error'))
+            <div class="alert alert-danger" role="alert">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="row">
             <!-- Order Summary -->
             <div class="col-lg-5 order-lg-2 mb-4">
