@@ -118,7 +118,7 @@ class AppointmentController extends Controller
 
         return redirect()
             ->route('customer.cases.show', $case)
-            ->with('success', 'Inspection scheduled successfully! A confirmation email has been sent.');
+            ->with('success', 'Inspection scheduled successfully!');
     }
 
     /**

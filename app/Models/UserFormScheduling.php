@@ -271,6 +271,7 @@ class UserFormScheduling extends Model
         $newEnd = $newStart->copy()->addMinutes($this->duration_minutes);
 
         $newAppointment = self::create([
+            'user_id' => $this->user_id,
             'user_case_id' => $this->user_case_id,
             'inspector_id' => $this->inspector_id,
             'subject' => $this->subject,
