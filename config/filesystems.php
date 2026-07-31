@@ -35,11 +35,26 @@ return [
             'root' => storage_path('app'),
         ],
 
-        'private' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'throw' => false,
-        ],
+        // Customer document uploads. Local disk for dev; in production point
+        // it at an S3-compatible bucket (PRIVATE_DISK_DRIVER=s3) because Cloud
+        // compute is ephemeral. Code paths already branch on driver === 's3'.
+        'private' => env('PRIVATE_DISK_DRIVER', 'local') === 's3'
+            ? [
+                'driver' => 's3',
+                'key' => env('PRIVATE_DISK_KEY', env('AWS_ACCESS_KEY_ID')),
+                'secret' => env('PRIVATE_DISK_SECRET', env('AWS_SECRET_ACCESS_KEY')),
+                'region' => env('PRIVATE_DISK_REGION', env('AWS_DEFAULT_REGION', 'auto')),
+                'bucket' => env('PRIVATE_DISK_BUCKET', env('AWS_BUCKET')),
+                'endpoint' => env('PRIVATE_DISK_ENDPOINT', env('AWS_ENDPOINT')),
+                'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+                'visibility' => 'private',
+                'throw' => false,
+            ]
+            : [
+                'driver' => 'local',
+                'root' => storage_path('app/private'),
+                'throw' => false,
+            ],
 
         'public' => [
             'driver' => 'local',
