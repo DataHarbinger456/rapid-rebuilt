@@ -101,7 +101,7 @@ class AppointmentController extends Controller
         // customer-note columns (there is no generic `location` column).
         $appointment = UserFormScheduling::create([
             'user_case_id' => $case->id,
-            'user_id' => Auth:[REDACTED],
+            'user_id' => auth()->id(),
             'start' => $startDateTime,
             'end' => $endDateTime,
             'duration_minutes' => 60,
@@ -122,7 +122,7 @@ class AppointmentController extends Controller
 
         // Add timeline entry
         $case->timeline()->create([
-            'user_id' => Auth:[REDACTED],
+            'user_id' => auth()->id(),
             'event_type' => 'appointment_scheduled',
             'title' => 'Inspection Scheduled',
             'description' => "Inspection scheduled for {$startDateTime->format('F j, Y \\a\\t g:i A')}",
