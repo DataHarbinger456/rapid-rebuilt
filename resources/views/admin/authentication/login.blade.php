@@ -71,6 +71,7 @@
                         </div>
 
                         <p>Don't have an account? <a class="ms-2" href="{{ route('sign-up') }}">Create Account</a></p>
+                        <p>Or <a href="{{ route('magic.form') }}">email me a sign-in link</a> instead.</p>
                     </form>
                 </div>
             </div>

@@ -55,6 +55,42 @@ class DocumentController extends Controller
     }
 
     /**
+     * Download a document (session auth; owner or staff only)
+     */
+    public function download(UploadedFile $document)
+    {
+        $user = Auth::user();
+
+        if (!$user->isStaff() && $document->userCase?->user_id !== $user->id) {
+            abort(403);
+        }
+
+        if (!$document->file_path || !Storage::disk('private')->exists($document->file_path)) {
+            abort(404, 'File not found');
+        }
+
+        return Storage::disk('private')->download($document->file_path, $document->original_name);
+    }
+
+    /**
+     * View a document inline (session auth; owner or staff only)
+     */
+    public function view(UploadedFile $document)
+    {
+        $user = Auth::user();
+
+        if (!$user->isStaff() && $document->userCase?->user_id !== $user->id) {
+            abort(403);
+        }
+
+        if (!$document->file_path || !Storage::disk('private')->exists($document->file_path)) {
+            abort(404, 'File not found');
+        }
+
+        return Storage::disk('private')->response($document->file_path, $document->original_name);
+    }
+
+    /**
      * Show re-upload form for rejected document
      */
     public function reupload(UploadedFile $document)
@@ -106,7 +142,7 @@ class DocumentController extends Controller
         $document->userCase->timeline()->create([
             'title' => 'Document Re-uploaded',
             'description' => "{$document->document_type_label} was re-uploaded",
-            'type' => 'document',
+            'event_type' => 'document_uploaded',
             'metadata' => ['document_id' => $document->id],
         ]);
 
@@ -145,7 +181,7 @@ class DocumentController extends Controller
         $case->timeline()->create([
             'title' => 'Document Uploaded',
             'description' => "{$document->document_type_label} was uploaded",
-            'type' => 'document',
+            'event_type' => 'document_uploaded',
             'metadata' => ['document_id' => $document->id],
         ]);
 

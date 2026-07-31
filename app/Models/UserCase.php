@@ -11,6 +11,7 @@ class UserCase extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'case_number',
         'user_id',
         'assigned_inspector_id',
         'case_status',
@@ -48,6 +49,16 @@ class UserCase extends Model
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (UserCase $case) {
+            if (empty($case->case_number)) {
+                $nextId = ((int) static::withTrashed()->max('id')) + 1;
+                $case->case_number = 'RR-' . date('Y') . '-' . str_pad((string) $nextId, 5, '0', STR_PAD_LEFT);
+            }
+        });
+    }
 
     public const STATUSES = [
         'draft' => 'Draft',
@@ -156,6 +167,14 @@ class UserCase extends Model
     public function getStatusLabelAttribute(): string
     {
         return self::STATUSES[$this->status] ?? $this->status;
+    }
+
+    /**
+     * Public tracker URL (signed, non-expiring, no auth required).
+     */
+    public function getTrackingUrlAttribute(): string
+    {
+        return \Illuminate\Support\Facades\URL::signedRoute('case.track', ['case' => $this->id]);
     }
 
     public function getStatusColorAttribute(): string

@@ -396,6 +396,11 @@
                         <a href="{{ route('customer.messages.create', ['case_id' => $case->id]) }}" class="btn btn-outline-primary w-100 mt-2">
                             <i data-feather="message-circle"></i> Contact Support
                         </a>
+
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2" id="copy-tracking-link"
+                                data-tracking-url="{{ $case->tracking_url }}">
+                            <i data-feather="link"></i> Share Tracking Link
+                        </button>
                     </div>
                 </div>
             </div>
@@ -418,4 +423,20 @@
     height: 18px;
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.getElementById('copy-tracking-link')?.addEventListener('click', function () {
+    var btn = this;
+    navigator.clipboard.writeText(btn.dataset.trackingUrl).then(function () {
+        var original = btn.innerHTML;
+        btn.innerHTML = 'Link copied!';
+        setTimeout(function () {
+            btn.innerHTML = original;
+            if (window.feather) feather.replace();
+        }, 2000);
+    });
+});
+</script>
 @endpush

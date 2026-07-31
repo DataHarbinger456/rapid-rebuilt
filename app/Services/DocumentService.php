@@ -286,10 +286,16 @@ class DocumentService
      */
     public function getDownloadUrl(UploadedFile $document): string
     {
-        return Storage::disk('private')->temporaryUrl(
-            $document->file_path,
-            now()->addMinutes(30)
-        );
+        // temporaryUrl() is only supported by the s3 driver; local disks
+        // fall back to the authenticated API download route.
+        if (config('filesystems.disks.private.driver') === 's3') {
+            return Storage::disk('private')->temporaryUrl(
+                $document->file_path,
+                now()->addMinutes(30)
+            );
+        }
+
+        return url("/api/cases/{$document->user_case_id}/documents/{$document->id}/download");
     }
 
     /**

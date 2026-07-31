@@ -15,3 +15,5 @@ yarn-error.log
 /.vscode
 /laravel
 admin-rapid.sql
+.DS_Store
+/.gg

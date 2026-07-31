@@ -7,8 +7,10 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HelpController;
+use App\Http\Controllers\TrackerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +57,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dmv-forms/{formType}', [DMVFormController::class, 'store'])->name('forms.store');
     Route::get('/dmv-forms', [DMVFormController::class, 'list'])->name('forms.list');
 
+    // Session-auth routes whose names match existing blade references (api.*)
+    Route::get('/documents/{document}/download', [\App\Http\Controllers\Customer\DocumentController::class, 'download'])
+        ->name('api.documents.download');
+    Route::get('/documents/{document}/view', [\App\Http\Controllers\Customer\DocumentController::class, 'view'])
+        ->name('api.documents.view');
+    Route::get('/documents/{document}/thumbnail', [\App\Http\Controllers\Customer\DocumentController::class, 'view'])
+        ->name('api.documents.thumbnail');
+    Route::get('/appointments/slots', [\App\Http\Controllers\Api\AppointmentController::class, 'availableSlots'])
+        ->name('api.appointments.slots');
+
     // Help & Manual routes
     Route::get('/help/manual', [HelpController::class, 'manual'])->name('help.manual');
     Route::get('/help/topic/{topic}', [HelpController::class, 'topic'])->name('help.topic');
@@ -69,6 +81,18 @@ Route::post('/login', [LoginController::class, 'login'])->name('login'); // This
 
 // Logout route
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Public case tracker (signed URL, no auth)
+Route::get('/track/{case}', [TrackerController::class, 'show'])
+    ->middleware('signed')
+    ->name('case.track');
+
+// Magic-link (passwordless) login routes
+Route::get('/magic-link', [MagicLinkController::class, 'showForm'])->name('magic.form');
+Route::post('/magic-link', [MagicLinkController::class, 'send'])->name('magic.send');
+Route::get('/magic-login/{user}', [MagicLinkController::class, 'login'])
+    ->middleware('signed')
+    ->name('magic.login');
 
 // Registration routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');

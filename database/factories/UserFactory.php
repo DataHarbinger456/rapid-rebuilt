@@ -23,12 +23,28 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
+            'user_type' => 'user',
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'username' => $this->faker->unique()->userName(),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'phone' => $this->faker->numerify('##########'),
+            'address_1' => $this->faker->streetAddress(),
+            'city' => $this->faker->city(),
+            'states' => 'FL',
+            'zip' => $this->faker->postcode(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Staff user state.
+     */
+    public function staff()
+    {
+        return $this->state(fn (array $attributes) => ['user_type' => 'staff']);
     }
 
     /**

@@ -36,6 +36,7 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'verified'])->
         Route::get('/{case}/schedule', [CaseController::class, 'schedule'])->name('schedule');
         Route::get('/{case}/pay', [CaseController::class, 'pay'])->name('pay');
         Route::post('/{case}/pay', [CaseController::class, 'processPayment'])->name('process-payment');
+        Route::get('/{case}/payment-success', [CaseController::class, 'paymentSuccess'])->name('payment-success');
     });
 
     // Documents

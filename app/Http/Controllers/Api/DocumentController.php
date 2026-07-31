@@ -189,13 +189,20 @@ class DocumentController extends Controller
     /**
      * Approve a document (staff only)
      */
-    public function approve(Request $request, UploadedFile $document): JsonResponse
+    public function approve(Request $request, UserCase $case, UploadedFile $document): JsonResponse
     {
         if (!$request->user()->isStaff()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',
             ], 403);
+        }
+
+        if ($document->user_case_id !== $case->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Document does not belong to this case',
+            ], 404);
         }
 
         $notes = $request->input('notes');
@@ -219,13 +226,20 @@ class DocumentController extends Controller
     /**
      * Reject a document (staff only)
      */
-    public function reject(Request $request, UploadedFile $document): JsonResponse
+    public function reject(Request $request, UserCase $case, UploadedFile $document): JsonResponse
     {
         if (!$request->user()->isStaff()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',
             ], 403);
+        }
+
+        if ($document->user_case_id !== $case->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Document does not belong to this case',
+            ], 404);
         }
 
         $request->validate(['reason' => 'required|string|max:500']);

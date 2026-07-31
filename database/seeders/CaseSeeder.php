@@ -7,6 +7,7 @@ use App\Models\UserCase;
 use App\Models\Vehicle;
 use App\Models\Component;
 use App\Models\CaseTimeline;
+use App\Models\UploadedFile;
 use App\Models\UserFormScheduling;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
@@ -168,7 +169,156 @@ class CaseSeeder extends Seeder
             }
         }
 
+        $this->seedDemoCases($customers, $inspectors, $caseNumber);
+
         $this->command->info("Cases seeded: " . UserCase::count() . " cases created");
+    }
+
+    /**
+     * Deterministic demo cases for the demo customer (mike@example.com):
+     * one pending_documents case with a rejected doc, and one scheduled case
+     * with an upcoming appointment. The demo script relies on these states.
+     */
+    private function seedDemoCases($customers, $inspectors, int $caseNumber): void
+    {
+        $demo = $customers->firstWhere('email', 'mike@example.com') ?? $customers->first();
+
+        // --- Case 1: pending_documents with a rejected document ---
+        $case1 = UserCase::create([
+            'user_id' => $demo->id,
+            'case_number' => 'RR-' . date('Y') . '-' . str_pad(++$caseNumber, 5, '0', STR_PAD_LEFT),
+            'status' => 'pending_documents',
+            'service_type' => 'rebuilt_title',
+            'inspection_fee' => 150.00,
+            'service_fee' => 100.00,
+            'total_amount' => 250.00,
+            'is_paid' => true,
+            'paid_at' => Carbon::now()->subDays(5),
+            'submitted_at' => Carbon::now()->subDays(7),
+            'created_at' => Carbon::now()->subDays(7),
+        ]);
+
+        Vehicle::create([
+            'user_case_id' => $case1->id,
+            'vin' => '1HGCV1F30LA123456',
+            'year' => 2020,
+            'make' => 'Honda',
+            'model' => 'Accord',
+            'color' => 'blue',
+            'body_type' => 'Sedan',
+            'odometer_reading' => 48200,
+            'title_state' => 'FL',
+        ]);
+
+        Component::create([
+            'user_case_id' => $case1->id,
+            'part_type' => 'hood',
+            'condition' => 'used',
+            'source_name' => 'AutoZone',
+            'source_state' => 'FL',
+            'verified' => false,
+        ]);
+
+        UploadedFile::create([
+            'user_case_id' => $case1->id,
+            'user_id' => $demo->id,
+            'uploaded_by' => $demo->id,
+            'document_type' => 'salvage_title',
+            'original_name' => 'salvage-title.pdf',
+            'file_path' => "cases/{$case1->id}/documents/salvage-title.pdf",
+            'mime_type' => 'application/pdf',
+            'file_size' => 245760,
+            'status' => 'rejected',
+            'rejection_reason' => 'Document is blurry — please re-upload a clear scan of the salvage title.',
+        ]);
+
+        CaseTimeline::create([
+            'user_case_id' => $case1->id,
+            'user_id' => $demo->id,
+            'title' => 'Case Created',
+            'description' => 'Rebuilt title case was created',
+            'event_type' => 'case_created',
+            'is_system_event' => true,
+            'created_at' => $case1->created_at,
+        ]);
+
+        CaseTimeline::create([
+            'user_case_id' => $case1->id,
+            'user_id' => $demo->id,
+            'title' => 'Document Rejected',
+            'description' => 'Salvage title was rejected: blurry scan',
+            'event_type' => 'document_rejected',
+            'is_system_event' => true,
+            'created_at' => $case1->created_at->copy()->addDays(2),
+        ]);
+
+        // --- Case 2: scheduled with an upcoming appointment ---
+        $case2 = UserCase::create([
+            'user_id' => $demo->id,
+            'case_number' => 'RR-' . date('Y') . '-' . str_pad(++$caseNumber, 5, '0', STR_PAD_LEFT),
+            'status' => 'scheduled',
+            'service_type' => 'rebuilt_title',
+            'inspection_fee' => 150.00,
+            'service_fee' => 120.00,
+            'total_amount' => 270.00,
+            'is_paid' => true,
+            'paid_at' => Carbon::now()->subDays(10),
+            'submitted_at' => Carbon::now()->subDays(14),
+            'created_at' => Carbon::now()->subDays(14),
+        ]);
+
+        Vehicle::create([
+            'user_case_id' => $case2->id,
+            'vin' => '1FTEW1EP5LFA98765',
+            'year' => 2021,
+            'make' => 'Ford',
+            'model' => 'F-150',
+            'color' => 'red',
+            'body_type' => 'Truck',
+            'odometer_reading' => 36500,
+            'title_state' => 'FL',
+        ]);
+
+        Component::create([
+            'user_case_id' => $case2->id,
+            'part_type' => 'bumper_front',
+            'condition' => 'new',
+            'source_name' => 'NAPA',
+            'source_state' => 'FL',
+            'verified' => false,
+        ]);
+
+        foreach ([
+            ['case_created', 'Case Created', 'Rebuilt title case was created', 14],
+            ['case_submitted', 'Case Submitted', 'Case was submitted for processing', 13],
+            ['payment_received', 'Payment Received', 'Payment of $270.00 was received', 10],
+            ['appointment_scheduled', 'Inspection Scheduled', 'Inspection appointment was scheduled', 3],
+        ] as [$eventType, $title, $description, $daysAgo]) {
+            CaseTimeline::create([
+                'user_case_id' => $case2->id,
+                'user_id' => $demo->id,
+                'title' => $title,
+                'description' => $description,
+                'event_type' => $eventType,
+                'is_system_event' => true,
+                'created_at' => Carbon::now()->subDays($daysAgo),
+            ]);
+        }
+
+        if ($inspectors->isNotEmpty()) {
+            $start = Carbon::now()->addDays(3)->setTime(10, 0);
+            UserFormScheduling::create([
+                'user_case_id' => $case2->id,
+                'user_id' => $demo->id,
+                'inspector_id' => $inspectors->first()->id,
+                'start' => $start,
+                'end' => $start->copy()->addHour(),
+                'duration_minutes' => 60,
+                'status' => 'confirmed',
+                'location_name' => 'Office Location',
+                'location_state' => 'FL',
+            ]);
+        }
     }
 
     /**

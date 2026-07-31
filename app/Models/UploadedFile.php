@@ -29,6 +29,7 @@ class UploadedFile extends Model
         'reviewed_by',
         'reviewed_at',
         'review_notes',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -122,11 +123,12 @@ class UploadedFile extends Model
         $disk = $this->disk ?? 'private';
         $path = $this->file_path ?? $this->path;
 
-        if (in_array($disk, ['s3', 'private'])) {
+        // temporaryUrl() is only supported by the s3 driver.
+        if (config("filesystems.disks.{$disk}.driver") === 's3') {
             return Storage::disk($disk)->temporaryUrl($path, now()->addMinutes(30));
         }
 
-        return $this->url;
+        return url("/api/cases/{$this->user_case_id}/documents/{$this->id}/download");
     }
 
     public function getHumanSizeAttribute(): string

@@ -65,12 +65,14 @@ class UserCasePolicy
      */
     public function update(User $user, UserCase $case): bool
     {
-        // Customer can update their own draft cases
+        // Customer can update their own cases while they still have actions to take
         if ($user->id === $case->user_id) {
             return in_array($case->status, [
                 'draft',
                 'pending_documents',
                 'pending_payment',
+                'paid',
+                'documents_complete',
                 'pending_scheduling'
             ]);
         }

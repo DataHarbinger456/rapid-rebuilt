@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UserCase;
 use App\Models\Vehicle;
 use App\Models\Component;
+use App\Models\Payment;
 use App\Models\UploadedFile;
 use App\Models\Setting;
 use App\Services\CaseService;
@@ -279,6 +280,119 @@ class CaseController extends Controller
         $case->load(['vehicle', 'components']);
 
         return view('customer.cases.pay', compact('case'));
+    }
+
+    /**
+     * Create a Stripe Checkout session for the case payment
+     */
+    public function processPayment(Request $request, UserCase $case)
+    {
+        $this->authorize('update', $case);
+
+        if ($case->status !== 'pending_payment') {
+            return redirect()
+                ->route('customer.cases.show', $case)
+                ->with('error', 'This case does not require payment.');
+        }
+
+        try {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'unit_amount' => (int) round($case->total_amount * 100),
+                        'product_data' => [
+                            'name' => "Rebuilt Title Inspection — Case {$case->case_number}",
+                        ],
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'metadata' => ['case_id' => $case->id],
+                'success_url' => route('customer.cases.payment-success', $case) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('customer.cases.pay', $case),
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+
+            return back()->with('error', 'Unable to start payment. Please try again.');
+        }
+
+        Payment::create([
+            'invoice_number' => Payment::nextInvoiceNumber(),
+            'user_id' => Auth::id(),
+            'user_case_id' => $case->id,
+            'amount' => $case->total_amount,
+            'status' => 'pending',
+            'transaction_id' => $session->id,
+            'payment_method' => 'card',
+        ]);
+
+        return redirect()->away($session->url);
+    }
+
+    /**
+     * Handle return from Stripe Checkout
+     */
+    public function paymentSuccess(Request $request, UserCase $case)
+    {
+        $this->authorize('update', $case);
+
+        $sessionId = $request->query('session_id');
+
+        if (!$sessionId) {
+            return redirect()
+                ->route('customer.cases.show', $case)
+                ->with('error', 'Missing payment session.');
+        }
+
+        try {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+        } catch (\Exception $e) {
+            report($e);
+
+            return redirect()
+                ->route('customer.cases.pay', $case)
+                ->with('error', 'Could not verify payment. Please contact support.');
+        }
+
+        if ($session->payment_status !== 'paid' || (int) ($session->metadata->case_id ?? 0) !== $case->id) {
+            return redirect()
+                ->route('customer.cases.pay', $case)
+                ->with('error', 'Payment was not completed.');
+        }
+
+        $payment = Payment::firstOrCreate(
+            ['transaction_id' => $session->id],
+            [
+                'invoice_number' => Payment::nextInvoiceNumber(),
+                'user_id' => Auth::id(),
+                'user_case_id' => $case->id,
+                'amount' => $case->total_amount,
+                'status' => 'pending',
+                'payment_method' => 'card',
+            ]
+        );
+
+        if (!$case->is_paid) {
+            $payment->update(['status' => 'completed']);
+            $case->markAsPaid($payment->id);
+
+            $case->timeline()->create([
+                'event_type' => 'payment_received',
+                'title' => 'Payment Received',
+                'description' => 'Payment of $' . number_format((float) $case->total_amount, 2) . ' was received',
+                'metadata' => ['payment_id' => $payment->id],
+            ]);
+        }
+
+        return redirect()
+            ->route('customer.cases.show', $case)
+            ->with('success', 'Payment received — thank you! Your inspection can now be scheduled.');
     }
 
     /**
