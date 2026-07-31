@@ -213,11 +213,6 @@ class UserCase extends Model
         return self::PRIORITIES[$this->priority] ?? $this->priority;
     }
 
-    public function getCaseNumberAttribute(): string
-    {
-        return 'RR-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
-    }
-
     public function getProgressPercentageAttribute(): int
     {
         $statusOrder = array_keys(self::STATUSES);
