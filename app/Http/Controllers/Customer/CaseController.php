@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class CaseController extends Controller
 {
@@ -78,8 +79,10 @@ class CaseController extends Controller
             'odometer' => 'required|integer|min:0',
             'title_state' => 'required|string|size:2',
             'components' => 'required|array|min:1',
-            'components.*.type' => 'required|string',
-            'components.*.source' => 'required|string',
+            'components.*.type' => ['required', Rule::in(array_keys(Component::PART_TYPES))],
+            'components.*.source' => ['required', Rule::in(array_keys(Component::CONDITIONS))],
+            'components.*.source_vin' => 'nullable|string|max:255',
+            'components.*.description' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -109,13 +112,18 @@ class CaseController extends Controller
             foreach ($request->components as $componentData) {
                 if (empty($componentData['type'])) continue;
 
+                // "New" parts are traced by purchase receipt; salvaged and
+                // rebuilt parts are traced by the donor vehicle's VIN.
+                $sourceReference = $componentData['source_vin'] ?? null;
+                $isNewPart = $componentData['source'] === 'new';
+
                 Component::create([
                     'user_case_id' => $case->id,
-                    'vehicle_id' => $vehicle->id,
                     'part_type' => $componentData['type'],
-                    'source' => $componentData['source'],
-                    'source_vin' => $componentData['source_vin'] ?? null,
-                    'notes' => $componentData['description'] ?? null,
+                    'condition' => $componentData['source'],
+                    'serial_number' => $isNewPart ? null : $sourceReference,
+                    'receipt_number' => $isNewPart ? $sourceReference : null,
+                    'other_description' => $componentData['description'] ?? null,
                 ]);
             }
 

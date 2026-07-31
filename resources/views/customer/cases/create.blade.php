@@ -196,27 +196,18 @@
                                                     <label class="form-label">Component Type *</label>
                                                     <select name="components[0][type]" class="form-select" required>
                                                         <option value="">Select Type</option>
-                                                        <option value="engine">Engine</option>
-                                                        <option value="transmission">Transmission</option>
-                                                        <option value="frame">Frame</option>
-                                                        <option value="front_clip">Front Clip</option>
-                                                        <option value="rear_clip">Rear Clip</option>
-                                                        <option value="door">Door</option>
-                                                        <option value="hood">Hood</option>
-                                                        <option value="trunk">Trunk/Liftgate</option>
-                                                        <option value="fender">Fender</option>
-                                                        <option value="quarter_panel">Quarter Panel</option>
-                                                        <option value="other">Other</option>
+                                                        @foreach (\App\Models\Component::PART_TYPES as $partValue => $partLabel)
+                                                            <option value="{{ $partValue }}">{{ $partLabel }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3 mb-2">
                                                     <label class="form-label">Source *</label>
                                                     <select name="components[0][source]" class="form-select" required>
                                                         <option value="">Select Source</option>
-                                                        <option value="new">New (OEM)</option>
-                                                        <option value="new_aftermarket">New (Aftermarket)</option>
-                                                        <option value="used">Used (Salvage)</option>
-                                                        <option value="rebuilt">Rebuilt</option>
+                                                        @foreach (\App\Models\Component::CONDITIONS as $conditionValue => $conditionLabel)
+                                                            <option value="{{ $conditionValue }}">{{ $conditionLabel }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                                 <div class="col-md-4 mb-2">
@@ -465,27 +456,18 @@ $(document).ready(function() {
                             <label class="form-label">Component Type *</label>
                             <select name="components[${componentIndex}][type]" class="form-select" required>
                                 <option value="">Select Type</option>
-                                <option value="engine">Engine</option>
-                                <option value="transmission">Transmission</option>
-                                <option value="frame">Frame</option>
-                                <option value="front_clip">Front Clip</option>
-                                <option value="rear_clip">Rear Clip</option>
-                                <option value="door">Door</option>
-                                <option value="hood">Hood</option>
-                                <option value="trunk">Trunk/Liftgate</option>
-                                <option value="fender">Fender</option>
-                                <option value="quarter_panel">Quarter Panel</option>
-                                <option value="other">Other</option>
+                                @foreach (\App\Models\Component::PART_TYPES as $partValue => $partLabel)
+                                    <option value="{{ $partValue }}">{{ $partLabel }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-3 mb-2">
                             <label class="form-label">Source *</label>
                             <select name="components[${componentIndex}][source]" class="form-select" required>
                                 <option value="">Select Source</option>
-                                <option value="new">New (OEM)</option>
-                                <option value="new_aftermarket">New (Aftermarket)</option>
-                                <option value="used">Used (Salvage)</option>
-                                <option value="rebuilt">Rebuilt</option>
+                                @foreach (\App\Models\Component::CONDITIONS as $conditionValue => $conditionLabel)
+                                    <option value="{{ $conditionValue }}">{{ $conditionLabel }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-4 mb-2">
