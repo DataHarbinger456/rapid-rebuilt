@@ -288,6 +288,32 @@ class CaseManagementController extends Controller
     }
 
     /**
+     * Approve an uploaded document from the staff case page.
+     */
+    public function approveDocument(Request $request, UserCase $case, \App\Models\UploadedFile $document): \Illuminate\Http\RedirectResponse
+    {
+        abort_unless($document->user_case_id === $case->id, 404);
+
+        $this->documentService->approveDocument($document, $request->user(), $request->input('notes'));
+
+        return back()->with('success', 'Document approved.');
+    }
+
+    /**
+     * Reject an uploaded document so the customer can re-upload it.
+     */
+    public function rejectDocument(Request $request, UserCase $case, \App\Models\UploadedFile $document): \Illuminate\Http\RedirectResponse
+    {
+        abort_unless($document->user_case_id === $case->id, 404);
+
+        $request->validate(['reason' => 'required|string|max:500']);
+
+        $this->documentService->rejectDocument($document, $request->user(), $request->input('reason'));
+
+        return back()->with('success', 'Document rejected. The customer has been asked to re-upload it.');
+    }
+
+    /**
      * Bulk update cases
      */
     public function bulkUpdate(Request $request): JsonResponse

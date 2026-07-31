@@ -32,6 +32,12 @@ Route::prefix('admin')->middleware(['auth', 'role.staff'])->group(function () {
         Route::post('/{case}/status', [CaseManagementController::class, 'updateStatus'])->name('admin.cases.updateStatus');
         Route::post('/{case}/assign', [CaseManagementController::class, 'assignInspector'])->name('admin.cases.assign');
         Route::post('/{case}/note', [CaseManagementController::class, 'addNote'])->name('admin.cases.addNote');
+        // Session-authenticated equivalents of the token-based document API,
+        // so staff can review documents from the case page.
+        Route::post('/{case}/documents/{document}/approve', [CaseManagementController::class, 'approveDocument'])
+            ->name('api.documents.approve');
+        Route::post('/{case}/documents/{document}/reject', [CaseManagementController::class, 'rejectDocument'])
+            ->name('api.documents.reject');
         Route::delete('/{case}', [CaseManagementController::class, 'destroy'])->name('admin.cases.destroy');
     });
 

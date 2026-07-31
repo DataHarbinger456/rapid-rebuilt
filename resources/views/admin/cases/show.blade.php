@@ -120,10 +120,12 @@
                                             </td>
                                             <td>{{ $doc->created_at->format('M j, Y') }}</td>
                                             <td>
-                                                <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                                                <a href="{{ route('api.documents.view', $doc) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">View</a>
                                                 @if($doc->status === 'pending')
-                                                    <button class="btn btn-sm btn-success">Approve</button>
-                                                    <button class="btn btn-sm btn-danger">Reject</button>
+                                                    <button type="button" class="btn btn-sm btn-success js-approve-document"
+                                                            data-url="{{ route('api.documents.approve', [$case, $doc]) }}">Approve</button>
+                                                    <button type="button" class="btn btn-sm btn-danger js-reject-document"
+                                                            data-url="{{ route('api.documents.reject', [$case, $doc]) }}">Reject</button>
                                                 @endif
                                             </td>
                                         </tr>
@@ -332,3 +334,41 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+// Approve/reject post through a real form so CSRF and redirects behave normally.
+function submitDocumentReview(url, fields) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+
+    fields._token = document.querySelector('meta[name="csrf-token"]').content;
+    Object.keys(fields).forEach(function (name) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = fields[name];
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+document.querySelectorAll('.js-approve-document').forEach(function (button) {
+    button.addEventListener('click', function () {
+        submitDocumentReview(this.dataset.url, {});
+    });
+});
+
+document.querySelectorAll('.js-reject-document').forEach(function (button) {
+    button.addEventListener('click', function () {
+        var reason = window.prompt('Why is this document being rejected? The customer will see this.');
+        if (reason && reason.trim()) {
+            submitDocumentReview(this.dataset.url, { reason: reason.trim() });
+        }
+    });
+});
+</script>
+@endpush
