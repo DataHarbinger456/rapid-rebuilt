@@ -221,12 +221,12 @@ return [
      */
     'notifications' => [
         'notifications' => [
-            BackupHasFailedNotification::class => ['mail'],
-            UnhealthyBackupWasFoundNotification::class => ['mail'],
-            CleanupHasFailedNotification::class => ['mail'],
-            BackupWasSuccessfulNotification::class => ['mail'],
-            HealthyBackupWasFoundNotification::class => ['mail'],
-            CleanupWasSuccessfulNotification::class => ['mail'],
+            BackupHasFailedNotification::class => env('BACKUP_NOTIFICATIONS_ENABLED', false) ? ['mail'] : [],
+            UnhealthyBackupWasFoundNotification::class => env('BACKUP_NOTIFICATIONS_ENABLED', false) ? ['mail'] : [],
+            CleanupHasFailedNotification::class => env('BACKUP_NOTIFICATIONS_ENABLED', false) ? ['mail'] : [],
+            BackupWasSuccessfulNotification::class => env('BACKUP_NOTIFICATIONS_ENABLED', false) ? ['mail'] : [],
+            HealthyBackupWasFoundNotification::class => env('BACKUP_NOTIFICATIONS_ENABLED', false) ? ['mail'] : [],
+            CleanupWasSuccessfulNotification::class => env('BACKUP_NOTIFICATIONS_ENABLED', false) ? ['mail'] : [],
         ],
 
         /*
