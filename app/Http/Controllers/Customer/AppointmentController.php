@@ -88,53 +88,33 @@ class AppointmentController extends Controller
             return back()->with('error', 'This case is not ready for scheduling.');
         }
 
-        // Parse date and time
         $startDateTime = Carbon::parse($request->selected_date . ' ' . $request->selected_time);
-        $endDateTime = $startDateTime->copy()->addHour();
 
-        // Check slot availability
-        if (!$this->appointmentService->isSlotAvailable($startDateTime)) {
-            return back()->with('error', 'This time slot is no longer available. Please select another time.');
-        }
-
-        // Create appointment using the scheduling table's actual location and
-        // customer-note columns (there is no generic `location` column).
-        $appointment = UserFormScheduling::create([
-            'user_case_id' => $case->id,
-            'user_id' => auth()->id(),
-            'start' => $startDateTime,
-            'end' => $endDateTime,
-            'duration_minutes' => 60,
-            'subject' => 'Rebuilt Title Inspection',
-            'status' => 'confirmed',
-            'location_name' => $request->inspection_type === 'mobile'
+        $locationData = [
+            'name' => $request->inspection_type === 'mobile'
                 ? 'Mobile Inspection'
                 : 'Office Inspection',
-            'location_address' => $request->inspection_type === 'mobile' ? $request->address : null,
-            'location_city' => $request->inspection_type === 'mobile' ? $request->city : null,
-            'location_state' => $request->state ?? 'FL',
-            'location_zip' => $request->inspection_type === 'mobile' ? $request->zip : null,
-            'customer_notes' => $request->notes,
-        ]);
+            'address' => $request->inspection_type === 'mobile' ? $request->address : null,
+            'city' => $request->inspection_type === 'mobile' ? $request->city : null,
+            'state' => $request->state ?? 'FL',
+            'zip' => $request->inspection_type === 'mobile' ? $request->zip : null,
+            'notes' => $request->notes,
+        ];
 
-        // Update case status
-        $case->update(['status' => 'scheduled']);
+        try {
+            $this->appointmentService->scheduleAppointment(
+                $case,
+                $startDateTime,
+                null,
+                $locationData
+            );
+        } catch (\Throwable $e) {
+            report($e);
 
-        // Add timeline entry
-        $case->timeline()->create([
-            'user_id' => auth()->id(),
-            'event_type' => 'appointment_scheduled',
-            'title' => 'Inspection Scheduled',
-            'description' => "Inspection scheduled for {$startDateTime->format('F j, Y \\a\\t g:i A')}",
-            'metadata' => [
-                'appointment_id' => $appointment->id,
-                'inspection_type' => $request->inspection_type,
-            ],
-            'is_system_event' => true,
-        ]);
-
-        // Send confirmation (handled by AppointmentService)
-        $this->appointmentService->sendConfirmation($appointment);
+            return back()
+                ->withInput()
+                ->with('error', 'Unable to schedule this appointment. Please choose another time.');
+        }
 
         return redirect()
             ->route('customer.cases.show', $case)
