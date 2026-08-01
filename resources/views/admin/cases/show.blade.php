@@ -48,6 +48,21 @@
                                     <p><strong>City/State:</strong> {{ $case->user->city ?? '' }}, {{ $case->user->states ?? '' }} {{ $case->user->zip ?? '' }}</p>
                                 </div>
                             </div>
+                            @if($case->user->isDealer())
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p>
+                                            <span class="badge badge-primary">Dealer</span>
+                                            <strong class="ms-2">{{ $case->user->dealer_name }}</strong>
+                                        </p>
+                                        <p><strong>License:</strong> {{ $case->user->license_type }}-{{ $case->user->license_number }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>County:</strong> {{ $case->user->county ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                            @endif
                         @else
                             <p class="text-muted">Customer information not available</p>
                         @endif
