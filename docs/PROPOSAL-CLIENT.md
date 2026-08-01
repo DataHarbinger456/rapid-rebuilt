@@ -55,7 +55,7 @@ Everything below is working today and you've used it yourself.
 **Underneath**
 - Live on a secure URL with SSL, running on managed cloud infrastructure
 - Automated nightly database backups, kept 14 days
-- Error monitoring so problems get caught before customers report them
+- Error tracking wired in and ready to switch on at launch
 - Documents stored in private cloud storage — not on a server that could be wiped
 - Modernized to current PHP and Laravel. The previous version ran on software that
   had reached end-of-life, meaning it was no longer receiving security updates.
