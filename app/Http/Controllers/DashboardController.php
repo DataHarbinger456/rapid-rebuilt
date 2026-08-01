@@ -15,10 +15,18 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Redirect based on user type
+        // Send each role to its own dashboard. Anything that is not a customer
+        // or an inspector falls through to the staff view, so both must be
+        // matched explicitly before the staff data below is built.
         if ($user->isCustomer()) {
             return redirect()->route('customer.dashboard');
         }
+
+        if ($user->isInspector()) {
+            return redirect()->route('inspector.dashboard');
+        }
+
+        abort_unless($user->isStaff(), 403);
 
         // Admin/Staff Dashboard
         $stats = $this->getAdminStats();
