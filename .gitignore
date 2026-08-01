@@ -19,3 +19,6 @@ admin-rapid.sql
 /.gg
 /storage/framework/views/*.php
 /.phpunit.cache
+
+# Local-only: contains live demo credentials
+/docs/DEMO-ACCESS.md
