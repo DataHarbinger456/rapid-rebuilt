@@ -11,6 +11,7 @@ use App\Models\UserCase;
 use App\Models\UserFormScheduling;
 use App\Models\Vehicle;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -43,23 +44,32 @@ class DemoReset extends Command
 
         $caseIds = UserCase::withTrashed()->pluck('id');
 
-        // Remove stored uploads first so the bucket does not keep orphaned files.
+        // Note the stored paths before the rows go away, but only delete the
+        // files once the database changes have committed: a failed transaction
+        // must not leave cases pointing at files that no longer exist.
+        $paths = UploadedFile::whereIn('user_case_id', $caseIds)
+            ->pluck('file_path')
+            ->filter()
+            ->all();
+
+        DB::transaction(function () use ($caseIds) {
+            Inspection::whereIn('user_case_id', $caseIds)->delete();
+            Payment::whereIn('user_case_id', $caseIds)->delete();
+            UserFormScheduling::whereIn('user_case_id', $caseIds)->delete();
+            UploadedFile::whereIn('user_case_id', $caseIds)->delete();
+            CaseTimeline::whereIn('user_case_id', $caseIds)->delete();
+            Component::whereIn('user_case_id', $caseIds)->delete();
+            Vehicle::whereIn('user_case_id', $caseIds)->delete();
+            UserCase::withTrashed()->whereIn('id', $caseIds)->forceDelete();
+        });
+
         $deletedFiles = 0;
-        foreach (UploadedFile::whereIn('user_case_id', $caseIds)->pluck('file_path') as $path) {
-            if ($path && Storage::disk('private')->exists($path)) {
+        foreach ($paths as $path) {
+            if (Storage::disk('private')->exists($path)) {
                 Storage::disk('private')->delete($path);
                 $deletedFiles++;
             }
         }
-
-        Inspection::whereIn('user_case_id', $caseIds)->forceDelete();
-        Payment::whereIn('user_case_id', $caseIds)->delete();
-        UserFormScheduling::whereIn('user_case_id', $caseIds)->delete();
-        UploadedFile::whereIn('user_case_id', $caseIds)->forceDelete();
-        CaseTimeline::whereIn('user_case_id', $caseIds)->delete();
-        Component::whereIn('user_case_id', $caseIds)->delete();
-        Vehicle::whereIn('user_case_id', $caseIds)->forceDelete();
-        UserCase::withTrashed()->whereIn('id', $caseIds)->forceDelete();
 
         $this->info("Cleared {$caseCount} case(s) and {$deletedFiles} stored file(s).");
         $this->line('Accounts and pricing settings were kept. Ready for a fresh demo run.');

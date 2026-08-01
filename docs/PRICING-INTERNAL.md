@@ -63,7 +63,7 @@ That's the friend price, and it's the only one I've got."*
 1. **Stretch the timeline**, not the price — "same $19k, spread over 5 months"
 2. **Drop M2** ($2,500 off) — he does his own outreach; portal is unaffected
 3. **Defer the monthly** to 60 days post-launch instead of immediately
-4. **Split S2 into two payments** of $2,375 each instead of two of $4,750
+4. **Split S2 into four payments** of $2,375 each instead of two of $4,750
 
 Notice all four preserve the rate. You're selling time and scope, never price.
 
