@@ -177,6 +177,8 @@ class DocumentService
             'reviewed_by' => $reviewer->id,
             'reviewed_at' => now(),
             'review_notes' => $reason,
+            // Customer-facing views read rejection_reason.
+            'rejection_reason' => $reason,
         ]);
 
         CaseTimeline::log(
