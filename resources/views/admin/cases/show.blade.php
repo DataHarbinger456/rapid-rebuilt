@@ -109,7 +109,7 @@
                                 <tbody>
                                     @forelse($case->documents as $doc)
                                         <tr>
-                                            <td>{{ ucfirst(str_replace('_', ' ', $doc->document_type)) }}</td>
+                                            <td>{{ $doc->document_type_label }}</td>
                                             <td>
                                                 <span class="badge badge-{{
                                                     $doc->status === 'approved' ? 'success' :

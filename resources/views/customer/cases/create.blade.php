@@ -243,60 +243,28 @@
                                 <p class="text-muted mb-4">Upload the required documents. Accepted formats: PDF, JPG, PNG (Max 10MB each)</p>
 
                                 <div class="row">
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6><i data-feather="file-text" class="text-primary"></i> Current Title *</h6>
-                                                <p class="text-muted small">Upload a clear photo or scan of the salvage/branded title</p>
-                                                <input type="file" name="documents[title]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    {{-- Driven by DocumentService so the staff-side
+                                         "missing documents" check always agrees. --}}
+                                    @foreach (app(\App\Services\DocumentService::class)->getRequiredDocuments() as $docKey => $docMeta)
+                                        @php($isMultiple = $docMeta['multiple'] ?? false)
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <h6>
+                                                        <i data-feather="file-text" class="{{ $docMeta['required'] ? 'text-primary' : 'text-info' }}"></i>
+                                                        {{ $docMeta['label'] }}@if($docMeta['required']) *@endif
+                                                    </h6>
+                                                    <p class="text-muted small">{{ $docMeta['description'] }}</p>
+                                                    <input type="file"
+                                                           name="documents[{{ $docKey }}]{{ $isMultiple ? '[]' : '' }}"
+                                                           class="form-control"
+                                                           accept="{{ $docMeta['accept'] }}"
+                                                           @if($isMultiple) multiple @endif
+                                                           @if($docMeta['required']) required @endif>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6><i data-feather="file-text" class="text-primary"></i> Bill of Sale *</h6>
-                                                <p class="text-muted small">Documentation showing purchase of the vehicle</p>
-                                                <input type="file" name="documents[bill_of_sale]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6><i data-feather="file-text" class="text-primary"></i> Driver's License *</h6>
-                                                <p class="text-muted small">Valid Florida driver's license or ID</p>
-                                                <input type="file" name="documents[drivers_license]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6><i data-feather="file-text" class="text-primary"></i> Proof of Insurance *</h6>
-                                                <p class="text-muted small">Current Florida insurance card</p>
-                                                <input type="file" name="documents[insurance]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6><i data-feather="file-text" class="text-info"></i> Repair Receipts</h6>
-                                                <p class="text-muted small">Invoices for parts and labor (optional but recommended)</p>
-                                                <input type="file" name="documents[receipts][]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" multiple>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h6><i data-feather="file-text" class="text-info"></i> Additional Documents</h6>
-                                                <p class="text-muted small">Any other relevant documentation</p>
-                                                <input type="file" name="documents[other][]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" multiple>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
 
