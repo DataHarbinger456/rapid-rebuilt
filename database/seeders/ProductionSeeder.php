@@ -10,11 +10,11 @@ use Illuminate\Support\Str;
 /**
  * Bootstrap seeder for a fresh production instance.
  *
- * Seeds reference data only: business/pricing settings and a single staff
- * account. No demo cases, customers, or inspectors.
+ * Seeds reference data only: business/pricing settings and a single owner
+ * account with the admin role. No demo cases, customers, or inspectors.
  *
- * The staff password comes from SEED_STAFF_PASSWORD; when unset, a random
- * one is generated and printed exactly once so nothing guessable ships.
+ * The password comes from SEED_STAFF_PASSWORD; when unset, a random one is
+ * generated and printed exactly once so nothing guessable ships.
  */
 class ProductionSeeder extends Seeder
 {
