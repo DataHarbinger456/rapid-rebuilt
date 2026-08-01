@@ -56,7 +56,9 @@
                                 </a>
                                 <ul class="nav-submenu menu-content" style="display: {{ request()->routeIs('admin.settings*') ? 'block' : 'none' }};">
                                     <li class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}"><a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">General</a></li>
+                                    @if(auth()->user()->isAdmin())
                                     <li class="{{ request()->routeIs('admin.settings.users*') ? 'active' : '' }}"><a href="{{ route('admin.settings.users') }}" class="{{ request()->routeIs('admin.settings.users*') ? 'active' : '' }}">User Management</a></li>
+                                    @endif
                                     <li class="{{ request()->routeIs('admin.settings.pricing*') ? 'active' : '' }}"><a href="{{ route('admin.settings.pricing') }}" class="{{ request()->routeIs('admin.settings.pricing*') ? 'active' : '' }}">Pricing</a></li>
                                     <li class="{{ request()->routeIs('admin.settings.notifications*') ? 'active' : '' }}"><a href="{{ route('admin.settings.notifications') }}" class="{{ request()->routeIs('admin.settings.notifications*') ? 'active' : '' }}">Notifications</a></li>
                                 </ul>

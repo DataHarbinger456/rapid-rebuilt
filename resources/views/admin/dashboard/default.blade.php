@@ -167,6 +167,9 @@
                                 <span class="text-dark">All Cases</span>
                             </a>
                         </div>
+                        {{-- User management is admin-only; hide it from staff
+                             rather than showing a tile that 403s. --}}
+                        @if(auth()->user()->isAdmin())
                         <div class="col-6 col-md-3">
                             <a href="{{ route('admin.settings.users') }}" class="quick-action-btn d-block text-center text-decoration-none">
                                 <div class="stat-icon bg-light-success text-success mx-auto mb-2">
@@ -175,6 +178,7 @@
                                 <span class="text-dark">Manage Users</span>
                             </a>
                         </div>
+                        @endif
                         <div class="col-6 col-md-3">
                             <a href="{{ route('admin.reports.index') }}" class="quick-action-btn d-block text-center text-decoration-none">
                                 <div class="stat-icon bg-light-warning text-warning mx-auto mb-2">
