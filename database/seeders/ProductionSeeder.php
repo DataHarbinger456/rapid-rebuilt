@@ -38,7 +38,9 @@ class ProductionSeeder extends Seeder
                 'last_name' => 'Member',
                 'username' => 'rr.staff',
                 'password' => Hash::make($password),
-                'user_type' => 'staff',
+                // Admin, not staff: only admins can create the other accounts,
+                // so a staff-only bootstrap leaves nobody able to add users.
+                'user_type' => 'admin',
                 'phone' => '',
                 'address_1' => '',
                 'city' => '',
