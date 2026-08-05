@@ -109,6 +109,13 @@ Route::get('/forget-password', [PasswordResetController::class, 'showForgetPassw
 // Route to handle the password reset link request
 Route::post('/forget-password', [PasswordResetController::class, 'sendResetLink'])->name('forget-password.send');
 
+// Target of the emailed reset link. The `password.reset` name is required:
+// Laravel's ResetPassword notification builds its URL from it.
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+
+// Route to store the new password
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
+
 // Route to check Availability of the email, usename, and phone number
 Route::get('/check-availability', [UserController::class, 'checkAvailability']);
 
