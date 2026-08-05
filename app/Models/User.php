@@ -38,6 +38,7 @@ class User extends Authenticatable
         'region',
         'zones',
         'verification_token',
+        'email_verified_at',
         // Inspector fields
         'inspector_license',
         'inspector_certification_date',

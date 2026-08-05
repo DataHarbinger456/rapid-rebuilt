@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class SettingsController extends Controller
@@ -236,14 +237,28 @@ class SettingsController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => ['required', Password::defaults()],
             'user_type' => 'required|in:user,dealer,inspector,staff,admin',
+            'phone' => 'nullable|string|max:255',
         ]);
 
         $newUser = User::create([
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
             'email' => $request->input('email'),
+            'username' => $this->generateUsername(
+                $request->input('first_name'),
+                $request->input('last_name')
+            ),
             'password' => Hash::make($request->input('password')),
             'user_type' => $request->input('user_type'),
+            'phone' => $request->input('phone') ?? '',
+            // Columns below are NOT NULL without defaults; admin-created
+            // accounts fill them in later from their profile page.
+            'address_1' => '',
+            'city' => '',
+            'states' => '',
+            'zip' => '',
+            // Admin-created accounts skip the email verification flow.
+            'email_verified_at' => now(),
         ]);
 
         if ($request->wantsJson()) {
@@ -256,6 +271,29 @@ class SettingsController extends Controller
 
         return redirect()->route('admin.settings.users')
             ->with('success', 'User created successfully.');
+    }
+
+    /**
+     * Build a unique username from a person's name, e.g. "ebenezer.mensah".
+     * Collisions get a numeric suffix: ebenezer.mensah2, ebenezer.mensah3...
+     */
+    private function generateUsername(string $firstName, string $lastName): string
+    {
+        $base = Str::slug($firstName . ' ' . $lastName, '.');
+
+        if ($base === '') {
+            $base = 'user';
+        }
+
+        $username = $base;
+        $suffix = 1;
+
+        while (User::withTrashed()->where('username', $username)->exists()) {
+            $suffix++;
+            $username = $base . $suffix;
+        }
+
+        return $username;
     }
 
     /**
