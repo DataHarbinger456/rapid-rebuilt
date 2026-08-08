@@ -7,11 +7,23 @@ use App\Models\Inspection;
 use App\Models\UploadedFile;
 use App\Models\Setting;
 use App\Models\CaseTimeline;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use mikehaertl\pdftk\Pdf;
+use RuntimeException;
 use ZipArchive;
 
+/**
+ * Generates the Florida HSMV packet for a case.
+ *
+ * Forms are produced by stamping data into the official fillable HSMV PDFs in
+ * docs/forms/ with pdftk, never by re-typesetting lookalike HTML — the tax
+ * collector rejects reproductions.
+ *
+ * Field maps live in config/hsmv_forms.php. A form without an entry there
+ * throws rather than silently producing an empty document; only HSMV 82040 is
+ * mapped so far.
+ */
 class PDFGeneratorService
 {
     protected string $storagePath = 'cases/{case_id}/generated';
@@ -23,14 +35,11 @@ class PDFGeneratorService
     {
         $data = $this->prepareFormData($case);
 
-        $pdf = Pdf::loadView('pdf.hsmv-82040', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'HSMV_82040');
+        return $this->renderPdf($case, 'HSMV_82040', $data);
     }
 
     /**
-     * Generate HSMV 84490 - Rebuilt Motor Vehicle Inspection
+     * Generate HSMV 84490 - Statement of Builder
      */
     public function generateHSMV84490(UserCase $case, Inspection $inspection): string
     {
@@ -38,50 +47,39 @@ class PDFGeneratorService
         $data['inspection'] = $inspection;
         $data['inspector'] = $inspection->inspector;
 
-        $pdf = Pdf::loadView('pdf.hsmv-84490', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'HSMV_84490');
+        return $this->renderPdf($case, 'HSMV_84490', $data);
     }
 
     /**
-     * Generate HSMV 84491 - Major Component Parts Form
+     * Generate HSMV 84491 - Statement of Builder, Additional Sheet
+     * (component continuation pages for 84490)
      */
     public function generateHSMV84491(UserCase $case): string
     {
         $data = $this->prepareFormData($case);
         $data['components'] = $case->components;
 
-        $pdf = Pdf::loadView('pdf.hsmv-84491', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'HSMV_84491');
+        return $this->renderPdf($case, 'HSMV_84491', $data);
     }
 
     /**
-     * Generate HSMV 82050 - Statement of Builder / Bill of Sale
+     * Generate HSMV 82050 - Notice of Sale and/or Bill of Sale
      */
     public function generateHSMV82050(UserCase $case): string
     {
         $data = $this->prepareFormData($case);
 
-        $pdf = Pdf::loadView('pdf.hsmv-82050', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'HSMV_82050');
+        return $this->renderPdf($case, 'HSMV_82050', $data);
     }
 
     /**
-     * Generate HSMV 82053 - Odometer Disclosure Statement
+     * Generate HSMV 82053 - Power of Attorney for a Motor Vehicle
      */
     public function generateHSMV82053(UserCase $case): string
     {
         $data = $this->prepareFormData($case);
 
-        $pdf = Pdf::loadView('pdf.hsmv-82053', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'HSMV_82053');
+        return $this->renderPdf($case, 'HSMV_82053', $data);
     }
 
     /**
@@ -94,10 +92,7 @@ class PDFGeneratorService
             ->where('status', 'approved')
             ->get();
 
-        $pdf = Pdf::loadView('pdf.document-checklist', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'Document_Checklist');
+        return $this->renderPdf($case, 'Document_Checklist', $data);
     }
 
     /**
@@ -117,10 +112,7 @@ class PDFGeneratorService
             'license' => Setting::get('prvip_license_number'),
         ];
 
-        $pdf = Pdf::loadView('pdf.cover-letter', $data);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $this->savePDF($case, $pdf, 'Cover_Letter');
+        return $this->renderPdf($case, 'Cover_Letter', $data);
     }
 
     /**
@@ -172,10 +164,115 @@ class PDFGeneratorService
         $data['inspector'] = $inspection->inspector;
         $data['photos'] = $inspection->photos;
 
-        $pdf = Pdf::loadView('pdf.inspection-report', $data);
-        $pdf->setPaper('letter', 'portrait');
+        return $this->renderPdf($case, 'Inspection_Report', $data);
+    }
 
-        return $this->savePDF($case, $pdf, 'Inspection_Report');
+    /**
+     * Fill a form with prepared data, then store the result.
+     */
+    protected function renderPdf(UserCase $case, string $formName, array $data): string
+    {
+        return $this->savePDF($case, $this->fillForm($formName, $data), $formName);
+    }
+
+    /**
+     * Produce the raw bytes of a filled, flattened form.
+     *
+     * @throws RuntimeException if the form has no field map yet, its template
+     *                          is missing, or pdftk fails.
+     */
+    protected function fillForm(string $formName, array $data): string
+    {
+        $label = str_replace('_', ' ', $formName);
+        $config = config('hsmv_forms.' . strtolower($formName));
+
+        if (!$config) {
+            throw new RuntimeException(
+                "{$label} cannot be generated yet. Automatic form filling is still "
+                . 'in development — please complete this form manually for now.'
+            );
+        }
+
+        $template = base_path($config['template']);
+
+        if (!is_file($template)) {
+            throw new RuntimeException("Missing form template for {$label}: {$config['template']}");
+        }
+
+        $pdf = new Pdf($template);
+
+        // flatten() bakes the values into the page so the printed copy shows
+        // them and nothing can be edited afterwards.
+        $output = $pdf
+            ->fillForm($this->mapFields($config['fields'], $data))
+            ->flatten()
+            ->toString();
+
+        if ($output === false) {
+            throw new RuntimeException("Could not fill {$label}: " . $pdf->getError());
+        }
+
+        return $output;
+    }
+
+    /**
+     * Turn a field map from config/hsmv_forms.php into pdftk's
+     * [pdf field name => value] array.
+     *
+     * A map entry may be:
+     *   - a data key: 'vin'
+     *   - several data keys: ['owner_first_name', 'owner_last_name'], joined
+     *     with a space, for HSMV boxes that hold what we store as separate
+     *     columns
+     *   - a checkbox: ['checkbox' => 'is_rebuilt', 'on' => 'On'], where 'on'
+     *     is the button's exact export value from the PDF
+     *
+     * Blank text values are omitted so the box stays empty rather than
+     * printing "null". Checkboxes are always written, as an unticked box has
+     * to be explicitly set to Off.
+     */
+    protected function mapFields(array $fieldMap, array $data): array
+    {
+        $values = [];
+
+        foreach ($fieldMap as $pdfField => $mapping) {
+            if (is_array($mapping) && isset($mapping['checkbox'])) {
+                $values[$pdfField] = $this->checkboxValue($mapping, $data);
+
+                continue;
+            }
+
+            $parts = [];
+
+            foreach ((array) $mapping as $key) {
+                $value = $data[$key] ?? null;
+
+                if ($value !== null && trim((string) $value) !== '') {
+                    $parts[] = trim((string) $value);
+                }
+            }
+
+            if ($parts !== []) {
+                $values[$pdfField] = implode(' ', $parts);
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * Resolve a checkbox mapping to the button's on or off export value.
+     *
+     * Export values are per-field and case sensitive; read them from the
+     * FieldStateOption lines of pdftk dump_data_fields_utf8. 'Off' is the
+     * PDF standard for an unticked button and is the same on every HSMV form
+     * we have seen, so only the on value is configurable.
+     */
+    protected function checkboxValue(array $mapping, array $data): string
+    {
+        $checked = (bool) ($data[$mapping['checkbox']] ?? false);
+
+        return $checked ? ($mapping['on'] ?? 'On') : 'Off';
     }
 
     /**
@@ -186,6 +283,31 @@ class PDFGeneratorService
         $vehicle = $case->vehicle;
         $owner = $case->user;
         $inspection = $case->inspection;
+
+        // Application Type, top of the 82040. Client confirmed 5 Aug: a
+        // Florida title is an Original application, an out-of-state title is a
+        // Transfer. The title number is irrelevant to this choice.
+        //
+        // title_state is a two-letter code, so anything that is not FL is out
+        // of state. A case with no vehicle ticks neither box rather than
+        // guessing on a legal document.
+        $titleState = $vehicle?->title_state;
+        $isOriginal = $titleState === 'FL';
+        $isTransfer = filled($titleState) && $titleState !== 'FL';
+
+        // Section 3 of the 82040 is "BRANDS, USAGE AND TYPE". The TYPE boxes
+        // describe how the vehicle was built and come from
+        // vehicles.vehicle_type; the BRAND boxes describe history carried by
+        // the title and come from vehicles.title_brand. The two are not
+        // interchangeable: ASPT is the state's abbreviation for Assembled From
+        // Parts, a build type, while flood is a brand on the title.
+        //
+        // vehicle_type is nullable and older cases predate it. Every case this
+        // business files is a rebuilt-title application, so a missing type on a
+        // rebuilt_title case falls back to rebuilt rather than leaving
+        // Section 3 entirely blank.
+        $vehicleType = $vehicle?->vehicle_type
+            ?? ($case->service_type === 'rebuilt_title' ? 'rebuilt' : null);
 
         return [
             'case' => $case,
@@ -205,8 +327,27 @@ class PDFGeneratorService
             'color' => $vehicle?->color,
             'title_number' => $vehicle?->title_number,
             'title_state' => $vehicle?->title_state,
+            // Weight is whatever the title says, not the VIN decoder's GVWR.
+            // Client confirmed 5 Aug: every Florida title carries its own
+            // weight, out-of-state titles may not, and a blank box is
+            // acceptable for staff to complete by hand. Blank values are
+            // skipped by mapFields(), so a null here leaves the box empty.
+            'weight' => $vehicle?->weight,
             'odometer' => $vehicle?->odometer_reading,
             'odometer_status' => $vehicle?->odometer_status,
+            'vehicle_type' => $vehicleType,
+            // Section 3 TYPE boxes. At most one is ever true; mobile_home and
+            // other have no box of their own on this form.
+            'is_rebuilt' => $vehicleType === 'rebuilt',
+            'is_assembled_from_parts' => $vehicleType === 'aspt',
+            'is_kit_car' => $vehicleType === 'kit_car',
+            'is_custom' => $vehicleType === 'custom_vehicle',
+            'is_street_rod' => $vehicleType === 'street_rod',
+            'is_replica' => $vehicleType === 'replica',
+            // Section 3 BRAND box.
+            'is_flood' => $vehicle?->title_brand === 'flood',
+            'is_application_original' => $isOriginal,
+            'is_application_transfer' => $isTransfer,
             // Owner info
             'owner_name' => $owner?->full_name,
             'owner_first_name' => $owner?->first_name,
@@ -225,12 +366,12 @@ class PDFGeneratorService
     /**
      * Save PDF to storage and create document record
      */
-    protected function savePDF(UserCase $case, $pdf, string $formName): string
+    protected function savePDF(UserCase $case, string $contents, string $formName): string
     {
         $filename = "{$formName}_{$case->case_number}.pdf";
         $path = str_replace('{case_id}', $case->id, $this->storagePath) . "/{$filename}";
 
-        Storage::disk('private')->put($path, $pdf->output());
+        Storage::disk('private')->put($path, $contents);
 
         // Create document record
         UploadedFile::updateOrCreate(

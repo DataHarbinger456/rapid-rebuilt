@@ -47,7 +47,10 @@ class ComponentController extends Controller
             ], 403);
         }
 
-        $request->validate([
+        // Only the validated fields are persisted. Component also has
+        // verified, verified_by and verified_at in $fillable, which only an
+        // inspector may set via Component::verify().
+        $validated = $request->validate([
             'part_type' => 'required|string',
             'condition' => 'required|in:new,used,repaired,original',
             'source' => 'nullable|string|max:255',
@@ -60,7 +63,7 @@ class ComponentController extends Controller
         ]);
 
         $component = Component::create(array_merge(
-            $request->all(),
+            $validated,
             ['user_case_id' => $case->id]
         ));
 
@@ -99,7 +102,9 @@ class ComponentController extends Controller
             ], 404);
         }
 
-        $request->validate([
+        // As in store(): persist only what was validated, so a caller cannot
+        // mark their own component verified.
+        $validated = $request->validate([
             'part_type' => 'sometimes|string',
             'condition' => 'sometimes|in:new,used,repaired,original',
             'source' => 'nullable|string|max:255',
@@ -111,7 +116,7 @@ class ComponentController extends Controller
             'purchase_date' => 'nullable|date',
         ]);
 
-        $component->update($request->all());
+        $component->update($validated);
 
         return response()->json([
             'success' => true,

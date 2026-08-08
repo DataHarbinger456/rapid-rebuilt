@@ -1,0 +1,70 @@
+ so we're going to start here on the customer side this is the customer side and this is the staff
+ side i've already logged in so we're going to start a new case so the customer sees this one
+ on the right this one here and then we rapid will see the one on the left yes i got you okay
+ and then there's also a site for inspectors okay um so i'm going to start a case
+ we're going to put the vin number in i'm just going to use the i've been using
+ we decode the vin put the information in here it already pulled it up this is required these aren't
+ just put it's the same i've been putting before it's just for florida right now next
+ we will need like the full state all the states but yeah okay all right um so
+ component type which the source we'll put uh used and then vin hold on i had a document here
+ with different things so i can make this easier
+ okay so we're going to use this information here can anybody hear us yeah oh yeah the microphone's on
+ all right so now we're going to put in the source vin for that detail for that hood you can put in some
+ information here you can add another one here we'll put a what was i doing before fender yeah
+ fender let me see hold on front bumper is what i did so front bumper we'll just do it new let's get this
+ invoice number here pop that in there all right and then we just go next and this is where the customer
+ will put in his files so we already have a bunch of files here that we're just going to pull in
+ let's see so salvage title right here number one current title bill of sale
+ owner id
+ insurance card
+ damage photos
+ repair photo
+ repair photo component receipts
+ and these are not uh required required or we can do any of that we could add anything else here
+ boom so now here goes everything this is where the customer would click here and submit the case
+ come on
+ there it goes successful boom so now if we come over here we refresh this
+ there it goes here oh so this is from the other tests that i was doing but we'll just check the
+ most recent case we go here to case management so when i just did here oh i did all of these earlier
+ we'll open this up now we'll see all the documents that they put in there you can view it here
+ all right and now we can reject and approve
+ now if we reject what happens if you can put the reason why it was rejected and send it through
+ i guess you have to put a reason so just any
+ i'm gonna go through
+ all right let's just go ahead and approve them all and then as far as like the process what you guys
+ got to do and stuff like that i'm not exactly sure yeah i'll tell you what we gotta do it's ingesting
+ everything here uh let's see and yeah that's pretty much it right now it adjusts everything
+ everything comes through yeah we cannot sign an inspector
+ yep okay so right now i just made one right but the inspectors would come in and create an account
+ just the same i signed the inspector and as far as like whatever else you needed to do it can be
+ done now the other categories where it says dmv form my forms that's not at live right now right no but
+ there's like basically some like templates form and this is what the ai would fill in which is exactly
+ what i'm looking for here so yeah let me just make sure everything looks good so it's pretty much took
+ the template and created it now the question is is it gonna print out a pdf of the actual template when
+ it's all filled in i don't i haven't built that in but we can't that can be that's so that would be the
+ goal so what is in it so print out the so ultimately we want to be able to fill that information in
+ and then spit out the form 82040 like every form that that goes with the rebuild or that pertains to
+ that i wanted to be able to if we ever able to fill it here i need it to be filled into a pdf
+ so if it fills here automatically goes into pdf once we like click print or something like that okay
+ you got what i'm going with like a physical file on you yes yes yes yeah um
+ and then another thing i want to i want to point out is every inspection that we do um i don't know
+ if you want to stop the video here or whatever but just to record it so we can but we have we have
+ what's called a log with that log we have to share it with the dmv or they give them access to it
+ so when we have that law they they could see when the inspection was conducted who conducted the
+ inspection and they want to see the pictures and all that stuff so it would be good also to have some
+ sort of thing where this is on a cloud and they're you know are able to access this and also uh attach
+ the inspection according to the vin number i'll show you in a little bit what that looks like on my hand
+ just so you know that way we can maybe create a working excel file when it goes there it goes into
+ some sort of i'll show you i'll show you all right yeah all right yeah um let's see reports
+ oh there we go case reports that probably is the what we would want you know and then they'll print
+ out right here yeah that might be that might even be better might not even have to do that yeah i think
+ it got all the bones pretty much yeah all the forms it pulled without me even doing i mean i did the
+ research but it did it on its own i didn't know what forms it needs yeah it looks like it's all there
+ um let me refresh here let's see what it looks like on this thing oh it's cool we could put a calendar
+ on there too so you see here so you said we rejected so they could see that on their side
+ so will they get a will they get a ping or an email saying hey you need to re-upload this document
+ can we you know what i mean um not yet but we are setting it up to where it could do messages yeah
+ yeah that's in the road map i can show you guys the road map and then here
+ there's like a tracker here it shows i got you where they're at with that so they'll see that
+ and yeah anything else while we're recording no i think for now that's a this is a good uh
+ good start to this yeah i like where it's going cool so we'll send you this

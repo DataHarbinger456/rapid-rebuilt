@@ -1,0 +1,1455 @@
+---
+FieldType: Button
+FieldName: Original
+FieldNameAlt: Original
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Transfer
+FieldNameAlt: Transfer
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: No
+FieldNameAlt: No
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Yes In office
+FieldNameAlt: Yes: In office
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Yes Mailed
+FieldNameAlt: Yes: Mailed
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: AllTerrain Vehicle ATV
+FieldNameAlt: All-Terrain Vehicle (ATV
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Customer Number
+FieldNameAlt: Customer Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Fleet Number
+FieldNameAlt: Fleet Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Unit Number
+FieldNameAlt: Unit Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner s County of Residence
+FieldNameAlt: Owner s County of Residence
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Tenancy by the Entirety
+FieldNameAlt: Tenancy by the Entirety
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Life EstateRemainder Person
+FieldNameAlt: Life Estate/Remainder Person
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: With Rights of Survivorship
+FieldNameAlt: With Rights of Survivorship
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Owners Email Voluntary
+FieldNameAlt: Owner’s Email (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owners Mailing Address
+FieldNameAlt: Owner’s Mailing Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Vehicle Identification Number VIN
+FieldNameAlt: Vehicle Identification Number (VIN)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Florida Title Number
+FieldNameAlt: Florida Title Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: License Plate Number
+FieldNameAlt: License Plate Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Previous State of Issue
+FieldNameAlt: Previous State of Issue
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Model
+FieldNameAlt: Model
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Year
+FieldNameAlt: Year
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Body
+FieldNameAlt: Body
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Color
+FieldNameAlt: Color
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Weight
+FieldNameAlt: Weight
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: GVW
+FieldNameAlt: GVW
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: BHPCC
+FieldNameAlt: BHP/CC
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Passenger
+FieldNameAlt: Passenger
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Natural Gas Liquid
+FieldNameAlt: Natural Gas (Liquid
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Natural Gas Compressed
+FieldNameAlt: Natural Gas (Compressed
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Hybrid GasElectric
+FieldNameAlt: Hybrid (Gas/Electric
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Hybrid DieselElectric
+FieldNameAlt: Hybrid (Diesel/Electric
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Electric
+FieldNameAlt: Electric
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Assembled from Parts
+FieldNameAlt: Assembled from Parts
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Autonomous
+FieldNameAlt: Autonomous
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Bonded Title
+FieldNameAlt: Bonded Title
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Custom
+FieldNameAlt: Custom
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Electric_2
+FieldNameAlt: Electric
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Flood
+FieldNameAlt: Flood
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Glider Kit
+FieldNameAlt: Glider Kit
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: ILEV
+FieldNameAlt: ILEV
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Kit Car
+FieldNameAlt: Kit Car
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Long Term Lease
+FieldNameAlt: Long Term Lease
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Manuf Buy Back
+FieldNameAlt: Manuf. Buy Back
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Police Veh
+FieldNameAlt: Police Veh
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Private Use
+FieldNameAlt: Private Use
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Rebuilt
+FieldNameAlt: Rebuilt
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Replica
+FieldNameAlt: Replica
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Short Term Lease
+FieldNameAlt: Short Term Lease
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Street Rod
+FieldNameAlt: Street Rod
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Taxicab
+FieldNameAlt: Taxicab
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Date of Lien
+FieldNameAlt: Date of Lien
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Gift
+FieldNameAlt: Gift
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Repossession
+FieldNameAlt: Repossession
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Court Order
+FieldNameAlt: Court Order
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Inheritance
+FieldNameAlt: Inheritance
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: 1  REFLECTS ACTUAL MILEAGE
+FieldNameAlt: 1.  REFLECTS ACTUAL MILEAGE
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: 2 IS NOT THE ACTUAL MILEAGE
+FieldNameAlt: 2. IS NOT THE ACTUAL MILEAGE
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: 3 IS IN EXCESS OF ITS MECHANICAL LIMITS
+FieldNameAlt: 3. IS IN EXCESS OF ITS MECHANICAL LIMITS
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Florida Sales Tax Registration Number
+FieldNameAlt: Florida Sales Tax Registration Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Dealer License Number
+FieldNameAlt: Dealer License Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Sale
+FieldNameAlt: Date of Sale
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Amount of Tax
+FieldNameAlt: Amount of Tax
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: DealerAgent Signature
+FieldNameAlt: Dealer/Agent Signature
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Year of Trade In
+FieldNameAlt: Year of Trade In
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Make of Trade In
+FieldNameAlt: Make of Trade In
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Title Number of Trade In If known
+FieldNameAlt: Title Number of Trade In (If known)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Vehicle Identification Number VIN of Trade In
+FieldNameAlt: Vehicle Identification Number (VIN) of Trade In
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Vehicle Identification Number VIN_2
+FieldNameAlt: Vehicle Identification Number (VIN)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Name Certifying Inspector
+FieldNameAlt: Name Certifying Inspector
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Florida Notary Public Stamp or Seal
+FieldNameAlt: Florida Notary Public (Stamp or Seal
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Agency Name
+FieldNameAlt: Agency Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Badge Number
+FieldNameAlt: Badge Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Law Enforcement
+FieldNameAlt: Law Enforcement
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Florida Dealer
+FieldNameAlt: Florida Dealer
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: FLHSMV
+FieldNameAlt: FLHSMV
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Tax Collector or
+FieldNameAlt: Tax Collector or
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Dealer Name
+FieldNameAlt: Dealer Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Dealer Number
+FieldNameAlt: Dealer Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Office Name
+FieldNameAlt: Office Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: User IDBadge
+FieldNameAlt: User ID/Badge
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Agency Name_2
+FieldNameAlt: Agency Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: CountyAgency
+FieldNameAlt: County/Agency
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Purchaser state agencies counties etc holds valid exemption certificate
+FieldNameAlt: Purchaser (state agencies, counties, etc.) holds valid exemption certificate
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Vehicle will be used exclusively for rental
+FieldNameAlt: Vehicle will be used exclusively for rental
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Consumers Certificate of Exemption Number
+FieldNameAlt: Consumer’s Certificate of Exemption Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Sales Tax Registration Number
+FieldNameAlt: Sales Tax Registration Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Inheritance_2
+FieldNameAlt: Inheritance
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Gift_2
+FieldNameAlt: Gift
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Divorce Decree
+FieldNameAlt: Divorce Decree
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Transfer between a married couple
+FieldNameAlt: Transfer between a married couple
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: I certify that this motor vehicle was repossessed upon default in the terms of the lien instrument and is now in my possession
+FieldNameAlt: I certify that this motor vehicle was repossessed upon default in the terms of the lien instrument and is now in my possession
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: I certify that the certificate of title is lost or destroyed
+FieldNameAlt: I certify that the certificate of title is lost or destroyed
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: The vehicle identified will not be operated on the streets and highways of this state until properly registered
+FieldNameAlt: The vehicle identified will not be operated on the streets and highways of this state until properly registered
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Full Name of Applicant Owner
+FieldNameAlt: Full Name of Applicant, Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Full Name of Applicant CoOwner
+FieldNameAlt: Full Name of Applicant, Co-Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Full Name of Spouse CoOwner or Heirs
+FieldNameAlt: Full Name of Spouse, Co-Owner or Heir(s)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Full Name of Spouse CoOwner or Heirs_2
+FieldNameAlt: Full Name of Spouse, Co-Owner or Heir(s)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Full Name of Applicant
+FieldNameAlt: Full Name of Applicant
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Full Name of Applicant_2
+FieldNameAlt: Full Name of Applicant
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Length in Feet
+FieldNameAlt: Length in Feet
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Length in Inches
+FieldNameAlt: Length in Inches
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: FEID/Suffix #
+FieldNameAlt: FEID/Suffix #
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: DMV Account #
+FieldNameAlt: DMV Account #
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: DL/ID #, Sex, and Date of Birth
+FieldNameAlt: DL/ID #, Sex, and Date of Birth
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Signature
+FieldName: Signature to send Title to Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Sale
+FieldNameAlt: If ownership has transferred, how and when was the motor vehicle acquired
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Other
+FieldNameAlt: Other
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Other Transer Type
+FieldNameAlt: Other
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Other Specify Transfer Type
+FieldNameAlt: Specify Transfer Type
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Sale Price in Cents
+FieldNameAlt: Sale Price in Cents
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Sale Price in US Dollars
+FieldNameAlt: Sale (Praice in US Dollars
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date Acquired MM
+FieldNameAlt: Date Acquired
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date Aquired DD
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date Aquired YYYY
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: 6-digit odometer now reads
+FieldNameAlt: 6-digit odometer now reads
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: 5-digit odometer now reads
+FieldNameAlt: 5 or
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: 100, 000 Place
+FieldNameAlt: 100, 000 Place
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: 10,000 Place
+FieldNameAlt: 10,000 Place
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: 1,000 Place
+FieldNameAlt: 1,000 Place
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: 100 Place
+FieldNameAlt: 100 Place
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: 10 Place
+FieldNameAlt: 10 Place
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Ones Place
+FieldNameAlt: Ones Place
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date Read DD
+FieldNameAlt: Date Read Day
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date Read MM
+FieldNameAlt: Date Read
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date Read YYYY
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of Applicant, Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Other Non-Use/Certification
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Other Non-Use/Certification: Explain
+FieldNameAlt: Other: (explain
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Applicant, Owner Signature MM/DD/YYYY
+FieldNameAlt: Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of Applicant, Co-Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Applicant, Co-Owner Signature MM/DD/YYYY
+FieldNameAlt: Date of Applicant, Co-Owner Signature MM/DD/YYYY
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Testate
+FieldNameAlt: Testate
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: When applicable, the heir(s) certifies that the certificate of title is lost or destroyed
+FieldNameAlt: When applicable, the heir(s) certifies that the certificate of title is lost or destroyed
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: Intestate
+FieldNameAlt: Intestate
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Spouse
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Heir(s)
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Signature
+FieldName: Signature of Spouse, Co-Owner, or Heir
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Spouse, Co-Owner, or Heir Signature
+FieldNameAlt: Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Spouse 2
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Co-Owner 2
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Heir 2
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Signature
+FieldName: Signature of Spouse, Co-Owner, or Heir 2
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Spouse, Co-Owner, Heir Signature 2
+FieldNameAlt: Date of Spouse, Co-Owner, Heir Signature 2
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of Applicant
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Applicant Signature
+FieldNameAlt: Date of Applicant Signature
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of Applicant 2
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Applicant Signature 2
+FieldNameAlt: Date of Applicant Signature 2
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Inspector Signature
+FieldNameAlt: Date of Inspector Signature
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of Certifying Inspector
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Lessee
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Co-Owner
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Recreational Off-Highway Vehicle (ROV
+FieldNameAlt: Recreational Off-Highway Vehicle (ROV
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Off-Highway Motorcycle (OHM)
+FieldNameAlt: Off-Highway Motorcycle (OHM)
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Joint Ownership: OR
+FieldNameAlt: Joint Ownership: OR
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Joint Ownership: AND
+FieldNameAlt: Joint Ownership: AND
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Owner’s Name as It Appears on Driver License (First, Full Middle/Maiden, & Last Name)
+FieldNameAlt: Owner’s Name as It Appears on Driver License (First, Full Middle/Maiden, & Last Name)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner’s Phone Number (Voluntary)
+FieldNameAlt: Owner’s Phone Number (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's Sex
+FieldNameAlt: Owner's Sex
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's Date of Birth
+FieldNameAlt: Owner's Date of Birth
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's FL DL/ID or FEID/Suffix Number
+FieldNameAlt: Owner's FL DL/ID or FEID/Suffix Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's City
+FieldNameAlt: Owner's City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's State
+FieldNameAlt: Owner's State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's Zip Code
+FieldNameAlt: Owner's Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner's Residential Street Address
+FieldNameAlt: Owner’s Residential Street Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner’s Residential City
+FieldNameAlt: Owner’s Residential City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner’s Residential State
+FieldNameAlt: Owner’s Residential State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owner’s Residential Zip Code
+FieldNameAlt: Owner’s Residential Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To Customer Name (If different from above owner)
+FieldNameAlt: Mail To Customer Name (If different from above owner)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s Phone Number (Voluntary)
+FieldNameAlt: Mail To’s Phone Number (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s Email (Voluntary)
+FieldNameAlt: Mail To’s Email (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s Sex
+FieldNameAlt: Mail To’s Sex
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s Date of Birth
+FieldNameAlt: Mail To’s Date of Birth
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s FL DL/ID or FEID/Suffix Number
+FieldNameAlt: Mail To’s FL DL/ID or FEID/Suffix Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s Address (If different from above mailing address)
+FieldNameAlt: Mail To’s Address (If different from above mailing address)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s City
+FieldNameAlt: Mail To’s City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s State
+FieldNameAlt: Mail To’s State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Mail To’s Zip Code
+FieldNameAlt: Mail To’s Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner or Lessee’s Name as It Appears on Driver License (First, Full Middle/Maiden, & Last Name)
+FieldNameAlt: Co-Owner or Lessee’s Name as It Appears on Driver License (First, Full Middle/Maiden, & Last Name)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s Phone Number (Voluntary)
+FieldNameAlt: Co-Owner’s Phone Number (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s Email (Voluntary)
+FieldNameAlt: Co-Owner’s Email (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s Sex
+FieldNameAlt: Co-Owner’s Sex
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s Date of Birth
+FieldNameAlt: Co-Owner’s Date of Birth
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s FL DL/ID or FEID/Suffix Number
+FieldNameAlt: Co-Owner’s FL DL/ID or FEID/Suffix Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Mailing Address
+FieldNameAlt: Co-Owner’s/Lessee’s Mailing Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Mailing City
+FieldNameAlt: Co-Owner’s/Lessee’s Mailing City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Mailing State
+FieldNameAlt: Co-Owner’s/Lessee’s Mailing State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Mailing Zip Code
+FieldNameAlt: Co-Owner’s/Lessee’s Mailing Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: CoOwnersLessees Residential Street Address
+FieldNameAlt: Co-Owner’s/Lessee’s Residential Street Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Residential City
+FieldNameAlt: Co-Owner’s/Lessee’s Residential City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Residential State
+FieldNameAlt: Co-Owner’s/Lessee’s Residential State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Co-Owner’s/Lessee’s Residential Zip Code
+FieldNameAlt: Co-Owner’s/Lessee’s Residential Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Make/Manufacturer
+FieldNameAlt: Make/Manufacturer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder's FEID/Suffix # DMV Account # DL/ID #, Sex and DOB
+FieldNameAlt: Lienholder's FEID/Suffix # DMV Account # DL/ID #, Sex and DOB
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder’s Email Voluntary
+FieldNameAlt: Lienholder’s Email (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder’s Phone Number Voluntary
+FieldNameAlt: Lienholder’s Phone Number (Voluntary)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholders Mailing Address
+FieldNameAlt: Lienholder’s Mailing Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder’s City
+FieldNameAlt: Lienholder’s City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder’s State
+FieldNameAlt: Lienholder’s State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder’s Zip Code
+FieldNameAlt: Lienholder’s Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Lienholder’s Name (If box is not checked, title will be mailed to the first lienholder.)
+FieldNameAlt: Lienholder’s Name (If box is not checked, title will be mailed to the first lienholder.)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Check this box if you, lienholder representative, authorize the Department to send the motor vehicle title to the owner and sign here
+FieldNameAlt: Check this box if you, lienholder representative, authorize the Department to send the motor vehicle title to the owner and sign here.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Signature
+FieldName: Signature of Notary Public
+FieldNameAlt: Signature of Notary Public
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Other Exemption
+FieldNameAlt: Other Exemption
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Specify Reason
+FieldNameAlt: Specify Reason 
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Terms of even trade or trade down
+FieldNameAlt: Terms of even trade or trade down
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Even trade or trade down
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Name of Deceased
+FieldNameAlt: Name of Deceased
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Deceased Date
+FieldNameAlt: died on
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Are you a Florida Resident
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: YES
+FieldStateOption: Off
+FieldStateOption: NO
+---
+FieldType: Button
+FieldName: Are you a US Citizen
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: YES_2
+FieldStateOption: Off
+FieldStateOption: NO_2
+---
+FieldType: Button
+FieldName: Are you deaf or hard of hearing Voluntary
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: YES_3
+FieldStateOption: Off
+FieldStateOption: NO_3
+---
+FieldType: Button
+FieldName: Co-Owner Are you a Florida Resident
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: YES_4
+FieldStateOption: Off
+FieldStateOption: NO_4
+---
+FieldType: Button
+FieldName: Co-Owner Are you a US Citizen
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: NO_5
+FieldStateOption: Off
+FieldStateOption: YES_5
+---
+FieldType: Button
+FieldName: Co-Owner Are you deaf or hard of hearing?
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: YES_6
+FieldStateOption: Off
+FieldStateOption: NO_6
+---
+FieldType: Button
+FieldName: ELT Customer
+FieldFlags: 49152
+FieldJustification: Left
+FieldStateOption: YES_7
+FieldStateOption: Off
+FieldStateOption: NO_7

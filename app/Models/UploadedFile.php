@@ -49,7 +49,8 @@ class UploadedFile extends Model
     public const DOCUMENT_TYPES = [
         'salvage_title' => 'Salvage Title',
         'bill_of_sale' => 'Bill of Sale',
-        'owner_id' => 'Owner ID',
+        'owner_id_front' => "Driver's License - Front",
+        'owner_id_back' => "Driver's License - Back",
         'insurance_card' => 'Insurance Card',
         'damage_photos' => 'Damage Photos',
         'repair_photos' => 'Repair Photos',

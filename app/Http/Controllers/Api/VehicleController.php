@@ -8,6 +8,7 @@ use App\Models\Vehicle;
 use App\Services\VINDecoderService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
@@ -59,7 +60,9 @@ class VehicleController extends Controller
             ], 403);
         }
 
-        $request->validate([
+        // Only validated fields are persisted; anything else in the request
+        // body is discarded rather than reaching the model.
+        $validated = $request->validate([
             'vin' => 'sometimes|string|size:17',
             'year' => 'sometimes|integer|min:1900|max:' . (date('Y') + 1),
             'make' => 'sometimes|string|max:100',
@@ -67,7 +70,7 @@ class VehicleController extends Controller
             'body_type' => 'nullable|string|max:100',
             'color' => 'nullable|string|max:50',
             'title_number' => 'nullable|string|max:50',
-            'title_state' => 'nullable|string|size:2',
+            'title_state' => ['nullable', Rule::in(array_keys(Vehicle::US_STATES))],
             'title_brand' => 'nullable|string',
             'odometer_reading' => 'nullable|integer|min:0',
             'odometer_status' => 'nullable|in:actual,exceeds_limits,not_actual',
@@ -78,11 +81,11 @@ class VehicleController extends Controller
         if (!$vehicle) {
             // Create vehicle if not exists
             $vehicle = Vehicle::create(array_merge(
-                $request->all(),
+                $validated,
                 ['user_case_id' => $case->id]
             ));
         } else {
-            $vehicle->update($request->all());
+            $vehicle->update($validated);
         }
 
         return response()->json([

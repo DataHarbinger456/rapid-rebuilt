@@ -175,9 +175,25 @@
                                             <label class="form-label">Title State *</label>
                                             <select name="title_state" class="form-select" required>
                                                 <option value="">Select State</option>
-                                                <option value="FL">Florida</option>
-                                                <option value="other">Other State</option>
+                                                @foreach (\App\Models\Vehicle::US_STATES as $code => $name)
+                                                    <option value="{{ $code }}"
+                                                        @selected(old('title_state') === $code)>{{ $name }}</option>
+                                                @endforeach
                                             </select>
+                                            <small class="text-muted">The state that issued the current title.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Vehicle Type *</label>
+                                            <select name="vehicle_type" class="form-select" required>
+                                                @foreach (\App\Models\Vehicle::VEHICLE_TYPES as $value => $label)
+                                                    <option value="{{ $value }}"
+                                                        @selected(old('vehicle_type', 'rebuilt') === $value)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                            <small class="text-muted">How the vehicle was built. This sets the type checked in Section 3 of the HSMV 82040.</small>
                                         </div>
                                     </div>
                                 </div>
@@ -397,8 +413,8 @@ $(document).ready(function() {
                     $('#vehicleYear').val(data.year);
                     $('#vehicleMake').val(data.make);
                     $('#vehicleModel').val(data.model);
-                    $('#vehicleBody').val(data.body_style || '');
-                    $('#vehicleEngine').val(data.engine || '');
+                    $('#vehicleBody').val(data.body_type || '');
+                    $('#vehicleEngine').val(data.engine_type || '');
                     $('#vehicleDetails').slideDown();
                 } else {
                     swal('Error', response.message || 'Failed to decode VIN', 'error');

@@ -29,9 +29,15 @@ class DocumentService
             'required' => true,
             'accept' => 'image/*,.pdf',
         ],
-        'owner_id' => [
-            'label' => 'Owner ID',
-            'description' => 'Valid government-issued photo ID of the owner',
+        'owner_id_front' => [
+            'label' => "Driver's License - Front",
+            'description' => 'Front of the valid government-issued photo ID of the owner',
+            'required' => true,
+            'accept' => 'image/*,.pdf',
+        ],
+        'owner_id_back' => [
+            'label' => "Driver's License - Back",
+            'description' => 'Back of the valid government-issued photo ID of the owner',
             'required' => true,
             'accept' => 'image/*,.pdf',
         ],

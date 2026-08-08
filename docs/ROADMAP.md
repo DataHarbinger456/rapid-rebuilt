@@ -1,4 +1,7 @@
-# Rapid Rebuilt — Build Roadmap (v3, two tracks)
+# Rapid Rebuilt — Build Roadmap (v4, two tracks)
+
+*v4 (3 Aug 2026): adds S2.5 and the multi-state note, both from the demo call.
+Transcript: `docs/calls/2026-08-03-demo-call-transcript.txt`.*
 
 Two tracks that run in parallel after S1: the **Software** track builds the machine, the
 **Marketing** track fills it. Payment: 50% of a stage up front, 50% on demo of that stage.
@@ -53,16 +56,89 @@ The part nobody else in Florida has. Customer uploads paperwork, state forms fil
 
 **Demo:** phone photo of a salvage title goes in, a filled 82040 comes out.
 
+### Form pack — verified 3 Aug
+
+All six official PDFs are in `docs/forms/` and all six are genuinely fillable, confirmed
+with `pdftk dump_data_fields`. This was the main technical risk in S2 and it is now retired.
+
+| Form | What it actually is | Fields |
+|---|---|---|
+| 82040 | Application for Certificate of Title | 215 |
+| 82042 | VIN and Odometer Verification | 38 |
+| 82050 | Notice of Sale and/or Bill of Sale | 40 |
+| 82053 | Power of Attorney for a Motor Vehicle | 35 |
+| 84490 | Statement of Builder | 134 |
+| 84491 | Statement of Builder — Additional Sheet | 122 |
+
+The previous build's code labelled 84490 "Rebuilt Motor Vehicle Inspection", 84491 "Major
+Component Parts Form" and 82053 "Odometer Disclosure Statement". All three were wrong.
+Corrected in `PDFGeneratorService`.
+
+**Weight:** the 82040 has separate `Weight` and `GVW` fields. Client confirmed weight comes
+from what is printed on the title — so it is AI-extracted from the salvage title, never
+auto-filled from the VIN decoder's GVWR.
+
+## S2.5 — Inspection Log & DMV Access (Weeks 7–9) — $4,500
+
+**Added after the 3 Aug demo.** He described this himself: *"we have what's called a log…
+we have to share it with the DMV or give them access to it… they could see when the
+inspection was conducted, who conducted the inspection, and they want to see the pictures."*
+
+This is the compliance record that makes the DMV/Tallahassee conversation possible. It was
+previously buried as a footnote in S3; it is his second-strongest ask and gets its own stage.
+
+1. **Inspector field capture (mobile):** photos taken on-site, geotagged and timestamped at
+   the moment of capture. The `inspection_photos` table and `InspectionService::addPhoto()`
+   already exist with latitude/longitude/taken_at/device_info columns and 24 defined photo
+   types — there is no web UI wired to them. This builds that UI.
+2. **The inspection log itself:** one immutable record per inspection — date/time conducted,
+   which inspector conducted it, checklist results, and every photo, all in one view.
+3. **VIN-keyed lookup:** find any inspection by VIN, not just by case. Explicitly requested
+   (*"attach the inspection according to the vin number"*).
+4. **DMV read-only access:** a fourth role, or a tokenized verification link per inspection,
+   that exposes the log and nothing else — no revenue, no other customers' cases. Same
+   pattern as the public tracker already shipped in S1.
+5. **Excel/CSV export:** the log as a working spreadsheet (*"maybe create a working excel
+   file"*), per-inspection or date-ranged for bulk state reporting.
+6. **Cloud retention:** logs and photos held in private storage with a defined retention
+   window, so a request from the state months later can still be answered.
+
+**Demo:** hand over a VIN, get back a timestamped, geotagged, photographed inspection record
+the state can verify without a login.
+
+**Dependency:** ships after S2 — the packet is stronger when generated forms and the log
+are one record. Can run before S2 if the state conversation moves first.
+
+---
+
+## Multi-state expansion (quoted per state, not bundled)
+
+Raised in the demo: *"it's just for Florida right now… we will need all the states."*
+
+S2 builds the extraction engine and the Florida HSMV form pack. The engine is
+state-agnostic; the forms are not. Every additional state is its own research pass, its own
+PDF templates, and its own field-mapping and validation rules.
+
+**Roughly $2,000–$3,000 per state pack** once the Florida engine exists, quoted individually
+after confirming which states he actually gets volume from. Do not promise "all 50" — that
+is a multi-year product, not a feature, and pricing it as one number destroys the margin.
+
+The honest framing for him: Florida first, prove it, then add states in the order his
+revenue justifies.
+
+---
+
 ## S3 — Scale & Licensing (future, separate conversation)
 
 - Dealer bulk portal: CSV/VIN-list bulk case creation, volume pricing, fleet dashboard
   (the `dealer` user type already exists in the code, unused)
 - White-label / multi-tenant for licensing to other rebuilt-title shops
+- Additional state form packs (see multi-state note above)
 - E-signature on generated forms: self-hosted Documenso (13k-star open source, no
   per-envelope fees, title documents never leave our server). Day-of flow stays
   print + wet-sign; e-sign only matters when pitching Tallahassee on going paperless.
 - The Tallahassee pitch: official forms + e-signature + QR certificates + audit trail.
-  Most of the demo builds itself in S1–S2 + M2.
+  Most of the demo builds itself in S1–S2.5 + M2 — S2.5 is now the centerpiece.
 - Live-updating dashboards (websockets) if case volume justifies it
 
 ---
@@ -130,7 +206,12 @@ content shoots, S3 licensing work.
 |---|---|---|
 | S1 — Portal live | $3,500 | $1,750 to start, $1,750 on live demo |
 | S2 — AI + official forms | $9,500 | $4,750 to start, $4,750 on demo |
+| S2.5 — Inspection log + DMV access | $4,500 | $2,250 to start, $2,250 on demo |
 | M1 — Marketing foundation | $3,500 | $1,750 to start, $1,750 on launch |
 | M2 — Outreach engine | $2,500 | $1,250 to start, $1,250 on launch |
-| **Build total** | **$19,000** | vs. $55k–$80k from an agency |
+| **Build total** | **$23,500** | vs. $55k–$80k from an agency |
 | Ongoing | $950/mo | starts after M2, cancel anytime with 30 days notice |
+| Extra state packs | $2,000–$3,000 each | quoted per state, after Florida is proven |
+
+S2.5 is new as of the 3 Aug demo. Present it as a separate decision, not as a
+$4,500 increase to a number he already agreed to.

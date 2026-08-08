@@ -7,20 +7,26 @@ where the floor is, and what to never give away.
 
 ## 1. The number you ask for
 
-**$19,000 build, staged in four payments. $950/mo ongoing after launch.**
+**$23,500 build, staged across five stages. $950/mo ongoing after launch.**
 
-Do not present this as one number. Present it as four small decisions, because
-he is cash-sensitive (his words: "practically bankrupt… $120k+ in" on a previous
-attempt). Four $3k–$9k decisions are psychologically survivable. One $19k decision is not.
+Do not present this as one number, and do not put $23,500 in front of him in one
+sitting. Present it as small sequential decisions, because he is cash-sensitive
+(his words: "practically bankrupt… $120k+ in" on a previous attempt). A $2k–$9k
+decision is psychologically survivable. A $23,500 decision is not.
+
+**Right now the only live ask is S2 at $9,500** ($4,750 to start). S2.5 gets quoted
+after he has watched a state form fill itself. See §8.
 
 | Stage | Price | Deposit to start | Balance on demo |
 |---|---|---|---|
 | S1 — Portal live | $3,500 | $1,750 | $1,750 |
 | S2 — AI + official state forms | $9,500 | $4,750 | $4,750 |
+| S2.5 — Inspection log + DMV access | $4,500 | $2,250 | $2,250 |
 | M1 — Marketing foundation | $3,500 | $1,750 | $1,750 |
 | M2 — Outreach engine | $2,500 | $1,250 | $1,250 |
-| **Total** | **$19,000** | | |
+| **Total** | **$23,500** | | |
 | Ongoing | $950/mo | starts after M2 | |
+| Extra state packs | $2,000–$3,000 ea | quoted separately, never bundled | |
 
 ---
 
@@ -31,12 +37,12 @@ extraction, state-form automation, marketing site — lands at **$55k–$80k** a
 3–5 months. Even an offshore team is ~$20k–$35k with heavy management risk and
 no accountability.
 
-**You are pricing at roughly 65–70% below market.** That discount is your single
-biggest lever. Name it explicitly, once, then never discount again. A discount
-that keeps moving isn't a discount — it's an admission the price was fake.
+**You are pricing at well under half of market — roughly 55–70% below.** That discount
+is your single biggest lever. Name it explicitly, once, then never discount again. A
+discount that keeps moving isn't a discount — it's an admission the price was fake.
 
-**Say this:** *"Market for this is $55k–$80k. You're at $19k because of who you are.
-That's the friend price, and it's the only one I've got."*
+**Say this:** *"Market for this is $55k–$80k. You're at less than half that because of
+who you are. That's the friend price, and it's the only one I've got."*
 
 ---
 
@@ -46,10 +52,11 @@ That's the friend price, and it's the only one I've got."*
 |---|---|---|
 | S1 | $3,500 | Already delivered. Non-negotiable — the work exists. |
 | S2 | $8,000 | Hard floor. Below this the AI + form automation isn't worth building. |
+| S2.5 | $3,500 | Schema exists, so the build is cheaper than it looks — but the DMV role and export are real work. |
 | M1 | $3,000 | |
 | M2 | $2,000 | Droppable entirely if he wants to self-serve outreach. |
 | Monthly | $750 | Below $750 you're paying for his hosting and AI out of pocket. |
-| **Build floor** | **$16,000** | Walk below this. |
+| **Build floor** | **$20,000** | Sum of every floor above. Walk below this. |
 
 **Never concede:**
 - **The 50% deposit.** Nothing starts on a handshake. This is the whole rule.
@@ -60,7 +67,7 @@ That's the friend price, and it's the only one I've got."*
 
 ## 4. Concession ladder (give in this order, only if pushed)
 
-1. **Stretch the timeline**, not the price — "same $19k, spread over 5 months"
+1. **Stretch the timeline**, not the price — "same total, spread over 6 months"
 2. **Drop M2** ($2,500 off) — he does his own outreach; portal is unaffected
 3. **Defer the monthly** to 60 days post-launch instead of immediately
 4. **Split S2 into four payments** of $2,375 each instead of two of $4,750
@@ -72,15 +79,28 @@ Notice all four preserve the rate. You're selling time and scope, never price.
 ## 5. Objection handling
 
 **"That's a lot of money right now."**
-> "It's $1,750 to start. Not $19,000. You see a working portal before decision two."
+> "It's $4,750 to start, and that's the only decision on the table today. You see
+> the forms filling themselves before anything else gets discussed."
 
 **"I already spent $120k and got nothing."**
 > "Exactly why we're doing it in stages. You've already seen S1 live — you're not
 > paying on faith anymore, you're paying on something you clicked through yourself."
 
 **"Can you do it cheaper?"**
-> "The market number is $55k–$80k. I'm at $19k. I can reduce scope, not the rate —
-> if M2 is out, that's $2,500 off and you handle your own dealer outreach."
+> "The market number is $55k–$80k. I'm well under half that. I can reduce scope,
+> not the rate — if M2 is out, that's $2,500 off and you handle your own dealer outreach."
+
+**"Why is the inspection log extra? I thought that was included."**
+> "It wasn't in what you approved — that covered the portal and the state forms.
+> The log is a compliance system with its own access role for the state, its own
+> export, and geotagged field photos. It's the thing that makes the Tallahassee
+> conversation possible. Separate build, separate decision."
+
+**"I need all the states, not just Florida."**
+> "The reading engine works anywhere — that's the expensive part and it's in S2.
+> Each state's forms are their own research and their own templates. Let's prove
+> Florida, then add states in whatever order your volume justifies. Two to three
+> thousand each." Never quote "all 50" as one number.
 
 **"What's the $950/mo actually for?"**
 > Point at the itemized table in the client doc. Hosting, AI usage, SMS, security
@@ -129,7 +149,33 @@ Use this factually, never gloatingly. The receipts speak louder than the adjecti
 
 ---
 
-## 8. Close
+## 8. Post-demo read (3 Aug 2026)
+
+He closed with *"I like where it's going"* and asked for zero refunds, zero pushback
+on price — he pushed on **capability**, which is the good kind of pressure. Full
+transcript in `docs/calls/2026-08-03-demo-call-transcript.txt`.
+
+What he asked for that wasn't scoped:
+
+| Ask | Where it landed | Notes |
+|---|---|---|
+| All states, not just Florida | Per-state packs, $2–3k each | Said it 90 seconds in, casually. He has not priced it in his head. |
+| DMV-shareable inspection log | **S2.5**, $4,500 | His second-biggest ask. Quote it. |
+| Inspection lookup by VIN | S2.5 | |
+| Excel export of the log | S2.5 | |
+| Inspector field photos | S2.5 | Schema already built, no UI — cheap for you, valuable to him. |
+| Calendar on the tracker | Fold into S2 free | Throwaway remark, costs nothing, buys goodwill. |
+
+Already covered, so **reassure rather than requote**: filled PDFs that print
+(his loudest ask — S2), and rejection notifications (S1 email + M2 SMS).
+
+**Sequencing:** sell S2 first. S2.5 is a much easier yes once he has watched a
+state form fill itself, and pitching $14,000 of new scope in one breath will
+stall a man who has already lost $120k.
+
+---
+
+## 9. Close
 
 Ask for the S2 deposit **in the room**, while the demo is still on screen.
 The single highest-conversion moment is the sixty seconds after he sees the

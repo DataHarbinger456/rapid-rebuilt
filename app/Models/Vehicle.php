@@ -9,6 +9,88 @@ class Vehicle extends Model
 {
     use HasFactory;
 
+    /**
+     * How the vehicle was built, matching the vehicles.vehicle_type enum.
+     *
+     * These drive the TYPE checkboxes in Section 3 of the HSMV 82040; see
+     * config/hsmv_forms.php. 'mobile_home' and 'other' have no box of their
+     * own on that form.
+     */
+    public const VEHICLE_TYPES = [
+        'rebuilt' => 'Rebuilt',
+        'aspt' => 'Assembled from Parts (ASPT)',
+        'kit_car' => 'Kit Car',
+        'custom_vehicle' => 'Custom Vehicle',
+        'street_rod' => 'Street Rod',
+        'replica' => 'Replica',
+        'mobile_home' => 'Mobile Home',
+        'other' => 'Other',
+    ];
+
+    /**
+     * Issuing states for a title, matching the two-character
+     * vehicles.title_state column.
+     *
+     * Florida is listed first because it is the common case; the rest follow
+     * alphabetically. On the HSMV 82040 a Florida title is an Original
+     * application and anything else is a Transfer, so this list has to cover
+     * every state the business actually sees rather than a Florida/other
+     * shorthand.
+     */
+    public const US_STATES = [
+        'FL' => 'Florida',
+        'AL' => 'Alabama',
+        'AK' => 'Alaska',
+        'AZ' => 'Arizona',
+        'AR' => 'Arkansas',
+        'CA' => 'California',
+        'CO' => 'Colorado',
+        'CT' => 'Connecticut',
+        'DE' => 'Delaware',
+        'DC' => 'District of Columbia',
+        'GA' => 'Georgia',
+        'HI' => 'Hawaii',
+        'ID' => 'Idaho',
+        'IL' => 'Illinois',
+        'IN' => 'Indiana',
+        'IA' => 'Iowa',
+        'KS' => 'Kansas',
+        'KY' => 'Kentucky',
+        'LA' => 'Louisiana',
+        'ME' => 'Maine',
+        'MD' => 'Maryland',
+        'MA' => 'Massachusetts',
+        'MI' => 'Michigan',
+        'MN' => 'Minnesota',
+        'MS' => 'Mississippi',
+        'MO' => 'Missouri',
+        'MT' => 'Montana',
+        'NE' => 'Nebraska',
+        'NV' => 'Nevada',
+        'NH' => 'New Hampshire',
+        'NJ' => 'New Jersey',
+        'NM' => 'New Mexico',
+        'NY' => 'New York',
+        'NC' => 'North Carolina',
+        'ND' => 'North Dakota',
+        'OH' => 'Ohio',
+        'OK' => 'Oklahoma',
+        'OR' => 'Oregon',
+        'PA' => 'Pennsylvania',
+        'RI' => 'Rhode Island',
+        'SC' => 'South Carolina',
+        'SD' => 'South Dakota',
+        'TN' => 'Tennessee',
+        'TX' => 'Texas',
+        'UT' => 'Utah',
+        'VT' => 'Vermont',
+        'VA' => 'Virginia',
+        'WA' => 'Washington',
+        'WV' => 'West Virginia',
+        'WI' => 'Wisconsin',
+        'WY' => 'Wyoming',
+    ];
+
     protected $fillable = [
         'user_case_id',
         'vin',

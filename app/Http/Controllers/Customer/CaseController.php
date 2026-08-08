@@ -77,7 +77,8 @@ class CaseController extends Controller
             'model' => 'required|string|max:100',
             'color' => 'required|string|max:50',
             'odometer' => 'required|integer|min:0',
-            'title_state' => 'required|string|size:2',
+            'title_state' => ['required', Rule::in(array_keys(Vehicle::US_STATES))],
+            'vehicle_type' => ['required', Rule::in(array_keys(Vehicle::VEHICLE_TYPES))],
             'components' => 'required|array|min:1',
             'components.*.type' => ['required', Rule::in(array_keys(Component::PART_TYPES))],
             'components.*.source' => ['required', Rule::in(array_keys(Component::CONDITIONS))],
@@ -86,6 +87,8 @@ class CaseController extends Controller
         ], [
             'components.*.type.in' => 'Please pick a component type from the list. Reload the page if the options look out of date.',
             'components.*.source.in' => 'Please pick a source from the list. Reload the page if the options look out of date.',
+            'vehicle_type.in' => 'Please pick a vehicle type from the list. Reload the page if the options look out of date.',
+            'title_state.in' => 'Please pick a state from the list. Reload the page if the options look out of date.',
         ]);
 
         DB::beginTransaction();
@@ -109,6 +112,7 @@ class CaseController extends Controller
                 'engine_type' => $request->engine,
                 'odometer_reading' => $request->odometer,
                 'title_state' => $request->title_state,
+                'vehicle_type' => $request->vehicle_type,
             ]);
 
             // Create components
