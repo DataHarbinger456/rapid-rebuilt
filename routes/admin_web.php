@@ -10,6 +10,7 @@ use App\Http\Controllers\Inspector\InspectionController as InspectorInspectionCo
 // Admin Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CaseManagementController;
+use App\Http\Controllers\Admin\ExtractionReviewController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 
@@ -38,6 +39,16 @@ Route::prefix('admin')->middleware(['auth', 'role.staff'])->group(function () {
             ->name('api.documents.approve');
         Route::post('/{case}/documents/{document}/reject', [CaseManagementController::class, 'rejectDocument'])
             ->name('api.documents.reject');
+        // AI document extraction. Values read from a document reach the
+        // vehicle only through the confirm action below.
+        Route::post('/{case}/documents/{document}/extract', [ExtractionReviewController::class, 'store'])
+            ->name('admin.extractions.store');
+        Route::get('/{case}/extractions/{extraction}', [ExtractionReviewController::class, 'show'])
+            ->name('admin.extractions.show');
+        Route::post('/{case}/extractions/{extraction}/confirm', [ExtractionReviewController::class, 'confirm'])
+            ->name('admin.extractions.confirm');
+        Route::post('/{case}/extractions/{extraction}/retry', [ExtractionReviewController::class, 'retry'])
+            ->name('admin.extractions.retry');
         Route::delete('/{case}', [CaseManagementController::class, 'destroy'])->name('admin.cases.destroy');
     });
 

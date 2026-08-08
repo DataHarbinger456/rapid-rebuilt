@@ -8,8 +8,9 @@
 #   1. (re)creates the `admin-rapid` DB and imports the dump
 #   2. drops 7 legacy 2021 tables with zero references in app/
 #   3. prunes their rows from the `migrations` table
-#   4. clones the schema into `admin_rapid_test` for phpunit
-#   5. runs the seeders (test accounts, pricing, demo cases)
+#   4. applies the migrations added since the dump was taken
+#   5. clones the schema into `admin_rapid_test` for phpunit
+#   6. runs the seeders (test accounts, pricing, demo cases)
 #
 # Usage: ./scripts/demo-db.sh
 # Requires: mysql running locally, root with no password (see .env), php+artisan.
@@ -64,6 +65,12 @@ $MYSQL "$DB" -e "ALTER TABLE uploaded_files
   ADD COLUMN rejection_reason TEXT NULL AFTER review_notes,
   MODIFY path VARCHAR(255) NOT NULL DEFAULT '',
   MODIFY size BIGINT UNSIGNED NOT NULL DEFAULT 0;"
+
+echo "==> Applying migrations added since the dump was taken"
+# The dump lags the repo's migrations (timeline enum additions, the document
+# extraction tables). Without this, a reset silently drops them and the
+# extraction tests fail on missing tables.
+"$PHP_BIN" artisan migrate --force
 
 echo "==> Cloning schema into \`$TEST_DB\` for phpunit"
 $MYSQL -e "DROP DATABASE IF EXISTS \`$TEST_DB\`; CREATE DATABASE \`$TEST_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"

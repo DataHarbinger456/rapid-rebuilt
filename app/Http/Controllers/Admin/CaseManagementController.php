@@ -124,7 +124,7 @@ class CaseManagementController extends Controller
             'user',
             'vehicle',
             'components',
-            'documents',
+            'documents.extractions',
             'inspection.photos',
             'scheduling',
             'assignedInspector',

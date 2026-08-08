@@ -61,6 +61,10 @@ class CaseTimeline extends Model
         'sent_to_dmv' => 'Sent to DMV',
         'dmv_received' => 'DMV Received',
         'title_issued' => 'Title Issued',
+        // Document extraction
+        'extraction_completed' => 'Document Read by AI',
+        'extraction_failed' => 'Document Read Failed',
+        'extraction_confirmed' => 'Extracted Data Confirmed',
         // Communication
         'note_added' => 'Note Added',
         'message_sent' => 'Message Sent',
@@ -107,6 +111,9 @@ class CaseTimeline extends Model
             'inspection_passed' => 'check',
             'inspection_failed' => 'x',
             'title_issued' => 'award',
+            'extraction_completed' => 'scan',
+            'extraction_failed' => 'alert-triangle',
+            'extraction_confirmed' => 'check-square',
             'case_completed' => 'flag',
             'case_cancelled' => 'slash',
         ];
@@ -128,6 +135,8 @@ class CaseTimeline extends Model
             'inspection_passed' => 'green',
             'inspection_failed' => 'red',
             'title_issued' => 'green',
+            'extraction_failed' => 'red',
+            'extraction_confirmed' => 'green',
         ];
 
         return $colors[$this->event_type] ?? 'gray';

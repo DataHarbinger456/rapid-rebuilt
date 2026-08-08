@@ -136,6 +136,17 @@
                                             <td>{{ $doc->created_at->format('M j, Y') }}</td>
                                             <td>
                                                 <a href="{{ route('api.documents.view', $doc) }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">View</a>
+                                                @php($extraction = $doc->currentExtraction())
+                                                @if($extraction)
+                                                    <a href="{{ route('admin.extractions.show', [$case->id, $extraction->id]) }}"
+                                                       class="btn btn-sm btn-outline-info">{{ $extraction->reviewed_at ? 'Extraction reviewed' : 'Review extraction' }}</a>
+                                                @elseif(config("extraction.documents.{$doc->document_type}.extractor"))
+                                                    <form method="POST" class="d-inline"
+                                                          action="{{ route('admin.extractions.store', [$case->id, $doc->id]) }}">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-outline-info">Read with AI</button>
+                                                    </form>
+                                                @endif
                                                 @if($doc->status === 'pending')
                                                     <button type="button" class="btn btn-sm btn-success js-approve-document"
                                                             data-url="{{ route('api.documents.approve', [$case, $doc]) }}">Approve</button>

@@ -107,6 +107,21 @@ class UploadedFile extends Model
         return $this->hasOne(InspectionPhoto::class);
     }
 
+    public function extractions()
+    {
+        return $this->hasMany(DocumentExtraction::class)->latest('id');
+    }
+
+    /**
+     * The attempt staff should be looking at: the newest one that has not been
+     * superseded by a re-run.
+     */
+    public function currentExtraction(): ?DocumentExtraction
+    {
+        return $this->extractions
+            ->firstWhere(fn (DocumentExtraction $e): bool => $e->status !== DocumentExtraction::STATUS_SUPERSEDED);
+    }
+
     // =====================
     // ACCESSORS
     // =====================
