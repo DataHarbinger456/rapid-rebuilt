@@ -100,10 +100,32 @@ class InspectionController extends Controller
             ], 422);
         }
 
-        $data = $request->all();
+        // Mirrors the $allowedFields whitelist in
+        // InspectionService::updateChecklist(), which filters keys but never
+        // checked types. Note that despite their names, vin_location_1/2 are
+        // varchar columns holding the VIN as read at each location, and
+        // odometer_reading_verified is the integer reading itself, not a flag.
+        $validated = $request->validate([
+            'vin_verified' => 'sometimes|boolean',
+            'vin_location_1' => 'sometimes|nullable|string|max:255',
+            'vin_location_2' => 'sometimes|nullable|string|max:255',
+            'vin_plates_match' => 'sometimes|boolean',
+            'vin_no_alterations' => 'sometimes|boolean',
+            'odometer_reading_verified' => 'sometimes|nullable|integer|min:0',
+            'odometer_functional' => 'sometimes|boolean',
+            'brakes_functional' => 'sometimes|boolean',
+            'lights_functional' => 'sometimes|boolean',
+            'steering_functional' => 'sometimes|boolean',
+            'horn_functional' => 'sometimes|boolean',
+            'wipers_functional' => 'sometimes|boolean',
+            'airbags_present' => 'sometimes|boolean',
+            'seatbelts_functional' => 'sometimes|boolean',
+            'all_receipts_match' => 'sometimes|boolean',
+            'inspector_notes' => 'sometimes|nullable|string|max:5000',
+        ]);
 
         try {
-            $inspection = $this->inspectionService->updateChecklist($inspection, $data);
+            $inspection = $this->inspectionService->updateChecklist($inspection, $validated);
 
             return response()->json([
                 'success' => true,
