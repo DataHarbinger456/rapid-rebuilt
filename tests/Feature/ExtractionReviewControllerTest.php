@@ -224,6 +224,90 @@ class ExtractionReviewControllerTest extends TestCase
         $this->assertSame('FL', $case->vehicle()->first()->title_state);
     }
 
+    public function test_an_invalid_vin_is_flagged_as_failing_its_checksum(): void
+    {
+        $case = $this->makeCase();
+        // One character misread: a real failure from the live sample run.
+        $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB37874']);
+
+        $response = $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
+
+        $response->assertOk();
+        $response->assertSee('VIN failed checksum validation');
+        $response->assertSee('character by character');
+        $response->assertViewHas('vinWarning', fn (?string $w): bool => $w !== null);
+    }
+
+    public function test_a_valid_vin_is_not_flagged(): void
+    {
+        $case = $this->makeCase();
+        // The same vehicle's real VIN, which passes its check digit.
+        $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB73874']);
+
+        $response = $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
+
+        $response->assertOk();
+        $response->assertDontSee('VIN failed checksum validation');
+        // A closure, not a bare null: assertViewHas treats null as "key
+        // exists" and would pass even if the VIN were flagged.
+        $response->assertViewHas('vinWarning', fn (?string $w): bool => $w === null);
+    }
+
+    public function test_a_corrected_vin_clears_the_warning(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB37874']);
+
+        // Staff checked the document and fixed the transposition. The warning
+        // describes what is on screen, so it must not persist against the
+        // superseded AI value.
+        $extraction->fields()->where('field_key', 'vin')->update([
+            'confirmed_value' => '1FMSK8DH1LGB73874',
+            'status' => DocumentExtractionField::STATUS_CORRECTED,
+        ]);
+
+        $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
+            ->assertOk()
+            ->assertDontSee('VIN failed checksum validation')
+            ->assertViewHas('vinWarning', fn (?string $w): bool => $w === null);
+    }
+
+    public function test_a_vin_the_model_could_not_read_is_not_flagged(): void
+    {
+        $case = $this->makeCase();
+
+        // Nothing found is already shown as "Not found on the document";
+        // a checksum warning on top of that would be noise.
+        $extraction = $this->makeExtraction($case, ['vin' => null]);
+
+        $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
+            ->assertOk()
+            ->assertViewHas('vinWarning', fn (?string $w): bool => $w === null);
+    }
+
+    public function test_a_failing_checksum_does_not_block_confirmation(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB37874']);
+
+        // Pre-1981 vehicles have no valid check digit, so staff must be able to
+        // confirm a failing VIN once they have checked it against the document.
+        $response = $this->actingAs($this->staff())
+            ->post(route('admin.extractions.confirm', [$case->id, $extraction->id]), [
+                'fields' => [
+                    'vin' => ['status' => 'confirmed', 'value' => '1FMSK8DH1LGB37874'],
+                ],
+            ]);
+
+        $response->assertRedirect(route('admin.cases.show', $case->id));
+        $response->assertSessionHas('success');
+        $this->assertSame('1FMSK8DH1LGB37874', $case->vehicle()->first()->vin);
+    }
+
     public function test_a_superseded_extraction_can_no_longer_be_confirmed(): void
     {
         $case = $this->makeCase();

@@ -9,6 +9,7 @@ use App\Models\UploadedFile;
 use App\Models\UserCase;
 use App\Services\DocumentExtractionService;
 use App\Services\Extraction\ExtractionConfirmer;
+use App\Support\Vin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -94,7 +95,37 @@ class ExtractionReviewController extends Controller
             'labels' => $extractor->fieldLabels(),
             'conflicts' => $conflicts,
             'vehicle' => $vehicle,
+            'vinWarning' => $this->vinWarning($extraction),
         ]);
+    }
+
+    /**
+     * Why the VIN on screen looks wrong, or null if it looks fine.
+     *
+     * Checks the value the reviewer is actually looking at, not the raw AI
+     * value: once staff have corrected the VIN, the warning must describe
+     * their correction, otherwise a fixed VIN keeps showing a stale failure.
+     *
+     * Advisory only — confirmation is never blocked. Pre-1981 vehicles predate
+     * ISO 3779 and a handful of legitimately-issued VINs fail the checksum, so
+     * staff must be able to override after checking the document.
+     */
+    private function vinWarning(DocumentExtraction $extraction): ?string
+    {
+        $field = $extraction->fields->firstWhere('field_key', 'vin');
+        $vin = $field?->confirmed_value ?? $field?->ai_value;
+
+        if ($vin === null || trim($vin) === '' || Vin::isValid($vin)) {
+            return null;
+        }
+
+        if (! Vin::isWellFormed($vin)) {
+            return 'This is not a well-formed 17-character VIN. Check it against the document character by character.';
+        }
+
+        return 'This VIN fails its ISO 3779 check digit, which usually means one character was misread. '
+            . 'Compare it to the document character by character before confirming. '
+            . 'Pre-1981 vehicles have no valid check digit, so you may confirm it anyway if the document agrees.';
     }
 
     /**

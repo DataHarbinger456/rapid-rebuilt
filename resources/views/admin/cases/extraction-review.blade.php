@@ -97,6 +97,13 @@
                             </div>
                         @endif
 
+                        @if($vinWarning)
+                            <div class="alert alert-danger">
+                                <strong>VIN failed checksum validation.</strong>
+                                <div class="mt-1">{{ $vinWarning }}</div>
+                            </div>
+                        @endif
+
                         <form method="POST" action="{{ route('admin.extractions.confirm', [$case->id, $extraction->id]) }}">
                             @csrf
 
@@ -104,9 +111,9 @@
                                 <table class="table align-middle">
                                     <thead>
                                         <tr>
-                                            <th style="width: 26%">Field</th>
-                                            <th style="width: 38%">Value</th>
-                                            <th style="width: 36%">Decision</th>
+                                            <th style="width: 24%">Field</th>
+                                            <th style="width: 42%">Value</th>
+                                            <th style="width: 34%">Decision</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -115,10 +122,19 @@
                                                 $key = $field->field_key;
                                                 $conflict = $conflicts[$key] ?? null;
                                                 $current = $field->confirmed_value ?? $field->ai_value;
+                                                $failsChecksum = $key === 'vin' && $vinWarning !== null;
                                             @endphp
-                                            <tr @class(['table-warning' => $conflict !== null])>
+                                            <tr @class([
+                                                'table-warning' => $conflict !== null && ! $failsChecksum,
+                                                'table-danger' => $failsChecksum,
+                                            ])>
                                                 <td>
                                                     <strong>{{ $labels[$key] ?? $key }}</strong>
+                                                    @if($failsChecksum)
+                                                        <div class="small text-danger fw-bold">
+                                                            Fails ISO 3779 check digit &mdash; verify character by character
+                                                        </div>
+                                                    @endif
                                                     @if($field->ai_value === null)
                                                         <div class="text-muted small">Not found on the document</div>
                                                     @endif
@@ -132,8 +148,12 @@
                                                     @endif
                                                 </td>
                                                 <td>
+                                                    {{-- A VIN has to be compared to the document one character at a
+                                                         time, so it is set in a monospace face and given room for all
+                                                         17 characters rather than being clipped. --}}
                                                     <input type="text"
-                                                           class="form-control"
+                                                           @class(['form-control', 'font-monospace' => $key === 'vin'])
+                                                           @if($key === 'vin') style="min-width: 20ch; letter-spacing: .04em;" @endif
                                                            name="fields[{{ $key }}][value]"
                                                            value="{{ old('fields.' . $key . '.value', $current) }}"
                                                            maxlength="255">
