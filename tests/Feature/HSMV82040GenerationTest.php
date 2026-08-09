@@ -303,6 +303,269 @@ class HSMV82040GenerationTest extends TestCase
         $this->assertSame('Off', $values['Transfer']);
     }
 
+    /**
+     * Section 6 mileage boxes, most significant first. A box the generator
+     * leaves untouched prints blank.
+     */
+    private const MILEAGE_BOXES = [
+        '100, 000 Place',
+        '10,000 Place',
+        '1,000 Place',
+        '100 Place',
+        '10 Place',
+        'Ones Place',
+    ];
+
+    private const DECLARATION_BOXES = [
+        '1  REFLECTS ACTUAL MILEAGE',
+        '2 IS NOT THE ACTUAL MILEAGE',
+        '3 IS IN EXCESS OF ITS MECHANICAL LIMITS',
+    ];
+
+    /**
+     * The six mileage boxes as one string, a space per blank box, so a
+     * misalignment by one place shows up in the failure message.
+     */
+    private function mileageBoxes(UserCase $case): string
+    {
+        $values = $this->stampedValues($case);
+
+        return implode('', array_map(
+            fn (string $box): string => $values[$box] ?? ' ',
+            self::MILEAGE_BOXES
+        ));
+    }
+
+    #[DataProvider('odometerReadings')]
+    public function test_odometer_reading_fills_the_digit_boxes_right_aligned(
+        ?int $reading,
+        string $expected
+    ): void {
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['odometer_reading' => $reading]
+        );
+
+        $this->assertSame($expected, $this->mileageBoxes($case));
+    }
+
+    public static function odometerReadings(): array
+    {
+        return [
+            // The reading from the Alabama title in docs/samples.
+            'four digits' => [4527, '  4527'],
+            'six digits fills every box' => [128450, '128450'],
+            'internal zero is kept' => [4027, '  4027'],
+            'one digit' => [7, '     7'],
+            // A genuine zero still needs a printed digit, or the box looks
+            // unanswered rather than answered with nought.
+            'zero prints a single digit' => [0, '     0'],
+            'missing reading leaves every box blank' => [null, '      '],
+            // Six boxes cannot hold this. A truncation on a declaration sworn
+            // under penalty of perjury is worse than a blank.
+            'more than six digits leaves every box blank' => [1234567, '      '],
+        ];
+    }
+
+    public function test_odometer_date_fills_the_three_date_read_boxes(): void
+    {
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['odometer_date' => '2025-11-04']
+        );
+
+        $values = $this->stampedValues($case);
+
+        // Zero padded, because each box is a fixed two- or four-character space
+        // on the form.
+        $this->assertSame('11', $values['Date Read MM']);
+        $this->assertSame('04', $values['Date Read DD']);
+        $this->assertSame('2025', $values['Date Read YYYY']);
+    }
+
+    public function test_a_title_with_no_odometer_date_leaves_the_date_read_boxes_blank(): void
+    {
+        // Alabama titles carry no odometer date. Staff reject the field rather
+        // than let a model supply one, so it arrives here null.
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['odometer_date' => null]
+        );
+
+        $values = $this->stampedValues($case);
+
+        $this->assertArrayNotHasKey('Date Read MM', $values);
+        $this->assertArrayNotHasKey('Date Read DD', $values);
+        $this->assertArrayNotHasKey('Date Read YYYY', $values);
+    }
+
+    #[DataProvider('odometerStatuses')]
+    public function test_odometer_status_ticks_exactly_one_declaration_box(
+        ?string $status,
+        ?string $expectedBox
+    ): void {
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['odometer_status' => $status]
+        );
+
+        $values = $this->stampedValues($case);
+
+        $ticked = array_values(array_filter(
+            self::DECLARATION_BOXES,
+            fn (string $box): bool => ($values[$box] ?? 'Off') !== 'Off'
+        ));
+
+        $this->assertSame(
+            $expectedBox === null ? [] : [$expectedBox],
+            $ticked,
+            "odometer_status '" . ($status ?? 'null') . "' ticked the wrong declaration box"
+        );
+    }
+
+    public static function odometerStatuses(): array
+    {
+        return [
+            'actual' => ['actual', '1  REFLECTS ACTUAL MILEAGE'],
+            'not actual' => ['not_actual', '2 IS NOT THE ACTUAL MILEAGE'],
+            'exceeds limits' => ['exceeds_limits', '3 IS IN EXCESS OF ITS MECHANICAL LIMITS'],
+            // Sworn under penalty of perjury, so an unknown status ticks
+            // nothing and staff complete it by hand.
+            'unknown' => [null, null],
+        ];
+    }
+
+    public function test_model_lands_in_its_own_box(): void
+    {
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['model' => 'ACCORD SEDAN TOURING']
+        );
+
+        $this->assertSame('ACCORD SEDAN TOURING', $this->stampedValues($case)['Model']);
+    }
+
+    public function test_previous_state_of_issue_falls_back_to_the_issuing_state(): void
+    {
+        // The usual case: the title names no earlier state, so the state that
+        // issued the surrendered title is the answer.
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['title_state' => 'AL', 'previous_state' => null]
+        );
+
+        $this->assertSame('AL', $this->stampedValues($case)['Previous State of Issue']);
+    }
+
+    public function test_an_explicit_previous_state_wins_over_the_issuing_state(): void
+    {
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['title_state' => 'GA', 'previous_state' => 'TX']
+        );
+
+        $this->assertSame('TX', $this->stampedValues($case)['Previous State of Issue']);
+    }
+
+    /**
+     * Pinned deliberately, because it is the arguable case: a Florida title is
+     * an Original application with no earlier jurisdiction, yet this still
+     * prints FL. Awaiting the client's answer on whether the box should be
+     * blank for an Original — if it should, this test is the one to change.
+     */
+    public function test_a_florida_title_still_prints_fl_as_previous_state(): void
+    {
+        $case = $this->makeCaseWithVehicle(
+            User::factory()->create(),
+            ['title_state' => 'FL', 'previous_state' => null]
+        );
+
+        $values = $this->stampedValues($case);
+
+        $this->assertSame('On', $values['Original']);
+        $this->assertSame('FL', $values['Previous State of Issue']);
+    }
+
+    public function test_the_five_or_six_digit_boxes_are_left_for_staff(): void
+    {
+        // How many digits the instrument cluster displays is not on the title
+        // and cannot be inferred from the reading, so the generator must not
+        // guess at it.
+        $values = $this->stampedValues(
+            $this->makeCaseWithVehicle(User::factory()->create(), ['odometer_reading' => 4527])
+        );
+
+        $this->assertArrayNotHasKey('5-digit odometer now reads', $values);
+        $this->assertArrayNotHasKey('6-digit odometer now reads', $values);
+    }
+
+    public function test_section_6_survives_into_the_generated_pdf(): void
+    {
+        Storage::fake('private');
+
+        $case = $this->makeCaseWithVehicle(User::factory()->create(), [
+            'model' => 'ACCORD SEDAN TOURING',
+            'title_state' => 'AL',
+            'odometer_reading' => 128450,
+            'odometer_date' => '2025-11-04',
+            'odometer_status' => 'actual',
+        ]);
+
+        $path = app(PDFGeneratorService::class)->generateHSMV82040($case);
+        $text = $this->textOf($path);
+
+        // Checkbox marks flatten into page graphics and leave no text, so only
+        // the typed values are assertable here.
+        $this->assertStringContainsString('ACCORD SEDAN TOURING', $text);
+
+        $layout = (string) shell_exec(
+            'pdftotext -layout ' . escapeshellarg(Storage::disk('private')->path($path)) . ' -'
+        );
+
+        // The six mileage boxes sit at slightly different heights, so pdftotext
+        // emits them out of order and across lines. Scope to the Section 6
+        // sentence and compare digits as a multiset: that still proves all six
+        // landed in the odometer area rather than anywhere else on the page.
+        $this->assertSame(
+            $this->sortedDigits('128450'),
+            $this->sortedDigitsIn('/odometer now reads(.*?)\.xx miles/s', $layout),
+            'The mileage digits did not land in Section 6.'
+        );
+
+        // The three date boxes stagger across lines for the same reason, so
+        // scope from the Date Read label to the end of Section 6 rather than to
+        // the end of its line.
+        $this->assertSame(
+            $this->sortedDigits('11' . '04' . '2025'),
+            $this->sortedDigitsIn('/Date Read:(.*?)I\/we hereby certify/s', $layout),
+            'The odometer date did not land next to Date Read.'
+        );
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function sortedDigits(string $value): array
+    {
+        $digits = str_split(preg_replace('/[^0-9]/', '', $value));
+        sort($digits);
+
+        return $digits;
+    }
+
+    /**
+     * The digits inside the first capture group of $pattern, sorted.
+     *
+     * @return array<int, string>
+     */
+    private function sortedDigitsIn(string $pattern, string $subject): array
+    {
+        $this->assertMatchesRegularExpression($pattern, $subject);
+        preg_match($pattern, $subject, $matches);
+
+        return $this->sortedDigits($matches[1]);
+    }
+
     public function test_unmapped_form_throws_instead_of_producing_a_blank_pdf(): void
     {
         Storage::fake('private');

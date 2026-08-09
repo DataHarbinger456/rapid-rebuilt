@@ -276,6 +276,44 @@ class PDFGeneratorService
     }
 
     /**
+     * Split an odometer reading into the 82040's six per-digit boxes.
+     *
+     * Returned most significant first, right-aligned with leading nulls, so
+     * 4527 fills only the last four boxes. mapFields() skips nulls, leaving
+     * those boxes empty on the page.
+     *
+     * A reading that will not fit in six digits returns all nulls rather than
+     * a truncation: a wrong mileage on a declaration sworn under penalty of
+     * perjury is worse than a blank staff must fill in.
+     *
+     * @return array<int, ?string>
+     */
+    protected function odometerDigits(?int $reading): array
+    {
+        $blank = array_fill(0, 6, null);
+
+        if ($reading === null || $reading < 0 || $reading > 999999) {
+            return $blank;
+        }
+
+        $digits = str_split(str_pad((string) $reading, 6, '0', STR_PAD_LEFT));
+        $seenSignificant = false;
+
+        foreach ($digits as $i => $digit) {
+            // Keep every digit from the first non-zero onwards, so a reading of
+            // 4027 keeps its internal zero but drops the leading padding.
+            $seenSignificant = $seenSignificant || $digit !== '0';
+
+            // A genuine reading of 0 still needs one printed digit.
+            if ($seenSignificant || $i === 5) {
+                $blank[$i] = $digit;
+            }
+        }
+
+        return $blank;
+    }
+
+    /**
      * Prepare common form data
      */
     protected function prepareFormData(UserCase $case): array
@@ -309,6 +347,14 @@ class PDFGeneratorService
         $vehicleType = $vehicle?->vehicle_type
             ?? ($case->service_type === 'rebuilt_title' ? 'rebuilt' : null);
 
+        // Section 6 ODOMETER DECLARATION. The form has no single mileage box:
+        // it is six per-digit boxes, a three-part date, and a 1/2/3
+        // declaration. All of it comes off the title through extraction, and
+        // only lands here once staff have confirmed it.
+        $odometerDigits = $this->odometerDigits($vehicle?->odometer_reading);
+        $odometerDate = $vehicle?->odometer_date;
+        $odometerStatus = $vehicle?->odometer_status;
+
         return [
             'case' => $case,
             'case_number' => $case->case_number,
@@ -334,7 +380,33 @@ class PDFGeneratorService
             // skipped by mapFields(), so a null here leaves the box empty.
             'weight' => $vehicle?->weight,
             'odometer' => $vehicle?->odometer_reading,
-            'odometer_status' => $vehicle?->odometer_status,
+            'odometer_status' => $odometerStatus,
+            // Section 2 "Previous State of Issue": the jurisdiction that issued
+            // the title being surrendered. previous_state is only populated
+            // when the title itself names an earlier state distinct from its
+            // issuer, in which case it is the more precise answer; otherwise
+            // the issuing state is what the box is asking for.
+            'previous_state_of_issue' => $vehicle?->previous_state ?: $vehicle?->title_state,
+            // Section 6 mileage, one box per decimal place. Leading boxes stay
+            // blank rather than zero-padded, matching how the form is filled by
+            // hand.
+            'odometer_digit_100000' => $odometerDigits[0],
+            'odometer_digit_10000' => $odometerDigits[1],
+            'odometer_digit_1000' => $odometerDigits[2],
+            'odometer_digit_100' => $odometerDigits[3],
+            'odometer_digit_10' => $odometerDigits[4],
+            'odometer_digit_1' => $odometerDigits[5],
+            // Date the odometer was read, as three separate boxes.
+            'odometer_date_mm' => $odometerDate?->format('m'),
+            'odometer_date_dd' => $odometerDate?->format('d'),
+            'odometer_date_yyyy' => $odometerDate?->format('Y'),
+            // The three declaration boxes are mutually exclusive. An unknown or
+            // missing status ticks none of them: this declaration is sworn
+            // under penalty of perjury, so a blank for staff to complete beats
+            // a guess.
+            'is_odometer_actual' => $odometerStatus === 'actual',
+            'is_odometer_not_actual' => $odometerStatus === 'not_actual',
+            'is_odometer_exceeds_limits' => $odometerStatus === 'exceeds_limits',
             'vehicle_type' => $vehicleType,
             // Section 3 TYPE boxes. At most one is ever true; mobile_home and
             // other have no box of their own on this form.

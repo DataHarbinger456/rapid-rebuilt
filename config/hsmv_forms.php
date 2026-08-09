@@ -42,11 +42,17 @@ return [
         // Partial map. The remaining fields land as the AI extraction work
         // progresses.
         'fields' => [
+            // Section 2: MOTOR VEHICLE DESCRIPTION.
             'Vehicle Identification Number VIN' => 'vin',
             'Year' => 'year',
             'Make/Manufacturer' => 'make',
+            'Model' => 'model',
             'Body' => 'body_type',
             'Color' => 'color',
+
+            // The state that issued the title being surrendered. See
+            // prepareFormData() for why this prefers previous_state.
+            'Previous State of Issue' => 'previous_state_of_issue',
 
             // Weight is transcribed from the title, never derived from the VIN
             // decoder's GVWR — the form has a separate GVW box for that.
@@ -89,6 +95,43 @@ return [
 
             // BRAND box, driven by vehicles.title_brand.
             'Flood' => ['checkbox' => 'is_flood', 'on' => 'On'],
+
+            // Section 6: ODOMETER DECLARATION.
+            //
+            // The mileage is six separate boxes, one per decimal place, filled
+            // right to left. These names are verbatim from
+            // dump_data_fields_utf8 including the inconsistent spacing: the
+            // hundred-thousands box really is '100, 000 Place' with a space
+            // after the comma while the others have none.
+            '100, 000 Place' => 'odometer_digit_100000',
+            '10,000 Place' => 'odometer_digit_10000',
+            '1,000 Place' => 'odometer_digit_1000',
+            '100 Place' => 'odometer_digit_100',
+            '10 Place' => 'odometer_digit_10',
+            'Ones Place' => 'odometer_digit_1',
+
+            // Date the odometer was read, three boxes.
+            'Date Read MM' => 'odometer_date_mm',
+            'Date Read DD' => 'odometer_date_dd',
+            'Date Read YYYY' => 'odometer_date_yyyy',
+
+            // The 1/2/3 declaration, driven by vehicles.odometer_status.
+            // Exactly one is ever ticked and an unknown status ticks none.
+            // Note the double space in the first name and the missing full
+            // stops after the numbers, both verbatim from the dump.
+            '1  REFLECTS ACTUAL MILEAGE' => ['checkbox' => 'is_odometer_actual', 'on' => 'On'],
+            '2 IS NOT THE ACTUAL MILEAGE' => ['checkbox' => 'is_odometer_not_actual', 'on' => 'On'],
+            '3 IS IN EXCESS OF ITS MECHANICAL LIMITS' => [
+                'checkbox' => 'is_odometer_exceeds_limits',
+                'on' => 'On',
+            ],
+
+            // Deliberately unmapped: '5-digit odometer now reads' and
+            // '6-digit odometer now reads'. That pair describes how many digits
+            // the instrument cluster physically displays, which the title does
+            // not state and the reading cannot imply — 4,527 miles shows the
+            // same on a 5- and a 6-digit odometer. Staff tick it from the
+            // vehicle.
         ],
     ],
 
