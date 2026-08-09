@@ -8,7 +8,10 @@ use App\Models\UploadedFile;
 use App\Models\User;
 use App\Models\UserCase;
 use App\Models\Vehicle;
+use App\Services\Extraction\VinDecodeCheck;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Testing\StructuredResponseFake;
@@ -27,6 +30,37 @@ class ExtractionReviewControllerTest extends TestCase
         parent::setUp();
 
         Storage::fake('private');
+
+        // VINDecoderService caches decodes for 24h, so without this a result
+        // faked in one test would leak into the next.
+        Cache::flush();
+    }
+
+    /**
+     * Shape of a real NHTSA decodevin response, trimmed to the variables the
+     * decoder reads.
+     *
+     * Http::fake() merges stubs and the first match wins, so this must be the
+     * only decoder stub a test registers — a default in setUp would silently
+     * shadow it.
+     */
+    private function fakeDecode(?int $year, ?string $make, ?string $model): void
+    {
+        Http::fake([
+            'vpic.nhtsa.dot.gov/*' => Http::response([
+                'Results' => [
+                    ['Variable' => 'Model Year', 'Value' => $year === null ? null : (string) $year],
+                    ['Variable' => 'Make', 'Value' => $make],
+                    ['Variable' => 'Model', 'Value' => $model],
+                    ['Variable' => 'Error Code', 'Value' => '0'],
+                ],
+            ]),
+        ]);
+    }
+
+    private function decoderUnreachable(): void
+    {
+        Http::fake(['vpic.nhtsa.dot.gov/*' => Http::response(null, 503)]);
     }
 
     private function makeCase(): UserCase
@@ -114,6 +148,9 @@ class ExtractionReviewControllerTest extends TestCase
             'vin' => '1HGCV1F30LA123456',
             'title_state' => 'GA',
         ]);
+
+        // This test is not about VIN decoding; keep the decoder out of it.
+        $this->decoderUnreachable();
 
         $response = $this->actingAs($this->staff())
             ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
@@ -230,6 +267,9 @@ class ExtractionReviewControllerTest extends TestCase
         // One character misread: a real failure from the live sample run.
         $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB37874']);
 
+        // This test is not about VIN decoding; keep the decoder out of it.
+        $this->decoderUnreachable();
+
         $response = $this->actingAs($this->staff())
             ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
 
@@ -244,6 +284,9 @@ class ExtractionReviewControllerTest extends TestCase
         $case = $this->makeCase();
         // The same vehicle's real VIN, which passes its check digit.
         $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB73874']);
+
+        // This test is not about VIN decoding; keep the decoder out of it.
+        $this->decoderUnreachable();
 
         $response = $this->actingAs($this->staff())
             ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
@@ -267,6 +310,9 @@ class ExtractionReviewControllerTest extends TestCase
             'confirmed_value' => '1FMSK8DH1LGB73874',
             'status' => DocumentExtractionField::STATUS_CORRECTED,
         ]);
+
+        // This test is not about VIN decoding; keep the decoder out of it.
+        $this->decoderUnreachable();
 
         $this->actingAs($this->staff())
             ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
@@ -306,6 +352,166 @@ class ExtractionReviewControllerTest extends TestCase
         $response->assertRedirect(route('admin.cases.show', $case->id));
         $response->assertSessionHas('success');
         $this->assertSame('1FMSK8DH1LGB37874', $case->vehicle()->first()->vin);
+    }
+
+    public function test_a_vin_decoding_to_a_different_vehicle_is_flagged(): void
+    {
+        $case = $this->makeCase();
+        // A real Ford Explorer VIN, but the model read the vehicle details off
+        // an auction sticker for something else.
+        $extraction = $this->makeExtraction($case, [
+            'vin' => '1FMSK8DH1LGB73874',
+            'year' => '2020',
+            'make' => 'TOYT',
+            'model' => 'CAMRY',
+        ]);
+
+        $this->fakeDecode(2020, 'FORD', 'Explorer');
+
+        $response = $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
+
+        $response->assertOk();
+        $response->assertSee('The VIN decodes to a different vehicle.');
+        $response->assertSee('2020 FORD Explorer');
+        $response->assertViewHas(
+            'vinDecode',
+            fn (?array $d): bool => $d['status'] === VinDecodeCheck::MISMATCHED
+                && array_keys($d['mismatches']) === ['make', 'model']
+        );
+    }
+
+    public function test_an_agreeing_decode_is_not_flagged(): void
+    {
+        $case = $this->makeCase();
+        // Titles abbreviate the make and pad the model; the decoder spells
+        // both out. That is agreement, not a mismatch.
+        $extraction = $this->makeExtraction($case, [
+            'vin' => '1FMSK8DH1LGB73874',
+            'year' => '2020',
+            'make' => 'FORD',
+            'model' => 'EXPLORER XLT',
+        ]);
+
+        $this->fakeDecode(2020, 'FORD', 'Explorer');
+
+        $response = $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
+
+        $response->assertOk();
+        $response->assertDontSee('The VIN decodes to a different vehicle.');
+        $response->assertViewHas('vinDecode', fn (?array $d): bool => $d['status'] === VinDecodeCheck::MATCHED);
+    }
+
+    public function test_an_abbreviated_make_still_counts_as_a_match(): void
+    {
+        $case = $this->makeCase();
+        // "TOYT" on the title against "TOYOTA" from the decoder must not flag:
+        // a cross-check that fires on every row would be ignored on every row.
+        $extraction = $this->makeExtraction($case, [
+            'vin' => '4T1C11AK7LU387042',
+            'year' => '2020',
+            'make' => 'TOYT',
+            'model' => '4D',
+        ]);
+
+        $this->fakeDecode(2020, 'TOYOTA', 'Camry');
+
+        $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
+            ->assertOk()
+            ->assertViewHas('vinDecode', fn (?array $d): bool => $d['status'] === VinDecodeCheck::MATCHED);
+    }
+
+    public function test_a_decoder_failure_degrades_to_a_soft_notice(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, [
+            'vin' => '1FMSK8DH1LGB73874',
+            'make' => 'FORD',
+        ]);
+
+        // The decoder is unreachable. That says nothing about the document, so
+        // it must not look like a finding and must not block anything.
+        $this->decoderUnreachable();
+
+        $response = $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]));
+
+        $response->assertOk();
+        $response->assertSee('could not confirm this VIN');
+        $response->assertDontSee('The VIN decodes to a different vehicle.');
+        $response->assertViewHas('vinDecode', fn (?array $d): bool => $d['status'] === VinDecodeCheck::UNAVAILABLE);
+    }
+
+    public function test_a_decoder_exception_does_not_break_the_screen(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, ['vin' => '1FMSK8DH1LGB73874']);
+
+        Http::fake(fn () => throw new \RuntimeException('connection reset'));
+
+        $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
+            ->assertOk()
+            ->assertViewHas('vinDecode', fn (?array $d): bool => $d['status'] === VinDecodeCheck::UNAVAILABLE);
+    }
+
+    public function test_an_unknown_vin_is_not_reported_as_a_mismatch(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, [
+            'vin' => '1FMSK8DH1LGB73874',
+            'make' => 'FORD',
+        ]);
+
+        // NHTSA answers, but recognises nothing about this VIN.
+        $this->fakeDecode(null, null, null);
+
+        $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
+            ->assertOk()
+            ->assertViewHas('vinDecode', fn (?array $d): bool => $d['status'] === VinDecodeCheck::UNAVAILABLE);
+    }
+
+    public function test_a_malformed_vin_is_not_sent_to_the_decoder(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, ['vin' => 'NOT A VIN']);
+
+        $this->decoderUnreachable();
+
+        $this->actingAs($this->staff())
+            ->get(route('admin.extractions.show', [$case->id, $extraction->id]))
+            ->assertOk()
+            ->assertViewHas('vinDecode', null);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_a_decode_mismatch_does_not_block_confirmation(): void
+    {
+        $case = $this->makeCase();
+        $extraction = $this->makeExtraction($case, [
+            'vin' => '1FMSK8DH1LGB73874',
+            'make' => 'TOYT',
+        ]);
+
+        $this->fakeDecode(2020, 'FORD', 'Explorer');
+
+        // The decoder can be wrong about rebodied or re-VINed vehicles, so
+        // staff must be able to confirm past it.
+        $response = $this->actingAs($this->staff())
+            ->post(route('admin.extractions.confirm', [$case->id, $extraction->id]), [
+                'fields' => [
+                    'vin' => ['status' => 'confirmed', 'value' => '1FMSK8DH1LGB73874'],
+                    'make' => ['status' => 'confirmed', 'value' => 'TOYT'],
+                ],
+            ]);
+
+        $response->assertRedirect(route('admin.cases.show', $case->id));
+        $response->assertSessionHas('success');
+        $this->assertSame('TOYT', $case->vehicle()->first()->make);
     }
 
     public function test_a_superseded_extraction_can_no_longer_be_confirmed(): void

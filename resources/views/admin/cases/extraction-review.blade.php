@@ -104,6 +104,25 @@
                             </div>
                         @endif
 
+                        @if($vinDecode && $vinDecode['status'] === \App\Services\Extraction\VinDecodeCheck::MISMATCHED)
+                            <div class="alert alert-danger">
+                                <strong>The VIN decodes to a different vehicle.</strong>
+                                <div class="mt-1">
+                                    Decoding the VIN gives
+                                    <strong>{{ collect($vinDecode['decoded'])->filter()->implode(' ') }}</strong>.
+                                    Either the VIN or the vehicle details were misread — check both against the
+                                    document before confirming.
+                                </div>
+                            </div>
+                        @elseif($vinDecode && $vinDecode['status'] === \App\Services\Extraction\VinDecodeCheck::UNAVAILABLE)
+                            {{-- Softer, and deliberately not an alert: the decoder being unreachable
+                                 says nothing about the document, and must not look like a finding. --}}
+                            <p class="text-muted small mb-3">
+                                The VIN decoder could not confirm this VIN, so the vehicle details below have
+                                not been cross-checked. This does not indicate a problem with the document.
+                            </p>
+                        @endif
+
                         <form method="POST" action="{{ route('admin.extractions.confirm', [$case->id, $extraction->id]) }}">
                             @csrf
 
@@ -123,16 +142,33 @@
                                                 $conflict = $conflicts[$key] ?? null;
                                                 $current = $field->confirmed_value ?? $field->ai_value;
                                                 $failsChecksum = $key === 'vin' && $vinWarning !== null;
+                                                $decodeMismatch = $vinDecode['mismatches'][$key] ?? null;
+                                                // The VIN row carries the decoder's verdict too: a mismatch
+                                                // means either the VIN or these fields were misread, and the
+                                                // reviewer has to look at both.
+                                                $vinDecodeFlag = $key === 'vin'
+                                                    && ($vinDecode['status'] ?? null) === \App\Services\Extraction\VinDecodeCheck::MISMATCHED;
+                                                $flagged = $failsChecksum || $vinDecodeFlag || $decodeMismatch !== null;
                                             @endphp
                                             <tr @class([
-                                                'table-warning' => $conflict !== null && ! $failsChecksum,
-                                                'table-danger' => $failsChecksum,
+                                                'table-warning' => $conflict !== null && ! $flagged,
+                                                'table-danger' => $flagged,
                                             ])>
                                                 <td>
                                                     <strong>{{ $labels[$key] ?? $key }}</strong>
                                                     @if($failsChecksum)
                                                         <div class="small text-danger fw-bold">
                                                             Fails ISO 3779 check digit &mdash; verify character by character
+                                                        </div>
+                                                    @endif
+                                                    @if($vinDecodeFlag)
+                                                        <div class="small text-danger fw-bold">
+                                                            Decodes to {{ collect($vinDecode['decoded'])->filter()->implode(' ') }}
+                                                        </div>
+                                                    @endif
+                                                    @if($decodeMismatch)
+                                                        <div class="small text-danger">
+                                                            VIN decodes to: {{ $decodeMismatch['decoded'] }}
                                                         </div>
                                                     @endif
                                                     @if($field->ai_value === null)

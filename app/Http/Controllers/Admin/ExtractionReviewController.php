@@ -9,6 +9,7 @@ use App\Models\UploadedFile;
 use App\Models\UserCase;
 use App\Services\DocumentExtractionService;
 use App\Services\Extraction\ExtractionConfirmer;
+use App\Services\Extraction\VinDecodeCheck;
 use App\Support\Vin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,7 @@ class ExtractionReviewController extends Controller
     public function __construct(
         private readonly DocumentExtractionService $extractionService,
         private readonly ExtractionConfirmer $confirmer,
+        private readonly VinDecodeCheck $vinDecodeCheck,
     ) {}
 
     /**
@@ -96,6 +98,7 @@ class ExtractionReviewController extends Controller
             'conflicts' => $conflicts,
             'vehicle' => $vehicle,
             'vinWarning' => $this->vinWarning($extraction),
+            'vinDecode' => $this->vinDecodeCheck->for($extraction),
         ]);
     }
 
