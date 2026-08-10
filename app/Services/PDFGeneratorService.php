@@ -7,6 +7,7 @@ use App\Models\Inspection;
 use App\Models\UploadedFile;
 use App\Models\Setting;
 use App\Models\CaseTimeline;
+use App\Support\PdftkBinary;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use mikehaertl\pdftk\Pdf;
@@ -199,7 +200,9 @@ class PDFGeneratorService
             throw new RuntimeException("Missing form template for {$label}: {$config['template']}");
         }
 
-        $pdf = new Pdf($template);
+        // Production has no system pdftk, so the binary is resolved rather
+        // than assumed. See config/pdftk.php.
+        $pdf = new Pdf($template, ['command' => PdftkBinary::path()]);
 
         // flatten() bakes the values into the page so the printed copy shows
         // them and nothing can be edited afterwards.

@@ -22,3 +22,6 @@ admin-rapid.sql
 
 # Local-only: contains live demo credentials
 /docs/DEMO-ACCESS.md
+
+# Self-contained pdftk staged by scripts/install-pdftk.sh (~161MB, JRE + jars)
+/vendor-bin

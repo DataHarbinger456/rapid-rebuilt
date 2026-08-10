@@ -266,8 +266,26 @@ class PreflightTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('1 check failed');
-        $response->assertSee('Install pdftk');
+        // The remedy names the script that fixes it, which is the whole point
+        // of showing a remedy at all.
+        $response->assertSee('scripts/install-pdftk.sh');
         $response->assertViewHas('failCount', 1);
+    }
+
+    /**
+     * Which pdftk was found matters: a deployment that quietly fell back to a
+     * system binary looks identical to one using the bundled install, and only
+     * one of those survives a rebuild of the Cloud image.
+     */
+    public function test_the_pdftk_check_reports_where_the_binary_came_from(): void
+    {
+        $this->fakeHost();
+        config(['pdftk.binary' => '/custom/pdftk']);
+
+        $check = $this->checksByName()['pdftk'];
+
+        $this->assertTrue($check->passed());
+        $this->assertStringContainsString('PDFTK_BINARY override', $check->detail);
     }
 
     /**

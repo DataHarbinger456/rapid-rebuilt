@@ -2,6 +2,7 @@
 
 namespace App\Services\Preflight;
 
+use App\Support\PdftkBinary;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
@@ -84,18 +85,26 @@ class PreflightService
 
     private function checkPdftk(): PreflightCheck
     {
-        $result = $this->runBinary('pdftk', ['pdftk', '--version']);
+        // Runs whichever binary the generator would run, so this cannot pass
+        // while form generation fails. Reports the source too: a deployment
+        // that quietly fell back to a system pdftk looks identical to one
+        // using the bundled install until someone asks.
+        ['path' => $path, 'source' => $source] = PdftkBinary::resolve();
+        $origin = PdftkBinary::describeSource($source);
+
+        $result = $this->runBinary('pdftk', [$path, '--version']);
 
         if ($result === null) {
             return PreflightCheck::fail(
                 'pdftk',
-                'Not found or not executable',
+                "Not found or not executable ({$origin})",
                 'No DMV form can be generated. The HSMV 82040 button will fail with an error.',
-                'Install pdftk (or pdftk-java) on the host and make sure it is on the PATH.'
+                'Add ./scripts/install-pdftk.sh to the deployment build command, '
+                    . 'or install pdftk on the host and make sure it is on the PATH.'
             );
         }
 
-        return PreflightCheck::pass('pdftk', $result);
+        return PreflightCheck::pass('pdftk', "{$result} ({$origin})");
     }
 
     private function checkPdftoppm(): PreflightCheck
