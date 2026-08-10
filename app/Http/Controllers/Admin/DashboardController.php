@@ -92,15 +92,15 @@ class DashboardController extends Controller
             'completed_this_month' => UserCase::where('status', 'completed')
                 ->where('updated_at', '>=', $thisMonth)
                 ->count(),
-            'total_users' => User::where('role', 'user')->count(),
-            'total_inspectors' => User::where('role', 'inspector')->count(),
+            'total_users' => User::where('user_type', 'user')->count(),
+            'total_inspectors' => User::where('user_type', 'inspector')->count(),
             'inspections_today' => Inspection::whereDate('started_at', $today)->count(),
             'pending_documents' => UserCase::where('status', 'pending_documents')->count(),
             'pending_scheduling' => UserCase::where('status', 'pending_scheduling')->count(),
             'pending_review' => UserCase::where('status', 'pending_review')->count(),
-            'revenue_this_month' => UserCase::where('payment_status', 'paid')
+            'revenue_this_month' => UserCase::where('is_paid', true)
                 ->where('paid_at', '>=', $thisMonth)
-                ->sum('total_price'),
+                ->sum('total_amount'),
         ];
     }
 
@@ -155,10 +155,10 @@ class DashboardController extends Controller
         $data = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
-            $revenue = UserCase::where('payment_status', 'paid')
+            $revenue = UserCase::where('is_paid', true)
                 ->whereYear('paid_at', $month->year)
                 ->whereMonth('paid_at', $month->month)
-                ->sum('total_price');
+                ->sum('total_amount');
 
             $data[] = [
                 'month' => $month->format('M Y'),
