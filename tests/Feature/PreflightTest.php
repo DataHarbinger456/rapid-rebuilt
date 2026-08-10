@@ -271,6 +271,31 @@ class PreflightTest extends TestCase
     }
 
     /**
+     * A diagnostics page nobody can navigate to is a page nobody runs. The
+     * link is admin-only for the same reason the route is.
+     */
+    public function test_the_page_is_reachable_from_the_admin_menu(): void
+    {
+        $this->fakeHost();
+
+        // Any admin page renders the sidebar. The case list is used rather
+        // than the dashboard because the dashboard has a pre-existing query
+        // against a users.role column that does not exist.
+        $this->actingAs($this->admin())
+            ->get(route('admin.cases.index'))
+            ->assertOk()
+            ->assertSee(route('admin.preflight'), false);
+    }
+
+    public function test_non_admin_staff_are_not_shown_the_menu_link(): void
+    {
+        $this->actingAs(User::factory()->create(['user_type' => 'staff']))
+            ->get(route('admin.cases.index'))
+            ->assertOk()
+            ->assertDontSee(route('admin.preflight'), false);
+    }
+
+    /**
      * Staff run cases; only an admin configures the host.
      */
     public function test_non_admin_staff_cannot_see_the_page(): void

@@ -50,17 +50,23 @@
                             <li class="sidebar-main-title">
                                 <div><h6>Settings</h6></div>
                             </li>
-                            <li class="dropdown {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
-                                <a class="nav-link menu-title {{ request()->routeIs('admin.settings*') ? 'active' : '' }}" href="javascript:void(0)">
+                            {{-- Preflight lives under Settings but has its own route name,
+                                 so it is named in each of these three checks: otherwise the
+                                 menu collapses on the one page it links to. --}}
+                            <li class="dropdown {{ request()->routeIs('admin.settings*', 'admin.preflight') ? 'active' : '' }}">
+                                <a class="nav-link menu-title {{ request()->routeIs('admin.settings*', 'admin.preflight') ? 'active' : '' }}" href="javascript:void(0)">
                                     <i data-feather="settings"></i><span>Settings</span>
                                 </a>
-                                <ul class="nav-submenu menu-content" style="display: {{ request()->routeIs('admin.settings*') ? 'block' : 'none' }};">
+                                <ul class="nav-submenu menu-content" style="display: {{ request()->routeIs('admin.settings*', 'admin.preflight') ? 'block' : 'none' }};">
                                     <li class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}"><a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">General</a></li>
                                     @if(auth()->user()->isAdmin())
                                     <li class="{{ request()->routeIs('admin.settings.users*') ? 'active' : '' }}"><a href="{{ route('admin.settings.users') }}" class="{{ request()->routeIs('admin.settings.users*') ? 'active' : '' }}">User Management</a></li>
                                     @endif
                                     <li class="{{ request()->routeIs('admin.settings.pricing*') ? 'active' : '' }}"><a href="{{ route('admin.settings.pricing') }}" class="{{ request()->routeIs('admin.settings.pricing*') ? 'active' : '' }}">Pricing</a></li>
                                     <li class="{{ request()->routeIs('admin.settings.notifications*') ? 'active' : '' }}"><a href="{{ route('admin.settings.notifications') }}" class="{{ request()->routeIs('admin.settings.notifications*') ? 'active' : '' }}">Notifications</a></li>
+                                    @if(auth()->user()->isAdmin())
+                                    <li class="{{ request()->routeIs('admin.preflight') ? 'active' : '' }}"><a href="{{ route('admin.preflight') }}" class="{{ request()->routeIs('admin.preflight') ? 'active' : '' }}">Preflight</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
