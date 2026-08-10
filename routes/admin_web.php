@@ -11,6 +11,7 @@ use App\Http\Controllers\Inspector\InspectionController as InspectorInspectionCo
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CaseManagementController;
 use App\Http\Controllers\Admin\ExtractionReviewController;
+use App\Http\Controllers\Admin\PreflightController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 
@@ -69,6 +70,13 @@ Route::prefix('admin')->middleware(['auth', 'role.staff'])->group(function () {
         Route::get('/inspector-performance', [ReportController::class, 'inspectorPerformance'])->name('admin.reports.inspector-performance');
         Route::get('/customers', [ReportController::class, 'customers'])->name('admin.reports.customers');
     });
+
+    // Host dependency diagnostics (Admin only). Reports whether the external
+    // binaries, API key, migrations, storage and third-party API this app
+    // needs are actually present on the host it is deployed to.
+    Route::get('/preflight', [PreflightController::class, 'index'])
+        ->middleware('role.admin')
+        ->name('admin.preflight');
 
     // Settings (Admin only)
     Route::prefix('settings')->middleware('role.admin')->group(function () {
