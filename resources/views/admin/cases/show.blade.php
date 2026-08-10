@@ -290,6 +290,53 @@
                     </div>
                 </div>
 
+                <!-- DMV Forms -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>DMV Forms</h5>
+                    </div>
+                    <div class="card-body">
+                        {{-- Inline single-statement form on purpose. Blade pairs the
+                             first raw-PHP opener in a file with the first closer, and
+                             this view already has an inline one further up, so a block
+                             here would swallow everything in between. The label map
+                             lives on the Inspection model. --}}
+                        @php($existing82040 = $case->documents->firstWhere('document_type', 'hsmv_82040'))
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Inspection:</span>
+                            @if($case->inspection)
+                                <span class="badge bg-{{ $case->inspection->result_colour }}">
+                                    {{ $case->inspection->result_label }}
+                                </span>
+                            @else
+                                <span class="badge bg-secondary">No inspection yet</span>
+                            @endif
+                        </div>
+
+                        <form action="{{ route('admin.cases.generate82040', $case) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                {{ $existing82040 ? 'Regenerate HSMV 82040' : 'Generate HSMV 82040' }}
+                            </button>
+                        </form>
+
+                        @if($existing82040)
+                            <a href="{{ route('api.documents.view', $existing82040) }}"
+                               target="_blank" rel="noopener"
+                               class="btn btn-sm btn-link w-100 mt-1">View current 82040</a>
+                        @endif
+
+                        {{-- The 82040 is filled from the vehicle record alone, so it does not
+                             wait on an inspection. The 84490 Statement of Builder does, and
+                             stays in the inspector flow. --}}
+                        <p class="text-muted small mb-0 mt-2">
+                            The 82040 uses the confirmed vehicle details and does not require an
+                            inspection. Check the vehicle record above before sending it to the state.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Payment Info -->
                 <div class="card">
                     <div class="card-header">

@@ -33,12 +33,20 @@ Route::prefix('admin')->middleware(['auth', 'role.staff'])->group(function () {
         Route::post('/{case}/status', [CaseManagementController::class, 'updateStatus'])->name('admin.cases.updateStatus');
         Route::post('/{case}/assign', [CaseManagementController::class, 'assignInspector'])->name('admin.cases.assign');
         Route::post('/{case}/note', [CaseManagementController::class, 'addNote'])->name('admin.cases.addNote');
+
+        // The 82040 is filled from the case and vehicle record alone, so it is
+        // not gated on an inspection. The case page shows the inspection status
+        // beside the button.
+        Route::post('/{case}/generate-82040', [CaseManagementController::class, 'generate82040'])
+            ->name('admin.cases.generate82040');
+
         // Session-authenticated equivalents of the token-based document API,
         // so staff can review documents from the case page.
         Route::post('/{case}/documents/{document}/approve', [CaseManagementController::class, 'approveDocument'])
             ->name('api.documents.approve');
         Route::post('/{case}/documents/{document}/reject', [CaseManagementController::class, 'rejectDocument'])
             ->name('api.documents.reject');
+
         // AI document extraction. Values read from a document reach the
         // vehicle only through the confirm action below.
         Route::post('/{case}/documents/{document}/extract', [ExtractionReviewController::class, 'store'])

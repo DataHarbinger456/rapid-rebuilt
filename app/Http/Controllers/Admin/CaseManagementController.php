@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Models\CaseTimeline;
 use App\Services\CaseService;
 use App\Services\DocumentService;
+use App\Services\PDFGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class CaseManagementController extends Controller
@@ -247,6 +249,72 @@ class CaseManagementController extends Controller
 
         return redirect()->route('admin.cases.show', $case)
             ->with('success', 'Inspector assigned successfully');
+    }
+
+    /**
+     * Generate the HSMV 82040 for a case.
+     *
+     * Deliberately not gated on a passed inspection. The 82040 is the title
+     * application and is filled entirely from the case and vehicle record, so
+     * staff can produce it as soon as the vehicle details are confirmed. The
+     * 84490 Statement of Builder is the one that genuinely needs an inspection,
+     * and it stays behind the inspector flow.
+     *
+     * The generator throws for a missing template, an unmapped form or a pdftk
+     * failure. None of those are the operator's fault and none should be a 500,
+     * so they come back as a flash message on the case page.
+     */
+    public function generate82040(
+        Request $request,
+        UserCase $case,
+        PDFGeneratorService $pdfGenerator
+    ): JsonResponse|\Illuminate\Http\RedirectResponse {
+        $user = $request->user();
+
+        if (!$user->isStaff()) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+            abort(403);
+        }
+
+        try {
+            $path = $pdfGenerator->generateHSMV82040($case);
+        } catch (\Throwable $e) {
+            Log::error('HSMV 82040 generation failed', [
+                'case_id' => $case->id,
+                'user_id' => $user->id,
+                'exception' => $e,
+            ]);
+
+            $message = 'Could not generate the HSMV 82040: ' . $e->getMessage();
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 500);
+            }
+
+            return redirect()->route('admin.cases.show', $case)->with('error', $message);
+        }
+
+        CaseTimeline::log(
+            $case->id,
+            'documents_generated',
+            'HSMV 82040 generated',
+            'Title application generated from the confirmed vehicle record.',
+            ['form' => 'HSMV_82040', 'path' => $path],
+            $user->id
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'HSMV 82040 generated successfully',
+                'data' => ['path' => $path],
+            ]);
+        }
+
+        return redirect()->route('admin.cases.show', $case)
+            ->with('success', 'HSMV 82040 generated and added to the case documents.');
     }
 
     /**

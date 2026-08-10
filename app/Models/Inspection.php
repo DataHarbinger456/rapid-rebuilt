@@ -9,6 +9,20 @@ class Inspection extends Model
 {
     use HasFactory;
 
+    /**
+     * inspections.result => [staff-facing label, bootstrap colour].
+     *
+     * Lives here rather than in a view so every screen describes an
+     * inspection the same way.
+     */
+    public const RESULTS = [
+        'pending' => ['Not started', 'secondary'],
+        'in_progress' => ['In progress', 'info'],
+        'passed' => ['Passed', 'success'],
+        'failed' => ['Failed', 'danger'],
+        'incomplete' => ['Incomplete', 'warning'],
+    ];
+
     protected $fillable = [
         'user_case_id',
         'scheduling_id',
@@ -60,6 +74,20 @@ class Inspection extends Model
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
+
+    // =====================
+    // ACCESSORS
+    // =====================
+
+    public function getResultLabelAttribute(): string
+    {
+        return self::RESULTS[$this->result][0] ?? $this->result;
+    }
+
+    public function getResultColourAttribute(): string
+    {
+        return self::RESULTS[$this->result][1] ?? 'secondary';
+    }
 
     // =====================
     // RELATIONSHIPS
