@@ -74,6 +74,30 @@ class AdminDashboardTest extends TestCase
     }
 
     /**
+     * The four counters across the top of the page come from their own query
+     * block, which the 500 masked entirely. Same exposure to a stale column
+     * name, so they get the same coverage.
+     */
+    public function test_every_pending_action_is_computed(): void
+    {
+        $response = $this->actingAs($this->admin())->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $response->assertViewHas('pending_actions', function (array $actions): bool {
+            foreach ([
+                'documents_to_review', 'inspections_to_review',
+                'overdue_cases', 'unassigned_cases',
+            ] as $key) {
+                if (! array_key_exists($key, $actions)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    /**
      * The user counts were reading users.role, which does not exist. Seeding
      * one of each type proves the replacement column actually discriminates
      * rather than just failing to throw.
