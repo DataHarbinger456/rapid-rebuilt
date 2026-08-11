@@ -348,10 +348,16 @@ type).
 1. **B (23 fields), no new data required.** Owner contact block, odometer digits and status,
    model, title number. Config-only work.
 2. **C (15 fields), surfacing existing columns.** Add `license_plate`, `previous_state`,
-   `fuel_type` and `odometer_date` to `prepareFormData()`. `fuel_type` alone lights up six
-   boxes across Sections 2 and 3.
+   `fuel_type` and `odometer_date` to `prepareFormData()`. ~~`fuel_type` alone lights up six
+   boxes across Sections 2 and 3.~~ **Corrected 11 Aug:** `fuel_type` alone cannot light up
+   the two hybrid boxes. NHTSA reports a hybrid's *primary* fuel as Gasoline — a 2018 Prius
+   decodes as Gasoline / Electric / `Strong HEV (Hybrid Electric Vehicle)` — so a mapping
+   driven by `fuel_type` would never tick them. `VINDecoderService` now also captures
+   `Fuel Type - Secondary` and `Electrification Level` into `vehicles.vin_decoded_data`,
+   and `App\Support\FuelType` classifies from all three. Done.
 3. **Section 8 inspector block.** Small, high value, and it is the part of the packet the
-   state actually scrutinises.
+   state actually scrutinises. Inspector name and signing date are mapped; the certifier
+   type boxes and the signature image still wait on ambiguity 3 below.
 4. **AI extraction.** Driver's licence and bill of sale, per S2 item 1.
 
 ## Resolved

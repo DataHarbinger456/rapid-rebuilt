@@ -6,6 +6,7 @@ use App\Models\UserCase;
 use App\Models\Inspection;
 use App\Models\UploadedFile;
 use App\Models\Setting;
+use App\Support\FuelType;
 use App\Models\CaseTimeline;
 use App\Support\PdftkBinary;
 use Illuminate\Support\Facades\Storage;
@@ -405,6 +406,26 @@ class PDFGeneratorService
             // Transfer on 5 Aug, and it fails safe: a blank box is one staff
             // can complete by hand.
             'florida_title_number' => $titleState === 'FL' ? $vehicle?->title_number : null,
+            'license_plate' => $vehicle?->license_plate,
+            // Section 2 fuel boxes. The form has one per alternative fuel and
+            // none for petrol or diesel, so an ordinary car ticks nothing here.
+            // See App\Support\FuelType for why a hybrid cannot be identified
+            // from vehicles.fuel_type alone.
+            'is_electric' => FuelType::isElectric($vehicle),
+            'is_cng' => FuelType::isCompressedNaturalGas($vehicle),
+            'is_lng' => FuelType::isLiquefiedNaturalGas($vehicle),
+            'is_hybrid_gas_electric' => FuelType::isGasElectricHybrid($vehicle),
+            'is_hybrid_diesel_electric' => FuelType::isDieselElectricHybrid($vehicle),
+            // Section 8, the inspector's VIN verification. The certifier type
+            // boxes and the signature image stay unmapped until the client
+            // confirms how their inspectors are licensed.
+            //
+            // signed_at is when the inspector actually signed; completed_at is
+            // the fallback for inspections recorded before that column existed.
+            // A blank date is better than today's date on a certification that
+            // was signed weeks ago.
+            'inspector_name' => $inspection?->inspector?->full_name,
+            'inspector_signed_date' => ($inspection?->signed_at ?? $inspection?->completed_at)?->format('m/d/Y'),
             // Weight is whatever the title says, not the VIN decoder's GVWR.
             // Client confirmed 5 Aug: every Florida title carries its own
             // weight, out-of-state titles may not, and a blank box is

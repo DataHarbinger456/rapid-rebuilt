@@ -182,6 +182,14 @@ class VINDecoderService
             'engine_displacement' => $getValue('Displacement (L)'),
             'engine_cylinders' => $getValue('Engine Number of Cylinders'),
             'fuel_type' => $getValue('Fuel Type - Primary'),
+            // A hybrid reports Gasoline as its primary fuel, so the primary
+            // value alone cannot identify one: a 2018 Prius decodes as
+            // Gasoline / Electric / 'Strong HEV (Hybrid Electric Vehicle)'.
+            // Section 2 of the HSMV 82040 has its own hybrid boxes, so the two
+            // variables that do reveal it are captured here and stored in
+            // vehicles.vin_decoded_data.
+            'fuel_type_secondary' => $getValue('Fuel Type - Secondary'),
+            'electrification_level' => $getValue('Electrification Level'),
             'transmission' => $getValue('Transmission Style'),
             'drive_type' => $getValue('Drive Type'),
             'plant_city' => $getValue('Plant City'),

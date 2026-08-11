@@ -76,6 +76,7 @@ class HSMV82040FieldMapTest extends TestCase
             'body_type' => 'Sedan',
             'color' => 'Blue',
             'weight' => '3131',
+            'license_plate' => 'LMN4821',
             'odometer_reading' => 128450,
             'odometer_date' => '2025-11-04',
             'odometer_status' => 'actual',
@@ -193,6 +194,7 @@ class HSMV82040FieldMapTest extends TestCase
 
             // Section 2 — the Florida title number of a Florida title.
             'florida title number' => ['Florida Title Number', '0123456789'],
+            'license plate' => ['License Plate Number', 'LMN4821'],
 
             // Section 8 — the VIN restated for the inspector's certification.
             'vin restated in section 8' => ['Vehicle Identification Number VIN_2', '1HGCV1F30LA123456'],

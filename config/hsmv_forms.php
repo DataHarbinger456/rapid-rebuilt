@@ -79,6 +79,17 @@ return [
             // Georgia number here would be a false statement on a sworn
             // application. See prepareFormData().
             'Florida Title Number' => 'florida_title_number',
+            'License Plate Number' => 'license_plate',
+
+            // Fuel. The form has a box per alternative fuel and none for
+            // petrol or diesel, so an ordinary car ticks nothing in this group.
+            // A hybrid cannot be identified from vehicles.fuel_type, which
+            // reports Gasoline for one: see App\Support\FuelType.
+            'Natural Gas Compressed' => ['checkbox' => 'is_cng', 'on' => 'On'],
+            'Natural Gas Liquid' => ['checkbox' => 'is_lng', 'on' => 'On'],
+            'Hybrid GasElectric' => ['checkbox' => 'is_hybrid_gas_electric', 'on' => 'On'],
+            'Hybrid DieselElectric' => ['checkbox' => 'is_hybrid_diesel_electric', 'on' => 'On'],
+            'Electric' => ['checkbox' => 'is_electric', 'on' => 'On'],
 
             // Weight is transcribed from the title, never derived from the VIN
             // decoder's GVWR — the form has a separate GVW box for that.
@@ -121,6 +132,11 @@ return [
 
             // BRAND box, driven by vehicles.title_brand.
             'Flood' => ['checkbox' => 'is_flood', 'on' => 'On'],
+
+            // The form repeats an Electric box in Section 3. Same data, same
+            // answer: a form with one ticked and not the other would look like
+            // two contradictory declarations.
+            'Electric_2' => ['checkbox' => 'is_electric', 'on' => 'On'],
 
             // Section 6: ODOMETER DECLARATION.
             //
@@ -168,6 +184,8 @@ return [
             // on the client confirming which of the five certifier types their
             // inspectors are.
             'Vehicle Identification Number VIN_2' => 'vin',
+            'Name Certifying Inspector' => 'inspector_name',
+            'Date of Inspector Signature' => 'inspector_signed_date',
 
             // Section 12: APPLICATION ATTESTMENT AND SIGNATURES. The printed
             // name only; the signature and its date are wet-signed on the day.
