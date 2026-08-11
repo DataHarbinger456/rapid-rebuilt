@@ -158,12 +158,14 @@ class ExtractionReviewControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('admin.cases.extraction-review');
         $response->assertSee('Vehicle Identification Number');
-        // The intake said FL and the title says GA: that decides Original vs
+        // The case record says FL and the AI read GA: that decides Original vs
         // Transfer on the 82040, so the screen must surface it.
-        // Both values are named, because showing only one left reviewers
-        // guessing which side of the disagreement it described.
-        $response->assertSee('AI read');
-        $response->assertSee('on file');
+        //
+        // Both values are named, and in order, because a row showing only one
+        // of them left reviewers guessing which side it described. Asserted as
+        // a sequence rather than a substring because each value is wrapped in
+        // its own markup.
+        $response->assertSeeInOrder(['AI read', 'GA', 'on file', 'FL']);
         $response->assertViewHas('conflicts', fn (array $c): bool => ($c['title_state'] ?? null) === 'FL');
     }
 
