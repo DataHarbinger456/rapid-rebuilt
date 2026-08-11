@@ -87,7 +87,7 @@
                     <div class="card-body">
                         @if($conflicts)
                             <div class="alert alert-warning">
-                                <strong>{{ count($conflicts) }} field(s) disagree with what the customer entered.</strong>
+                                <strong>{{ count($conflicts) }} field(s) differ from the case record.</strong>
                                 @if(array_key_exists('title_state', $conflicts))
                                     <div class="mt-1">
                                         The issuing state differs. This decides whether the HSMV 82040 is
@@ -175,8 +175,14 @@
                                                         <div class="text-muted small">Not found on the document</div>
                                                     @endif
                                                     @if($conflict !== null)
+                                                        {{-- Both sides are named. Showing only the case value left
+                                                             reviewers unsure which of the two it referred to, and
+                                                             "customer entered" was not even true for year, make and
+                                                             model: those are read-only at intake and come from the
+                                                             VIN decoder, not from anything the customer typed. --}}
                                                         <div class="small text-danger">
-                                                            Customer entered: {{ $conflict }}
+                                                            AI read <strong>{{ $field->ai_value }}</strong>,
+                                                            on file <strong>{{ $conflict }}</strong>
                                                         </div>
                                                     @endif
                                                     @if(\App\Services\Extraction\ExtractionConfirmer::vehicleColumnFor($key) === null)

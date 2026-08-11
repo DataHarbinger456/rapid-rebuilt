@@ -160,7 +160,10 @@ class ExtractionReviewControllerTest extends TestCase
         $response->assertSee('Vehicle Identification Number');
         // The intake said FL and the title says GA: that decides Original vs
         // Transfer on the 82040, so the screen must surface it.
-        $response->assertSee('Customer entered: FL');
+        // Both values are named, because showing only one left reviewers
+        // guessing which side of the disagreement it described.
+        $response->assertSee('AI read');
+        $response->assertSee('on file');
         $response->assertViewHas('conflicts', fn (array $c): bool => ($c['title_state'] ?? null) === 'FL');
     }
 
