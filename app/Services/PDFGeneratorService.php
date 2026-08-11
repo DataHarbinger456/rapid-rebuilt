@@ -396,6 +396,15 @@ class PDFGeneratorService
             'color' => $vehicle?->color,
             'title_number' => $vehicle?->title_number,
             'title_state' => $vehicle?->title_state,
+            // Section 2's box is labelled "Florida Title Number", so it is only
+            // answerable when the surrendered title is a Florida one. An
+            // out-of-state title has no Florida number until this application
+            // is granted, and printing its home-state number in a box that asks
+            // for a Florida one would be a false statement on a sworn
+            // application. Same rule the client confirmed for Original vs
+            // Transfer on 5 Aug, and it fails safe: a blank box is one staff
+            // can complete by hand.
+            'florida_title_number' => $titleState === 'FL' ? $vehicle?->title_number : null,
             // Weight is whatever the title says, not the VIN decoder's GVWR.
             // Client confirmed 5 Aug: every Florida title carries its own
             // weight, out-of-state titles may not, and a blank box is

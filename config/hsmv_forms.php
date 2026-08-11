@@ -42,6 +42,25 @@ return [
         // Partial map. The remaining fields land as the AI extraction work
         // progresses.
         'fields' => [
+            // Section 1: OWNER / APPLICANT INFORMATION.
+            //
+            // The apostrophes below are wildly inconsistent and every one is
+            // verbatim from dump_data_fields_utf8: 'Owner s County' has none at
+            // all, 'Owners Email' has none, the phone box has a CURLY one
+            // (U+2019) and the city/state/zip boxes have PLAIN ASCII ones. A
+            // mismatch here is silent — pdftk ignores the unknown name and the
+            // box prints blank — which is what the field-name test guards.
+            //
+            // The mailing-address block and the separate residential
+            // city/state/zip boxes stay unmapped: we store a single address and
+            // the form has two blocks for it. Pending client confirmation.
+            'Owner s County of Residence' => 'owner_county',
+            'Owners Email Voluntary' => 'owner_email',
+            'Owner’s Phone Number (Voluntary)' => 'owner_phone',
+            'Owner\'s City' => 'owner_city',
+            'Owner\'s State' => 'owner_state',
+            'Owner\'s Zip Code' => 'owner_zip',
+
             // Section 2: MOTOR VEHICLE DESCRIPTION.
             'Vehicle Identification Number VIN' => 'vin',
             'Year' => 'year',
@@ -53,6 +72,13 @@ return [
             // The state that issued the title being surrendered. See
             // prepareFormData() for why this prefers previous_state.
             'Previous State of Issue' => 'previous_state_of_issue',
+
+            // This box asks specifically for a FLORIDA title number, so it is
+            // filled only when the surrendered title is a Florida one. An
+            // out-of-state title has no Florida number yet, and printing its
+            // Georgia number here would be a false statement on a sworn
+            // application. See prepareFormData().
+            'Florida Title Number' => 'florida_title_number',
 
             // Weight is transcribed from the title, never derived from the VIN
             // decoder's GVWR — the form has a separate GVW box for that.
@@ -135,6 +161,17 @@ return [
             // not enough to justify a sworn statement, so that box is always
             // left for a human.
             '6-digit odometer now reads' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
+
+            // Section 8: MOTOR VEHICLE IDENTIFICATION NUMBER VERIFICATION.
+            // The VIN is restated here for the inspector's certification. The
+            // rest of this section — inspector name, date and signature — waits
+            // on the client confirming which of the five certifier types their
+            // inspectors are.
+            'Vehicle Identification Number VIN_2' => 'vin',
+
+            // Section 12: APPLICATION ATTESTMENT AND SIGNATURES. The printed
+            // name only; the signature and its date are wet-signed on the day.
+            'Full Name of Applicant Owner' => 'owner_name',
         ],
     ],
 
