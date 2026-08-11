@@ -27,6 +27,12 @@ use ZipArchive;
  */
 class PDFGeneratorService
 {
+    /**
+     * Model year from which a vehicle's odometer is assumed to have six
+     * digits. See the Section 6 notes in prepareFormData().
+     */
+    private const SIX_DIGIT_ODOMETER_FROM_YEAR = 1995;
+
     protected string $storagePath = 'cases/{case_id}/generated';
 
     /**
@@ -358,6 +364,20 @@ class PDFGeneratorService
         $odometerDate = $vehicle?->odometer_date;
         $odometerStatus = $vehicle?->odometer_status;
 
+        // "5 or 6-digit odometer" asks how many digits the instrument cluster
+        // physically displays, which the title never states and the reading
+        // cannot imply: 62,712 miles looks the same on either. The model year
+        // does answer it, though. Five-digit odometers disappeared from US
+        // production well before the mid 1990s, so anything from 1995 on is
+        // six-digit beyond realistic doubt.
+        //
+        // Below that cutoff, and when the year is unknown, both boxes stay
+        // blank for a human who has seen the car. This is a declaration sworn
+        // under penalty of perjury; a blank is a question, a wrong tick is a
+        // false statement.
+        $modelYear = $vehicle?->year;
+        $isSixDigitOdometer = $modelYear !== null && (int) $modelYear >= self::SIX_DIGIT_ODOMETER_FROM_YEAR;
+
         return [
             'case' => $case,
             'case_number' => $case->case_number,
@@ -407,6 +427,9 @@ class PDFGeneratorService
             // missing status ticks none of them: this declaration is sworn
             // under penalty of perjury, so a blank for staff to complete beats
             // a guess.
+            // Never both, and never the 5-digit box: a pre-1995 vehicle leaves
+            // the pair blank rather than asserting the smaller cluster.
+            'is_six_digit_odometer' => $isSixDigitOdometer,
             'is_odometer_actual' => $odometerStatus === 'actual',
             'is_odometer_not_actual' => $odometerStatus === 'not_actual',
             'is_odometer_exceeds_limits' => $odometerStatus === 'exceeds_limits',

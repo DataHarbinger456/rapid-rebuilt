@@ -486,17 +486,68 @@ class HSMV82040GenerationTest extends TestCase
         $this->assertSame('FL', $values['Previous State of Issue']);
     }
 
-    public function test_the_five_or_six_digit_boxes_are_left_for_staff(): void
-    {
-        // How many digits the instrument cluster displays is not on the title
-        // and cannot be inferred from the reading, so the generator must not
-        // guess at it.
-        $values = $this->stampedValues(
-            $this->makeCaseWithVehicle(User::factory()->create(), ['odometer_reading' => 4527])
-        );
+    /**
+     * The digit-count boxes are not answered by the title, but they are
+     * answered by the model year: five-digit odometers were gone from US
+     * production well before the mid 1990s.
+     *
+     * @param  int|null  $year  vehicle model year
+     * @param  bool  $expectSixDigit  whether the 6-digit box should be ticked
+     */
+    #[DataProvider('odometerDigitCountYears')]
+    public function test_the_digit_count_box_follows_the_model_year(
+        int $year,
+        bool $expectSixDigit
+    ): void {
+        $case = $this->makeCaseWithVehicle(User::factory()->create(), ['year' => $year]);
 
+        $values = $this->stampedValues($case);
+
+        if ($expectSixDigit) {
+            $this->assertSame('On', $values['6-digit odometer now reads']);
+        } else {
+            $this->assertNotSame('On', $values['6-digit odometer now reads'] ?? 'Off');
+        }
+
+        // Never ticked automatically. It is only right for genuinely old
+        // vehicles, where the year alone cannot justify a sworn statement.
         $this->assertArrayNotHasKey('5-digit odometer now reads', $values);
-        $this->assertArrayNotHasKey('6-digit odometer now reads', $values);
+    }
+
+    public static function odometerDigitCountYears(): array
+    {
+        return [
+            'a 2020 vehicle is six digit' => [2020, true],
+            'the 1995 cutoff is inclusive' => [1995, true],
+            'a 1994 vehicle is left blank' => [1994, false],
+            'a 1990 vehicle is left blank' => [1990, false],
+        ];
+    }
+
+    /**
+     * vehicles.year is NOT NULL, so an unknown year in practice means a case
+     * with no vehicle record at all. A blank is a question for staff; a wrong
+     * tick is a false statement on a declaration sworn under penalty of
+     * perjury.
+     */
+    public function test_a_case_with_no_vehicle_ticks_neither_digit_box(): void
+    {
+        $customer = User::factory()->create();
+
+        $case = UserCase::create([
+            'user_id' => $customer->id,
+            'case_number' => 'RR-TEST-' . uniqid(),
+            'status' => 'pending_documents',
+            'service_type' => 'rebuilt_title',
+            'inspection_fee' => 150.00,
+            'service_fee' => 100.00,
+            'total_amount' => 250.00,
+        ]);
+
+        $values = $this->stampedValues($case);
+
+        $this->assertNotSame('On', $values['6-digit odometer now reads'] ?? 'Off');
+        $this->assertArrayNotHasKey('5-digit odometer now reads', $values);
     }
 
     public function test_section_6_survives_into_the_generated_pdf(): void
@@ -526,9 +577,15 @@ class HSMV82040GenerationTest extends TestCase
         // emits them out of order and across lines. Scope to the Section 6
         // sentence and compare digits as a multiset: that still proves all six
         // landed in the odometer area rather than anywhere else on the page.
+        //
+        // Anchored just past the form's own "5 or 6-digit" label. Anchoring
+        // earlier drags that label's literal 5 and 6 into the comparison;
+        // anchoring on "odometer now reads" misses the first mileage digit,
+        // because a ticked digit-count box is emitted before that phrase and
+        // pushes the digit onto the line above.
         $this->assertSame(
             $this->sortedDigits('128450'),
-            $this->sortedDigitsIn('/odometer now reads(.*?)\.xx miles/s', $layout),
+            $this->sortedDigitsIn('/5 or .{0,4}6-digit(.*?)\.xx miles/s', $layout),
             'The mileage digits did not land in Section 6.'
         );
 

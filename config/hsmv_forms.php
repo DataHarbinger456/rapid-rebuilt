@@ -126,12 +126,15 @@ return [
                 'on' => 'On',
             ],
 
-            // Deliberately unmapped: '5-digit odometer now reads' and
-            // '6-digit odometer now reads'. That pair describes how many digits
-            // the instrument cluster physically displays, which the title does
-            // not state and the reading cannot imply — 4,527 miles shows the
-            // same on a 5- and a 6-digit odometer. Staff tick it from the
-            // vehicle.
+            // How many digits the instrument cluster shows. The title never
+            // states it and the reading cannot imply it, but the model year
+            // can: see prepareFormData(). Ticked only from 1995 onwards.
+            //
+            // '5-digit odometer now reads' is deliberately left unmapped. It is
+            // only correct for genuinely old vehicles, where the year alone is
+            // not enough to justify a sworn statement, so that box is always
+            // left for a human.
+            '6-digit odometer now reads' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
         ],
     ],
 
