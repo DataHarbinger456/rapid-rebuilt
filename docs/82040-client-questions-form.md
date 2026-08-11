@@ -1,11 +1,15 @@
-# HSMV 82040 — Client Questions (fill-in version)
+# HSMV 82040 — Client Questions (plain text, superseded)
 
-The same eight questions as `docs/82040-client-questions-email.md`, laid out so the
-client answers inside the document instead of writing an email back.
+> **Do not paste this into Google Docs.** Tried on 11 Aug 2026 and the layout
+> collapsed: Docs merges single newlines on a plain-text paste, so every tick box
+> ran onto one line and the underscore answer lines wrapped mid-rule.
+>
+> **Use `docs/82040-client-questions-gdoc.html` instead.** Upload it to Drive,
+> right-click, Open with > Google Docs. Drive converts HTML to a real Doc, and
+> because each option is a table row it cannot reflow into the line above.
 
-This is the version to use. `docs/82040-client-questions.html` is a fillable page
-built for the same job; it was not adopted, because pasting into a Google Doc is
-fewer moving parts than sending an attachment back and forth.
+Kept only as the plain-text source of the same eight questions, for a medium where
+markup is not an option.
 
 HOW TO USE THIS
 1. Open a blank Google Doc.
