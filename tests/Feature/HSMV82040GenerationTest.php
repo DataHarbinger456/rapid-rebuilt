@@ -491,7 +491,7 @@ class HSMV82040GenerationTest extends TestCase
      * answered by the model year: five-digit odometers were gone from US
      * production well before the mid 1990s.
      *
-     * @param  int|null  $year  vehicle model year
+     * @param  int  $year  vehicle model year
      * @param  bool  $expectSixDigit  whether the 6-digit box should be ticked
      */
     #[DataProvider('odometerDigitCountYears')]
