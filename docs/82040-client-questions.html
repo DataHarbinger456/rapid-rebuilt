@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HSMV 82040: 8 questions for Rapid Rebuilt</title>
+<!--
+  Self-contained questionnaire. No build step, no server, no external files
+  except the webfont, which degrades to a system stack when offline.
+
+  Send it as an email attachment or host it anywhere static. Answers never
+  leave the recipient's machine: there is no endpoint to post to, so the
+  return path is Print / Save as PDF, Copy answers, or Email answers, all
+  driven from the DOM. Work in progress is kept in localStorage so a form
+  filled over two sittings is not lost.
+
+  Source of the questions: docs/82040-coverage.md, "Ambiguous, confirm
+  before mapping". Answers go back into that section.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #242934;
+    --ink-soft: #5a6663;
+    --brand: #1b4c43;
+    --brand-bright: #80c242;
+    --page: #f5f7fb;
+    --surface: #ffffff;
+    --line: #e3e8e6;
+    --line-strong: #c9d3d0;
+    --attention: #b3242f;
+    --selected-wash: #f2f8ec;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --rail: 1.5rem;
+    --ease: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: 'Montserrat', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* One shared content rail for header, main and footer. */
+  .rail {
+    width: 100%;
+    max-width: 46rem;
+    margin-inline: auto;
+    padding-inline: var(--rail);
+  }
+
+  a { color: var(--brand); }
+
+  :focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding-block: 2rem 1.75rem;
+  }
+
+  .masthead img {
+    display: block;
+    width: 132px;
+    height: auto;
+  }
+
+  .eyebrow {
+    margin: 1.5rem 0 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.5rem, 1.15rem + 1.6vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--brand);
+  }
+
+  .lede { margin: 0 0 1.25rem; max-width: 38rem; }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    margin: 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.875rem;
+  }
+
+  .meta div { display: flex; gap: 0.5rem; }
+  .meta dt { color: var(--ink-soft); margin: 0; }
+  .meta dd { margin: 0; font-weight: 600; }
+
+  /* ---------- Action bar ---------- */
+
+  .actions {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 1px 3px rgb(36 41 52 / 0.06);
+  }
+
+  .actions-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 0.75rem;
+  }
+
+  .progress-group { flex: 1 1 12rem; min-width: 0; }
+
+  .progress-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 0.35rem;
+  }
+
+  .progress-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: var(--brand-bright);
+    transition: width 240ms var(--ease);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.125rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease);
+  }
+
+  .btn svg { width: 1.05em; height: 1.05em; flex: none; }
+
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: #14382f; }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--brand);
+    border-color: var(--line-strong);
+  }
+  .btn-secondary:hover { background: #f1f5f3; border-color: var(--brand); }
+
+  .btn.is-done { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+  /* ---------- Sections ---------- */
+
+  main { padding-block: 2.5rem 1rem; }
+
+  .part-head { margin: 0 0 1.25rem; }
+
+  .part-head + .part-head { margin-top: 3rem; }
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--brand);
+  }
+
+  .part-head p { margin: 0; font-size: 0.9375rem; color: var(--ink-soft); }
+
+  .divider {
+    margin: 3rem 0 1.25rem;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ---------- Question card ---------- */
+
+  .q {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .q-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .q-num {
+    flex: none;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .tag {
+    flex: none;
+    margin-left: auto;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag-blocking { background: var(--brand); color: #fff; }
+
+  .tag-optional {
+    background: var(--surface);
+    color: var(--ink-soft);
+    border: 1px solid var(--line-strong);
+  }
+
+  /* A legend is rendered at the top of its fieldset whatever the DOM order,
+     so the whole question header lives inside it rather than beside it.
+     display:block keeps it a full-width container across browsers. */
+  .q legend { display: block; width: 100%; padding: 0; }
+
+  .q-title {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  .q-ref {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+  }
+
+  .q-body { margin: 0.625rem 0 1rem; font-size: 0.9375rem; }
+
+  fieldset { margin: 0; padding: 0; border: 0; }
+
+  .options { display: grid; gap: 0.5rem; }
+
+  .option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color 140ms var(--ease), border-color 140ms var(--ease);
+  }
+
+  .option:hover { background: #f7faf9; border-color: var(--line-strong); }
+
+  .option:has(input:checked) {
+    background: var(--selected-wash);
+    border-color: var(--line-strong);
+    border-left-color: var(--brand-bright);
+  }
+
+  .option:has(input:focus-visible) {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  .option input {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0.15rem 0 0;
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: none;
+    border: 2px solid var(--line-strong);
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    transition: border-color 140ms var(--ease);
+  }
+
+  .option input::after {
+    content: "";
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    transform: scale(0);
+    background: var(--brand);
+    transition: transform 140ms var(--ease);
+  }
+
+  .option input:checked { border-color: var(--brand); }
+  .option input:checked::after { transform: scale(1); }
+  .option input:focus-visible { outline: none; }
+
+  .option-text { font-size: 0.9375rem; line-height: 1.5; }
+
+  .suggested {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  /* ---------- Text inputs ---------- */
+
+  .field { margin-top: 0.875rem; }
+
+  .field label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--ink);
+    transition: border-color 140ms var(--ease);
+  }
+
+  input[type="text"]:hover, textarea:hover { border-color: #aab8b4; }
+  input[type="text"]:focus, textarea:focus { border-color: var(--brand); }
+
+  textarea { min-height: 5.5rem; resize: vertical; }
+
+  /* ---------- Footer ---------- */
+
+  .closing {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .closing h2 { margin-bottom: 0.5rem; }
+
+  .send {
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding-block: 2rem 3rem;
+  }
+
+  .send h2 { margin-bottom: 0.5rem; }
+  .send p { margin: 0 0 1.25rem; font-size: 0.9375rem; }
+
+  .send-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+  .status {
+    margin: 0.875rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--brand);
+    min-height: 1.4em;
+  }
+
+  .fineprint {
+    margin: 1.5rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.8125rem;
+    color: var(--ink-soft);
+  }
+
+  /* Plain-text digest used by Copy answers. Off-screen but reachable. */
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Stacked, the sticky bar costs a sixth of a phone screen for the whole
+     scroll. The same actions sit in the footer, so below this width it
+     scrolls away instead of following the reader down. */
+  @media (max-width: 40rem) {
+    .actions { position: static; }
+  }
+
+  @media (max-width: 34rem) {
+    :root { --rail: 1.125rem; }
+    .q { padding: 1.125rem; }
+    .actions-inner { gap: 0.5rem; }
+    .actions .btn { flex: 1 1 auto; justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .option:has(input:checked) { border: 2px solid Highlight; }
+    .progress-fill { background: Highlight; }
+  }
+
+  /* ---------- Print ---------- */
+
+  @media print {
+    :root { --page: #fff; }
+
+    @page { margin: 14mm; }
+
+    body {
+      background: #fff;
+      font-size: 11pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .actions, .send, .no-print { display: none !important; }
+
+    .masthead { border-bottom: 2px solid var(--brand); padding-block: 0 0.75rem; }
+    .rail { max-width: none; padding-inline: 0; }
+
+    main { padding-block: 1rem 0; }
+
+    .q, .closing {
+      border: 1px solid #b9c4c1;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 0.75rem;
+      padding: 0.875rem;
+    }
+
+    .part-head { break-after: avoid; page-break-after: avoid; }
+
+    /* An unselected option is noise on paper. Selected ones stay, and read
+       as answers rather than as choices. */
+    .option { border-left-width: 3px; padding: 0.4rem 0.5rem; }
+    .option:not(:has(input:checked)) { display: none; }
+    .option:has(input:checked) {
+      background: #eef5e6 !important;
+      border-color: #8fa39d;
+      border-left-color: var(--brand-bright) !important;
+    }
+
+    .options:not(:has(input:checked))::after {
+      content: "No option selected.";
+      font-style: italic;
+      color: #555;
+    }
+
+    .field:has(input[type="text"]:placeholder-shown),
+    .field:has(textarea:placeholder-shown) { display: none; }
+
+    input[type="text"], textarea { border-color: #b9c4c1; }
+
+    .print-only { display: block !important; }
+  }
+
+  .print-only { display: none; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="rail">
+    <img src="data:image/png;base64,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" alt="Rapid Rebuilt">
+    <p class="eyebrow">Florida HSMV form 82040</p>
+    <h1>Eight questions before we finish the automatic form filling</h1>
+    <p class="lede">
+      The portal now fills the state title application from what your customer submits.
+      Eight boxes on that form need a decision from you before we can fill them safely.
+    </p>
+    <p class="lede">
+      Every question has a suggested answer. If the suggestion looks right, tick it and
+      move on. That is a complete answer. Questions 1 to 3 are holding up real work.
+      Questions 4 to 8 are minor, and leaving those boxes blank on the state form is a
+      perfectly good outcome.
+    </p>
+    <dl class="meta">
+      <div><dt>Prepared for</dt><dd>Genesis, Rapid Rebuilt</dd></div>
+      <div><dt>From</dt><dd>Aris</dd></div>
+      <div><dt>Sent</dt><dd>11 August 2026</dd></div>
+    </dl>
+  </div>
+</header>
+
+<div class="actions no-print">
+  <div class="rail actions-inner">
+    <div class="progress-group">
+      <span class="progress-label" id="progressLabel" role="status">0 of 8 answered</span>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+    <button type="button" class="btn btn-primary" data-action="print">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      <span class="btn-label">Print or save as PDF</span>
+    </button>
+    <button type="button" class="btn btn-secondary" data-action="copy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span class="btn-label">Copy answers</span>
+    </button>
+  </div>
+</div>
+
+<main class="rail" id="form">
+
+  <div class="part-head">
+    <h2>Part 1. These three are holding up work</h2>
+    <p>Each one decides how a box on the state form gets filled for every case from here on.</p>
+  </div>
+
+  <!-- Q1 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 1</span>
+          <span class="tag tag-blocking">Needs your answer</span>
+        </span>
+        <span class="q-title">Mailing address and home address</span>
+        <span class="q-ref">Section 1 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        We collect one address per customer. The form has a separate block for a mailing
+        address and for a home address.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q1" value="They are nearly always the same, print one address in both blocks">
+          <span class="option-text">They are nearly always the same. Print the one address in both blocks.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="q1" value="They differ often enough that we should collect both at sign-up">
+          <span class="option-text">They differ often enough that we should start asking customers for both at sign-up.</span>
+        </label>
+      </div>
+      <div class="field">
+        <label for="q1notes">Anything else about addresses (optional)</label>
+        <input type="text" id="q1notes" name="q1notes" placeholder="Type here if you want to add something">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- Q2 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 2</span>
+          <span class="tag tag-blocking">Needs your answer</span>
+        </span>
+        <span class="q-title">Who certifies the VIN?</span>
+        <span class="q-ref">Section 8 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        The form asks which authority physically verified the vehicle's VIN. Your answer
+        decides which block gets filled and which licence, badge or office number prints
+        on the form. This is the section the state looks at hardest, so we would rather
+        ask than guess.
+      </p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q2" value="Notary public"><span class="option-text">Notary public</span></label>
+        <label class="option"><input type="radio" name="q2" value="Law enforcement officer"><span class="option-text">Law enforcement officer</span></label>
+        <label class="option"><input type="radio" name="q2" value="Florida licensed dealer"><span class="option-text">Florida licensed dealer</span></label>
+        <label class="option"><input type="radio" name="q2" value="FLHSMV employee"><span class="option-text">FLHSMV employee</span></label>
+        <label class="option"><input type="radio" name="q2" value="Tax collector employee"><span class="option-text">Tax collector employee</span></label>
+        <label class="option"><input type="radio" name="q2" value="It varies per inspection"><span class="option-text">It varies from one inspection to the next.</span></label>
+      </div>
+      <div class="field">
+        <label for="q2varies">If it varies, what decides which one applies?</label>
+        <input type="text" id="q2varies" name="q2varies" placeholder="Type here">
+      </div>
+      <div class="field">
+        <label for="q2number">Licence, badge or dealer number to print on the form</label>
+        <input type="text" id="q2number" name="q2number" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- Q3 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 3</span>
+          <span class="tag tag-blocking">Needs your answer</span>
+        </span>
+        <span class="q-title">Printing the certificate of title</span>
+        <span class="q-ref">Top of page 1</span>
+      </legend>
+      <p class="q-body">
+        The form asks whether the customer wants their new title printed, and if so
+        whether they collect it in the office or have it mailed.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q3" value="Leave blank for the customer to tick on the day">
+          <span class="option-text">Leave it blank for the customer to tick on the day.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option"><input type="radio" name="q3" value="Always No"><span class="option-text">Always &ldquo;No&rdquo;.</span></label>
+        <label class="option"><input type="radio" name="q3" value="Always Yes, in office"><span class="option-text">Always &ldquo;Yes, in office&rdquo;.</span></label>
+        <label class="option"><input type="radio" name="q3" value="Always Yes, mailed"><span class="option-text">Always &ldquo;Yes, mailed&rdquo;.</span></label>
+      </div>
+      <div class="field">
+        <label for="q3notes">Notes (optional)</label>
+        <input type="text" id="q3notes" name="q3notes" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <hr class="divider">
+
+  <div class="part-head">
+    <h2>Part 2. Minor, and blank is a fine answer</h2>
+    <p>These boxes stay empty on the state form unless you tell us otherwise. Skip any you are unsure about.</p>
+  </div>
+
+  <!-- Q4 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 4</span>
+          <span class="tag tag-optional">Optional</span>
+        </span>
+        <span class="q-title">GVW</span>
+        <span class="q-ref">Section 2 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        The form has two separate weight boxes, Weight and GVW. We take Weight off the
+        title, as you confirmed on 5 August.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q4" value="Leave GVW blank">
+          <span class="option-text">Leave GVW blank.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="q4" value="Fill GVW from a source given below">
+          <span class="option-text">Fill it in, from the source below.</span>
+        </label>
+      </div>
+      <div class="field">
+        <label for="q4source">Where should GVW come from?</label>
+        <input type="text" id="q4source" name="q4source" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- Q5 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 5</span>
+          <span class="tag tag-optional">Optional</span>
+        </span>
+        <span class="q-title">Odometer, 5 or 6 digits</span>
+        <span class="q-ref">Section 6 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        The form asks how many digits the odometer display physically shows. The title
+        never states it, so today we tick 6 for vehicles from 1995 onward and leave
+        anything older blank.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q5" value="Keep the 1995 rule">
+          <span class="option-text">Keep that rule.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="q5" value="Inspectors record it on site">
+          <span class="option-text">Have inspectors record it on site instead.</span>
+        </label>
+      </div>
+      <div class="field">
+        <label for="q5notes">Notes (optional)</label>
+        <input type="text" id="q5notes" name="q5notes" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- Q6 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 6</span>
+          <span class="tag tag-optional">Optional</span>
+        </span>
+        <span class="q-title">The dealer section</span>
+        <span class="q-ref">Section 7 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        A block for the selling dealer's sales tax registration number, dealer licence
+        number, date of sale and amount of tax.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q6" value="Always the selling dealer's responsibility, leave blank">
+          <span class="option-text">That is always the selling dealer's to fill in. Leave it blank.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="q6" value="Rapid Rebuilt fills this in">
+          <span class="option-text">Rapid Rebuilt fills this in, using the numbers below.</span>
+        </label>
+      </div>
+      <div class="field">
+        <label for="q6tax">Sales tax registration number</label>
+        <input type="text" id="q6tax" name="q6tax" placeholder="Type here">
+      </div>
+      <div class="field">
+        <label for="q6licence">Dealer licence number</label>
+        <input type="text" id="q6licence" name="q6licence" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- Q7 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 7</span>
+          <span class="tag tag-optional">Optional</span>
+        </span>
+        <span class="q-title">An unlabelled box</span>
+        <span class="q-ref">Section 2 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        There is a box next to &ldquo;Passenger&rdquo; under the van use heading that the
+        form itself does not label.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q7" value="Do not know, leave blank">
+          <span class="option-text">Not sure. Leave it blank.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="q7" value="It is for the purpose given below">
+          <span class="option-text">I know what it is for. See below.</span>
+        </label>
+      </div>
+      <div class="field">
+        <label for="q7what">What is that box for?</label>
+        <input type="text" id="q7what" name="q7what" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- Q8 -->
+  <section class="q">
+    <fieldset>
+      <legend>
+        <span class="q-head">
+          <span class="q-num">Question 8</span>
+          <span class="tag tag-optional">Optional</span>
+        </span>
+        <span class="q-title">Two boxes with the same label</span>
+        <span class="q-ref">Sections 10 and 11 of the 82040</span>
+      </legend>
+      <p class="q-body">
+        Between the repossession section and the non-use section sit two boxes, both
+        labelled &ldquo;Full Name of Applicant&rdquo;.
+      </p>
+      <div class="options">
+        <label class="option">
+          <input type="radio" name="q8" value="Do not know, leave both blank">
+          <span class="option-text">Not sure. Leave both blank, they only apply to repossessions.<span class="suggested">Suggested</span></span>
+        </label>
+        <label class="option">
+          <input type="radio" name="q8" value="They belong to the section given below">
+          <span class="option-text">I know which section they belong to. See below.</span>
+        </label>
+      </div>
+      <div class="field">
+        <label for="q8which">Which section do they belong to?</label>
+        <input type="text" id="q8which" name="q8which" placeholder="Type here">
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="closing">
+    <h2>Anything else on the form that looks wrong to you?</h2>
+    <p class="q-body">
+      You know this paperwork better than we do. If a box is being filled in a way you
+      would not fill it by hand, tell us here.
+    </p>
+    <div class="field">
+      <label for="extra">Your notes</label>
+      <textarea id="extra" name="extra" placeholder="Type here"></textarea>
+    </div>
+  </section>
+
+</main>
+
+<footer class="send no-print">
+  <div class="rail">
+    <h2>Sending your answers back</h2>
+    <p>
+      Nothing is submitted automatically, so pick whichever is easiest. Your answers stay
+      on this device until you send them.
+    </p>
+    <div class="send-actions">
+      <button type="button" class="btn btn-primary" data-action="print">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span class="btn-label">Print or save as PDF</span>
+      </button>
+      <button type="button" class="btn btn-secondary" data-action="copy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span class="btn-label">Copy answers to clipboard</span>
+      </button>
+      <button type="button" class="btn btn-secondary" data-action="email">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+        <span class="btn-label">Open in email</span>
+      </button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <p class="fineprint">
+      On a phone, &ldquo;Print&rdquo; gives you a Save as PDF option you can attach to a
+      reply. &ldquo;Copy answers&rdquo; puts them on the clipboard as plain text, ready to
+      paste into an email or a text message. Your progress is saved on this device
+      automatically, so you can close the page and come back to it.
+    </p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'rr-82040-questions-v1';
+  var TOTAL = 8;
+  var form = document.getElementById('form');
+  var statusEl = document.getElementById('status');
+  var fillEl = document.getElementById('progressFill');
+  var labelEl = document.getElementById('progressLabel');
+  var statusTimer;
+
+  /** Every question, in the order they are asked. */
+  var QUESTIONS = [
+    { n: 1, title: 'Mailing address and home address', radio: 'q1', extras: [['q1notes', 'Notes']] },
+    { n: 2, title: 'Who certifies the VIN?', radio: 'q2', extras: [['q2varies', 'If it varies, what decides it'], ['q2number', 'Licence / badge / dealer number']] },
+    { n: 3, title: 'Printing the certificate of title', radio: 'q3', extras: [['q3notes', 'Notes']] },
+    { n: 4, title: 'GVW', radio: 'q4', extras: [['q4source', 'Where GVW comes from']] },
+    { n: 5, title: 'Odometer, 5 or 6 digits', radio: 'q5', extras: [['q5notes', 'Notes']] },
+    { n: 6, title: 'The dealer section', radio: 'q6', extras: [['q6tax', 'Sales tax registration number'], ['q6licence', 'Dealer licence number']] },
+    { n: 7, title: 'An unlabelled box', radio: 'q7', extras: [['q7what', 'What that box is for']] },
+    { n: 8, title: 'Two boxes with the same label', radio: 'q8', extras: [['q8which', 'Which section they belong to']] }
+  ];
+
+  function checkedValue(name) {
+    var el = form.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '';
+  }
+
+  function textValue(id) {
+    var el = document.getElementById(id);
+    return el && el.value ? el.value.trim() : '';
+  }
+
+  /**
+   * A question counts as answered once an option is ticked, or once the
+   * person has typed something into one of its boxes.
+   */
+  function isAnswered(q) {
+    if (checkedValue(q.radio)) { return true; }
+    return q.extras.some(function (pair) { return textValue(pair[0]) !== ''; });
+  }
+
+  function updateProgress() {
+    var done = QUESTIONS.filter(isAnswered).length;
+    var pct = Math.round((done / TOTAL) * 100);
+
+    fillEl.style.width = pct + '%';
+    labelEl.textContent = done === TOTAL
+      ? 'All 8 answered, ready to send'
+      : done + ' of ' + TOTAL + ' answered';
+  }
+
+  /** The plain-text digest that gets copied, emailed or pasted. */
+  function buildText() {
+    var lines = [
+      'HSMV 82040: answers from Rapid Rebuilt',
+      'Completed ' + new Date().toLocaleDateString(undefined, {
+        year: 'numeric', month: 'long', day: 'numeric'
+      }),
+      ''
+    ];
+
+    QUESTIONS.forEach(function (q) {
+      lines.push(q.n + '. ' + q.title);
+      lines.push('   Answer: ' + (checkedValue(q.radio) || 'not answered'));
+
+      q.extras.forEach(function (pair) {
+        var value = textValue(pair[0]);
+        if (value) { lines.push('   ' + pair[1] + ': ' + value); }
+      });
+
+      lines.push('');
+    });
+
+    var extra = textValue('extra');
+    if (extra) {
+      lines.push('Anything else that looks wrong:');
+      lines.push(extra);
+      lines.push('');
+    }
+
+    return lines.join('\n');
+  }
+
+  function say(message) {
+    statusEl.textContent = message;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () { statusEl.textContent = ''; }, 6000);
+  }
+
+  /** Clipboard API needs a secure context, so keep a document.execCommand path. */
+  function copyText(text, button) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(
+        function () { copied(button); },
+        function () { legacyCopy(text, button); }
+      );
+      return;
+    }
+    legacyCopy(text, button);
+  }
+
+  /* The live region sits in the footer, so a click on the sticky bar at the
+     top of the page would otherwise confirm itself off screen. Swapping the
+     button's own label puts the confirmation wherever the button is, and the
+     live region still announces it for screen readers. */
+  function copied(button) {
+    say('Answers copied. Paste them into an email or a text message.');
+
+    if (!button) { return; }
+
+    var label = button.querySelector('.btn-label');
+    if (!label || button.dataset.restoring === '1') { return; }
+
+    var original = label.textContent;
+    button.dataset.restoring = '1';
+    label.textContent = 'Copied';
+    button.classList.add('is-done');
+
+    setTimeout(function () {
+      label.textContent = original;
+      button.classList.remove('is-done');
+      button.dataset.restoring = '0';
+    }, 2600);
+  }
+
+  function legacyCopy(text, button) {
+    var area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.className = 'sr-only';
+    document.body.appendChild(area);
+    area.select();
+
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+
+    document.body.removeChild(area);
+
+    say(ok
+      ? 'Answers copied. Paste them into an email or a text message.'
+      : 'Could not reach the clipboard on this device. Use Print or save as PDF instead.');
+  }
+
+  /**
+   * mailto has a practical length limit and some setups have no mail client
+   * registered, so the answers go on the clipboard first. That way the person
+   * always has them, whatever the email window does.
+   */
+  function emailAnswers() {
+    var body = buildText();
+    copyText(body);
+
+    var href = 'mailto:?subject=' + encodeURIComponent('HSMV 82040 answers, Rapid Rebuilt')
+      + '&body=' + encodeURIComponent(body);
+
+    if (href.length > 1800) {
+      say('Answers copied. Your email app cannot take this much text directly, so paste them into a new message.');
+      return;
+    }
+
+    window.location.href = href;
+  }
+
+  function save() {
+    var data = {};
+    QUESTIONS.forEach(function (q) {
+      data[q.radio] = checkedValue(q.radio);
+      q.extras.forEach(function (pair) { data[pair[0]] = textValue(pair[0]); });
+    });
+    data.extra = textValue('extra');
+
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { /* private mode */ }
+  }
+
+  function restore() {
+    var raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { return; }
+    if (!raw) { return; }
+
+    var data;
+    try { data = JSON.parse(raw); } catch (e) { return; }
+
+    Object.keys(data).forEach(function (key) {
+      var value = data[key];
+      if (!value) { return; }
+
+      var radio = form.querySelector('input[name="' + key + '"][value="' + CSS.escape(value) + '"]');
+      if (radio) { radio.checked = true; return; }
+
+      var field = document.getElementById(key);
+      if (field) { field.value = value; }
+    });
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-action]');
+    if (!button) { return; }
+
+    var action = button.getAttribute('data-action');
+    if (action === 'print') { window.print(); }
+    if (action === 'copy') { copyText(buildText(), button); }
+    if (action === 'email') { emailAnswers(); }
+  });
+
+  form.addEventListener('input', function () { updateProgress(); save(); });
+  form.addEventListener('change', function () { updateProgress(); save(); });
+
+  restore();
+  updateProgress();
+}());
+</script>
+
+</body>
+</html>

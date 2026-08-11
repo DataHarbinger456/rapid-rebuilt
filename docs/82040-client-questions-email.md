@@ -1,8 +1,14 @@
-# HSMV 82040 — Client Questions (email version)
+# HSMV 82040 — Client Questions (covering email)
 
-Eight open questions from the 82040 field audit (`docs/82040-coverage.md`), written
-to be sent as an email. A fill-in version for sharing as a Google Doc is in
-`docs/82040-client-questions-form.md` — same eight questions, same defaults.
+Eight open questions from the 82040 field audit (`docs/82040-coverage.md`).
+
+This is the covering email. The questions themselves are the attachment:
+`docs/82040-client-questions.html`, a self-contained page the client fills in and
+returns by print, clipboard or email. Send both together.
+
+A plain-text version for pasting into a Google Doc was written first and removed
+once the HTML replaced it; recover it from git history if a Docs version is ever
+wanted again.
 
 Status: drafted 11 Aug 2026, not yet sent.
 Answers land back in the "Ambiguous — confirm before mapping" section of the audit.
@@ -17,9 +23,16 @@ Good progress on the automatic form filling — the 82040 now fills itself from 
 the customer submits, and I've just added the owner's contact details, the Florida
 title number and the applicant name.
 
-To fill the rest correctly I need your answers on eight boxes. I've put a suggested
-default under each one, so if a default looks right just reply "default is fine"
-and I'll go with it.
+To fill the rest correctly I need your answers on eight boxes. I've attached them
+as a short form: open the attachment in any browser, tick the answers, then use the
+"Print or save as PDF" or "Copy answers" button at the top to send them back. It
+saves as you go, so you can stop and come back to it.
+
+Every question has a suggested answer already marked. If the suggestions all look
+right, tick them and send it back; that's a complete answer.
+
+The eight questions are below as well, in case you'd rather just reply to this
+email.
 
 **These three are holding up real fields:**
 

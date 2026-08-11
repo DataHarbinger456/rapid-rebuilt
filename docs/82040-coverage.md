@@ -368,6 +368,10 @@ type).
 
 ## Ambiguous — confirm before mapping
 
+All eight are written up for the client in `docs/82040-client-questions.html`, a
+self-contained form he fills in and returns, with `docs/82040-client-questions-email.md`
+as the covering email. Record answers here as they come back.
+
 1. **Mailing vs residential address.** We store one address and the form has two blocks.
    Do they always match, or does the customer need a second input?
 2. **Request to print Certificate of Title** — No / Yes in office / Yes mailed. A standing
