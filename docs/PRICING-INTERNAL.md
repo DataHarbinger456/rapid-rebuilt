@@ -111,6 +111,75 @@ Notice all four preserve the rate. You're selling time and scope, never price.
 > No. Politely, but no. Revenue-share means you carry his business risk for free.
 > If he pushes hard, the answer is a longer schedule — never contingent payment.
 
+**"Should I get my own Anthropic account / use my own AI key?"**
+> "It's included. You'll never see a token bill." Then move on. Do not offer it,
+> do not explain the cost, do not raise the topic yourself. See §5b.
+
+---
+
+## 5b. The AI key decision (settled 10 Aug 2026)
+
+**You hold the Anthropic key. It is bundled into the $950/mo. Never itemised,
+never passed through, never entered by the client.**
+
+### The numbers that settle it
+
+Measured, not estimated — 14 real salvage titles through the live API, and the
+40 real cases in the database:
+
+| | |
+|---|---|
+| Average case value | **$266.90** |
+| AI cost per title read | **1.03¢** (Sonnet) |
+| AI as share of one case | **0.004%** |
+| At 100 titles/month | **~$1/month** |
+
+**One case pays for roughly 26,000 AI reads.** Haiku would cut it to 0.36¢ but
+reads VINs materially worse (4/14 valid check digits vs Sonnet's 8/14), so it is
+not worth switching. Sonnet stays.
+
+### Why not have him enter his own key
+
+An earlier version of this plan had the client supply his key so Anthropic
+billed him directly. That reasoning only holds when API cost is a real line
+item. At a penny a title it is not — it was solving a problem that does not
+exist.
+
+What it would actually cost you:
+
+- He must open an Anthropic developer account, attach a card, mint a key and
+  paste it in. That is a sales objection and a support call, to save you about
+  a dollar a month.
+- It breaks when the key rotates or his card expires, and you get the call.
+- **It reframes what you sell.** "Enter your API key" is software he installs.
+  "$950/mo, everything included" is a service. The second is worth more, is
+  stickier, and does not invite him to price your fee against a token bill.
+
+### What the fee is actually covering
+
+Hosting (~$20–50/mo), AI (~$1–5/mo), and **your time** — which is the whole
+cost. Price off support and maintenance. The AI is rounding error: bundle it
+silently and never bring up tokens.
+
+### Do not build the in-app key screen yet
+
+The key rotates from Laravel Cloud environment settings in under a minute, now
+proven in production. A settings screen saves a redeploy and costs hours. Not
+worth it at this scale.
+
+What does already exist: every extraction row stores `prompt_tokens` and
+`completion_tokens`, so true spend is one query away whenever you want it,
+rather than an estimate.
+
+### Revisit only if
+
+- **A client goes high-volume** — thousands of titles a month, where usage
+  becomes a real number worth attributing.
+- **You sign multiple clients** and want per-tenant cost visibility.
+- **Someone raises compliance.** With your key, documents flow through *your*
+  Anthropic account. Fine at this scale, but it is the one honest argument for
+  client-held keys and worth answering straight if asked.
+
 ---
 
 ## 6. What you've already delivered (proof, not promises)
