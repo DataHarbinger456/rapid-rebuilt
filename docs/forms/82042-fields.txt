@@ -1,0 +1,226 @@
+---
+FieldType: Text
+FieldName: Vehicle Identification Number
+FieldNameAlt: Enter Vehicle Identification Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Year
+FieldNameAlt: Enter Year
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Make
+FieldNameAlt: Enter Make
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Color
+FieldNameAlt: Enter Color
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Previous State Vehicle Titled In
+FieldNameAlt: Enter Previous State Vehicle Titled In
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Commissioned Name of Florida Notary
+FieldNameAlt: Enter Commissioned Name of Florida Notary
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Law Enforcement Agency Name
+FieldNameAlt: Enter Law Enforcement Agency Name if Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Florida Dealer Name
+FieldNameAlt: Enter Florida Dealer Name if Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Body Type
+FieldNameAlt: Enter Body Type
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Select if 5 digit odometer reading
+FieldNameAlt: Select if 5 digit odometer reading
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: Select if 6 digit odometer reading
+FieldNameAlt: Select if 6 digit odometer reading
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Hundred thousands place that the odometer number now reads
+FieldNameAlt: Enter hundred thousands place that the odometer number now reads
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Ten thousands place that the odometer number now reads
+FieldNameAlt: Enter ten thousands place that the odometer number now reads
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Thousands place that the odometer number now reads
+FieldNameAlt: Enter thousands place that the odometer number now reads
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Hundreds place that the odometer number now reads
+FieldNameAlt: Enter hundreds place that the odometer number now reads
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Tens place that the odometer number now reads
+FieldNameAlt: Enter tens place that the odometer number now reads
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Ones place that the odometer number now reads
+FieldNameAlt: Enter ones place that the odometer number now reads
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Two-digit month of odometer reading
+FieldNameAlt: Enter two-digit month of odometer reading
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Two-digit day of odometer reading
+FieldNameAlt: Enter two-digit day of odometer reading
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Four-digit year of odometer reading
+FieldNameAlt: Enter four-digit year of odometer reading
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: 1. reflects ACTUAL MILEAGE
+FieldNameAlt: Select if odometer reading reflects ACTUAL MILEAGE
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: 2. is IN EXCESS OF ITS MECHANICAL LIMITS
+FieldNameAlt: Select if odometer reading is IN EXCESS OF ITS MECHANICAL LIMITS
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Button
+FieldName: 3. is NOT THE ACTUAL MILEAGE
+FieldNameAlt: Select if odometer reading is NOT THE ACTUAL MILEAGE
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: On
+FieldStateOption: Off
+---
+FieldType: Text
+FieldName: Owner/Purchaser Name
+FieldNameAlt: Enter Owner/Purchaser Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Seller's Name
+FieldNameAlt: Enter Seller's Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date - Part B
+FieldNameAlt: Enter date Part B is completed
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date - Part A
+FieldNameAlt: Enter date Part A is completed
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Name of Signer
+FieldNameAlt: Enter Name of Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Florida Compliance Examiner/Inspector Name
+FieldNameAlt: Enter Florida Compliance Examiner/Inspector Name if Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Badge or ID Number
+FieldNameAlt: Enter Badge or ID Number if Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: LEO Badge Number
+FieldNameAlt: Enter LEO Badge Number if Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Florida Dealer Number
+FieldNameAlt: Enter Florida Dealer Number if Signer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: Military officer or Law Enforcement Officer
+FieldNameAlt: Select if signer is a Military Police or Law Enforcement Officer
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: Florida Licensed Dealer
+FieldNameAlt: Select if signer is a Florida Licensed Dealer
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
+---
+FieldType: Button
+FieldName: Florida Compliance Examiner or Inspector DMS or Tax Collector employee
+FieldNameAlt: Select if signer is a Florida Compliance Examiner or Inspector or Tax Collector employee
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: Yes
