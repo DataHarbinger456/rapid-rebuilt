@@ -117,9 +117,9 @@ installation because of known published vulnerabilities.
 
 ### 5. Real test coverage
 
-Two auto-generated placeholder files were replaced with **14 passing tests**
-covering document uploads, magic-link authentication, and the public tracker.
-These run before every deployment.
+**14 passing tests, 45 assertions** — 12 of them written from scratch to cover
+document uploads, magic-link authentication, and the public tracker. These run
+before every deployment.
 
 ---
 
