@@ -39,9 +39,9 @@
                         </div>
                         <div class="progress mb-3" style="height: 25px;">
                             <div class="progress-bar progress-bar-striped bg-primary" role="progressbar"
-                                 style="width: {{ $case->progress_percent }}%;"
-                                 aria-valuenow="{{ $case->progress_percent }}" aria-valuemin="0" aria-valuemax="100">
-                                {{ $case->progress_percent }}%
+                                 style="width: {{ $case->progress_percentage }}%;"
+                                 aria-valuenow="{{ $case->progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ $case->progress_percentage }}%
                             </div>
                         </div>
                         <div class="d-flex justify-content-between text-muted small">
@@ -157,6 +157,9 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Document Readiness -->
+                @include('partials.document-readiness', ['readiness' => $readiness, 'variant' => 'customer'])
 
                 <!-- Documents -->
                 <div class="card mb-4">

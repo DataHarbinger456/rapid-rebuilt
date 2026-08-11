@@ -10,7 +10,9 @@ use App\Models\Payment;
 use App\Models\UploadedFile;
 use App\Models\Setting;
 use App\Services\CaseService;
+use App\Services\DocumentService;
 use App\Services\VINDecoderService;
+use App\Support\DocumentRequirements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,11 +23,16 @@ class CaseController extends Controller
 {
     protected CaseService $caseService;
     protected VINDecoderService $vinDecoder;
+    protected DocumentService $documentService;
 
-    public function __construct(CaseService $caseService, VINDecoderService $vinDecoder)
-    {
+    public function __construct(
+        CaseService $caseService,
+        VINDecoderService $vinDecoder,
+        DocumentService $documentService
+    ) {
         $this->caseService = $caseService;
         $this->vinDecoder = $vinDecoder;
+        $this->documentService = $documentService;
     }
 
     /**
@@ -205,7 +212,9 @@ class CaseController extends Controller
             'inspection',
         ]);
 
-        return view('customer.cases.show', compact('case'));
+        $readiness = $this->documentService->readinessFor($case);
+
+        return view('customer.cases.show', compact('case', 'readiness'));
     }
 
     /**
@@ -259,7 +268,10 @@ class CaseController extends Controller
 
         $case->load('documents');
 
-        return view('customer.cases.documents', compact('case'));
+        $readiness = $this->documentService->readinessFor($case);
+        $requirements = DocumentRequirements::forCase($case);
+
+        return view('customer.cases.documents', compact('case', 'readiness', 'requirements'));
     }
 
     /**

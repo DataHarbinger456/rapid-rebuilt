@@ -259,24 +259,25 @@
                                 <p class="text-muted mb-4">Upload the required documents. Accepted formats: PDF, JPG, PNG (Max 10MB each)</p>
 
                                 <div class="row">
-                                    {{-- Driven by DocumentService so the staff-side
-                                         "missing documents" check always agrees. --}}
-                                    @foreach (app(\App\Services\DocumentService::class)->getRequiredDocuments() as $docKey => $docMeta)
-                                        @php($isMultiple = $docMeta['multiple'] ?? false)
+                                    {{-- Driven by the same requirement list as the readiness
+                                         meter, so the staff-side check always agrees. The service
+                                         type is not chosen yet here, hence the default list. --}}
+                                    @foreach (\App\Support\DocumentRequirements::forServiceType(null) as $docKey => $docMeta)
+                                        @php($isMultiple = $docMeta->multiple)
                                         <div class="col-md-6 mb-4">
                                             <div class="card h-100">
                                                 <div class="card-body">
                                                     <h6>
-                                                        <i data-feather="file-text" class="{{ $docMeta['required'] ? 'text-primary' : 'text-info' }}"></i>
-                                                        {{ $docMeta['label'] }}@if($docMeta['required']) *@endif
+                                                        <i data-feather="file-text" class="{{ $docMeta->required ? 'text-primary' : 'text-info' }}"></i>
+                                                        {{ $docMeta->label }}@if($docMeta->required) *@endif
                                                     </h6>
-                                                    <p class="text-muted small">{{ $docMeta['description'] }}</p>
+                                                    <p class="text-muted small">{{ $docMeta->description }}</p>
                                                     <input type="file"
                                                            name="documents[{{ $docKey }}]{{ $isMultiple ? '[]' : '' }}"
                                                            class="form-control"
-                                                           accept="{{ $docMeta['accept'] }}"
+                                                           accept="{{ $docMeta->accept }}"
                                                            @if($isMultiple) multiple @endif
-                                                           @if($docMeta['required']) required @endif>
+                                                           @if($docMeta->required) required @endif>
                                                 </div>
                                             </div>
                                         </div>

@@ -100,15 +100,14 @@
                     </div>
                 </div>
 
+                <!-- Document Readiness -->
+                @include('partials.document-readiness', ['readiness' => $readiness, 'variant' => 'admin'])
+
                 <!-- Documents -->
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header">
+                        {{-- State lives in the readiness meter directly above. --}}
                         <h5>Documents</h5>
-                        @if(count($missing_documents) > 0)
-                            <span class="badge badge-warning">{{ count($missing_documents) }} missing</span>
-                        @else
-                            <span class="badge badge-success">All documents uploaded</span>
-                        @endif
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

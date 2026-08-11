@@ -133,18 +133,20 @@ class CaseManagementController extends Controller
             'timeline',
         ]);
 
-        $missingDocuments = $this->documentService->getMissingDocuments($case);
+        $readiness = $this->documentService->readinessFor($case);
 
         $data = [
             'case' => $case,
-            'missing_documents' => $missingDocuments,
+            'readiness' => $readiness,
+            // Kept for existing consumers; the meter is the richer view.
+            'missing_documents' => $readiness->missingLabels(),
             'available_statuses' => $this->getAvailableStatusTransitions($case->status),
         ];
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'data' => $data,
+                'data' => array_merge($data, ['readiness' => $readiness->toArray()]),
             ]);
         }
 

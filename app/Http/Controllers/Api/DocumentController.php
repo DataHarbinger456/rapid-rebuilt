@@ -36,17 +36,18 @@ class DocumentController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $requiredDocuments = $this->documentService->getRequiredDocuments();
-        $missingDocuments = $this->documentService->getMissingDocuments($case);
+        $readiness = $this->documentService->readinessFor($case);
+        $missingDocuments = $readiness->missingLabels();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'documents' => $documents,
-                'required' => $requiredDocuments,
+                'required' => $this->documentService->getRequiredDocuments($case),
                 'missing' => $missingDocuments,
                 'all_uploaded' => empty($missingDocuments),
-                'all_approved' => $this->documentService->allDocumentsApproved($case),
+                'all_approved' => $readiness->isReady(),
+                'readiness' => $readiness->toArray(),
             ],
         ]);
     }

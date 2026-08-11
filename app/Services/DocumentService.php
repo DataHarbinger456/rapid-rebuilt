@@ -6,6 +6,9 @@ use App\Models\UserCase;
 use App\Models\User;
 use App\Models\UploadedFile;
 use App\Models\CaseTimeline;
+use App\Support\DocumentReadiness;
+use App\Support\DocumentRequirement;
+use App\Support\DocumentRequirements;
 use Illuminate\Http\UploadedFile as HttpUploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -13,75 +16,6 @@ use Illuminate\Support\Str;
 
 class DocumentService
 {
-    /**
-     * Required documents for rebuilt title
-     */
-    public const REQUIRED_DOCUMENTS = [
-        'salvage_title' => [
-            'label' => 'Salvage Title',
-            'description' => 'Original salvage title or certificate of destruction',
-            'required' => true,
-            'accept' => 'image/*,.pdf',
-        ],
-        'bill_of_sale' => [
-            'label' => 'Bill of Sale',
-            'description' => 'Bill of sale from when you purchased the vehicle',
-            'required' => true,
-            'accept' => 'image/*,.pdf',
-        ],
-        'owner_id_front' => [
-            'label' => "Driver's License - Front",
-            'description' => 'Front of the valid government-issued photo ID of the owner',
-            'required' => true,
-            'accept' => 'image/*,.pdf',
-        ],
-        'owner_id_back' => [
-            'label' => "Driver's License - Back",
-            'description' => 'Back of the valid government-issued photo ID of the owner',
-            'required' => true,
-            'accept' => 'image/*,.pdf',
-        ],
-        'insurance_card' => [
-            'label' => 'Insurance Card',
-            'description' => 'Current insurance card for the vehicle',
-            'required' => true,
-            'accept' => 'image/*,.pdf',
-        ],
-        'damage_photos' => [
-            'label' => 'Damage Photos',
-            'description' => 'Photos showing the vehicle before repair (damaged state)',
-            'required' => true,
-            'accept' => 'image/*',
-            'multiple' => true,
-        ],
-        'repair_photos' => [
-            'label' => 'Repair Photos',
-            'description' => 'Photos showing the vehicle after repair',
-            'required' => true,
-            'accept' => 'image/*',
-            'multiple' => true,
-        ],
-        'component_receipts' => [
-            'label' => 'Component Receipts',
-            'description' => 'Receipts for major components purchased for repair',
-            'required' => true,
-            'accept' => 'image/*,.pdf',
-            'multiple' => true,
-        ],
-        'insurance_estimate' => [
-            'label' => 'Insurance Estimate/Report',
-            'description' => 'Insurance company estimate or damage report',
-            'required' => false,
-            'accept' => 'image/*,.pdf',
-        ],
-        'power_of_attorney' => [
-            'label' => 'Power of Attorney',
-            'description' => 'If someone else will be handling the title application',
-            'required' => false,
-            'accept' => 'image/*,.pdf',
-        ],
-    ];
-
     /**
      * Upload a document for a case
      */
@@ -91,8 +25,10 @@ class DocumentService
         string $documentType,
         ?int $uploadedBy = null
     ): UploadedFile {
-        // Validate document type
-        if (!array_key_exists($documentType, self::REQUIRED_DOCUMENTS)) {
+        // Validated against the catalogue of known types, not against this
+        // case's requirement list: trimming a service type's list must not
+        // start rejecting uploads that used to be accepted.
+        if (!DocumentRequirements::isKnownType($documentType)) {
             throw new \Exception("Invalid document type: {$documentType}");
         }
 
@@ -125,7 +61,7 @@ class DocumentService
             $case->id,
             'document_uploaded',
             'Document uploaded',
-            self::REQUIRED_DOCUMENTS[$documentType]['label'],
+            DocumentRequirements::label($documentType),
             ['document_type' => $documentType, 'document_id' => $document->id]
         );
 
@@ -144,7 +80,7 @@ class DocumentService
             $document->user_case_id,
             'document_deleted',
             'Document deleted',
-            self::REQUIRED_DOCUMENTS[$document->document_type]['label'] ?? $document->document_type,
+            DocumentRequirements::label($document->document_type),
             ['document_type' => $document->document_type]
         );
 
@@ -168,9 +104,38 @@ class DocumentService
             $document->user_case_id,
             'document_approved',
             'Document approved',
-            self::REQUIRED_DOCUMENTS[$document->document_type]['label'] ?? $document->document_type,
+            DocumentRequirements::label($document->document_type),
             ['document_type' => $document->document_type, 'reviewer_id' => $reviewer->id]
         );
+
+        $this->markDocumentsCompleteIfReady($document->userCase);
+    }
+
+    /**
+     * Flip a case to documents_complete the moment its last required document
+     * is approved, so staff see the green light without a manual status change.
+     *
+     * canTransitionTo() only allows this from pending_documents, so a case that
+     * is already scheduled or inspected is never dragged backwards.
+     */
+    protected function markDocumentsCompleteIfReady(?UserCase $case): void
+    {
+        if ($case === null || !$case->canTransitionTo('documents_complete')) {
+            return;
+        }
+
+        // The approval that triggered this was written after the relation was
+        // loaded, so re-read it rather than trusting a cached collection.
+        $case->load('documents');
+
+        if (!$this->readinessFor($case)->isReady()) {
+            return;
+        }
+
+        // updateStatus() writes the status_changed timeline entry itself; the
+        // case_timeline.event_type enum has no 'documents_complete' value, and
+        // a second row would say the same thing twice.
+        $case->updateStatus('documents_complete');
     }
 
     /**
@@ -197,11 +162,35 @@ class DocumentService
     }
 
     /**
-     * Get required documents configuration
+     * Required documents configuration, in the array shape the views and the
+     * API have always consumed. Case-scoped when a case is given; the creation
+     * wizard has none yet, so it gets the default list.
+     *
+     * @return array<string, array{label: string, description: string, required: bool, accept: string, multiple: bool}>
      */
-    public function getRequiredDocuments(): array
+    public function getRequiredDocuments(?UserCase $case = null): array
     {
-        return self::REQUIRED_DOCUMENTS;
+        $requirements = $case
+            ? DocumentRequirements::forCase($case)
+            : DocumentRequirements::forServiceType(null);
+
+        return array_map(
+            fn (DocumentRequirement $requirement): array => $requirement->toArray(),
+            $requirements
+        );
+    }
+
+    /**
+     * The document readiness meter for a case: per-type state, approved count
+     * and the overall ready-for-inspection verdict.
+     */
+    public function readinessFor(UserCase $case): DocumentReadiness
+    {
+        if (!$case->relationLoaded('documents')) {
+            $case->load('documents');
+        }
+
+        return DocumentReadiness::for($case);
     }
 
     /**
@@ -216,29 +205,16 @@ class DocumentService
     }
 
     /**
-     * Get missing required documents for a case
+     * Missing required documents for a case, keyed type => label.
+     *
+     * A rejected document counts as missing: the customer still owes a usable
+     * copy of it.
+     *
+     * @return array<string, string>
      */
     public function getMissingDocuments(UserCase $case): array
     {
-        $requiredTypes = collect(self::REQUIRED_DOCUMENTS)
-            ->filter(fn($config) => $config['required'])
-            ->keys()
-            ->toArray();
-
-        $uploadedTypes = UploadedFile::where('user_case_id', $case->id)
-            ->whereIn('status', ['pending', 'approved'])
-            ->pluck('document_type')
-            ->unique()
-            ->toArray();
-
-        $missing = [];
-        foreach ($requiredTypes as $type) {
-            if (!in_array($type, $uploadedTypes)) {
-                $missing[$type] = self::REQUIRED_DOCUMENTS[$type]['label'];
-            }
-        }
-
-        return $missing;
+        return $this->readinessFor($case)->missingLabels();
     }
 
     /**
@@ -254,23 +230,7 @@ class DocumentService
      */
     public function allDocumentsApproved(UserCase $case): bool
     {
-        $requiredTypes = collect(self::REQUIRED_DOCUMENTS)
-            ->filter(fn($config) => $config['required'])
-            ->keys()
-            ->toArray();
-
-        foreach ($requiredTypes as $type) {
-            $hasApproved = UploadedFile::where('user_case_id', $case->id)
-                ->where('document_type', $type)
-                ->where('status', 'approved')
-                ->exists();
-
-            if (!$hasApproved) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->readinessFor($case)->isReady();
     }
 
     /**
@@ -319,7 +279,7 @@ class DocumentService
      */
     protected function getAllowedMimes(string $documentType): array
     {
-        $config = self::REQUIRED_DOCUMENTS[$documentType] ?? null;
+        $config = DocumentRequirements::catalogue()[$documentType] ?? null;
 
         if (!$config) {
             return [];
@@ -395,7 +355,7 @@ class DocumentService
             $case->id,
             'document_replaced',
             'Document replaced',
-            self::REQUIRED_DOCUMENTS[$documentType]['label'],
+            DocumentRequirements::label($documentType),
             [
                 'old_document_id' => $oldDocument->id,
                 'new_document_id' => $newDocument->id,
