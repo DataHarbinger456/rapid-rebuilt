@@ -8,11 +8,11 @@ use App\Models\User;
 use App\Models\UserCase;
 use App\Models\Vehicle;
 use App\Services\DocumentExtractionService;
-use App\Services\PDFGeneratorService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 use Prism\Prism\Facades\Prism;
 use Prism\Prism\Testing\StructuredResponseFake;
+use Tests\Concerns\ReadsPdfFormFields;
 use Tests\TestCase;
 
 /**
@@ -28,6 +28,12 @@ use Tests\TestCase;
 class ExtractionAffects82040Test extends TestCase
 {
     use DatabaseTransactions;
+    use ReadsPdfFormFields;
+
+    protected function formKey(): string
+    {
+        return 'hsmv_82040';
+    }
 
     protected function setUp(): void
     {
@@ -87,27 +93,6 @@ class ExtractionAffects82040Test extends TestCase
             'size' => 8208,
             'status' => 'pending',
         ]);
-    }
-
-    /**
-     * The exact field => value set the generator hands to pdftk, read at the
-     * last point a ticked checkbox is still inspectable. Mirrors
-     * HSMV82040GenerationTest.
-     */
-    private function stampedValues(UserCase $case): array
-    {
-        $service = app(PDFGeneratorService::class);
-
-        $prepare = new \ReflectionMethod($service, 'prepareFormData');
-        $map = new \ReflectionMethod($service, 'mapFields');
-        $prepare->setAccessible(true);
-        $map->setAccessible(true);
-
-        return $map->invoke(
-            $service,
-            config('hsmv_forms.hsmv_82040.fields'),
-            $prepare->invoke($service, $case)
-        );
     }
 
     public function test_a_confirmed_out_of_state_title_switches_the_82040_to_transfer(): void

@@ -6,10 +6,9 @@ use App\Models\Inspection;
 use App\Models\User;
 use App\Models\UserCase;
 use App\Models\Vehicle;
-use App\Services\PDFGeneratorService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ReflectionMethod;
+use Tests\Concerns\ReadsPdfFormFields;
 use Tests\TestCase;
 
 /**
@@ -25,6 +24,12 @@ use Tests\TestCase;
 class HSMV82040FuelAndInspectorTest extends TestCase
 {
     use DatabaseTransactions;
+    use ReadsPdfFormFields;
+
+    protected function formKey(): string
+    {
+        return 'hsmv_82040';
+    }
 
     /**
      * Every fuel box in Sections 2 and 3, by exact PDF field name.
@@ -60,22 +65,6 @@ class HSMV82040FuelAndInspectorTest extends TestCase
         ], $vehicle));
 
         return $case->fresh();
-    }
-
-    private function stampedValues(UserCase $case): array
-    {
-        $service = app(PDFGeneratorService::class);
-
-        $prepare = new ReflectionMethod($service, 'prepareFormData');
-        $map = new ReflectionMethod($service, 'mapFields');
-        $prepare->setAccessible(true);
-        $map->setAccessible(true);
-
-        return $map->invoke(
-            $service,
-            config('hsmv_forms.hsmv_82040.fields'),
-            $prepare->invoke($service, $case)
-        );
     }
 
     /**

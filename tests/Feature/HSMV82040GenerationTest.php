@@ -9,6 +9,7 @@ use App\Services\PDFGeneratorService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\ReadsPdfFormFields;
 use Tests\TestCase;
 
 /**
@@ -20,6 +21,12 @@ use Tests\TestCase;
 class HSMV82040GenerationTest extends TestCase
 {
     use DatabaseTransactions;
+    use ReadsPdfFormFields;
+
+    protected function formKey(): string
+    {
+        return 'hsmv_82040';
+    }
 
     private const VIN = '1HGCV1F30LA123456';
 
@@ -63,31 +70,6 @@ class HSMV82040GenerationTest extends TestCase
     }
 
     /**
-     * The exact field => value set the generator hands to pdftk for a case.
-     *
-     * flatten() bakes checkbox marks in as page graphics, so a ticked box
-     * leaves no trace in the PDF's text layer and cannot be asserted with
-     * pdftotext. This reads the values at the last point they are still
-     * inspectable, going through the real config file, the real
-     * prepareFormData() and the real mapFields().
-     */
-    private function stampedValues(UserCase $case): array
-    {
-        $service = app(PDFGeneratorService::class);
-
-        $prepare = new \ReflectionMethod($service, 'prepareFormData');
-        $map = new \ReflectionMethod($service, 'mapFields');
-        $prepare->setAccessible(true);
-        $map->setAccessible(true);
-
-        return $map->invoke(
-            $service,
-            config('hsmv_forms.hsmv_82040.fields'),
-            $prepare->invoke($service, $case)
-        );
-    }
-
-    /**
      * Which of the Section 3 TYPE boxes come out ticked.
      */
     private function tickedTypeBoxes(UserCase $case): array
@@ -102,12 +84,14 @@ class HSMV82040GenerationTest extends TestCase
 
     /**
      * Read the text layer back out of a generated PDF.
+     *
+     * flatten() bakes checkbox marks in as page graphics, so a ticked box
+     * leaves no trace in the text layer and cannot be asserted this way. Use
+     * stampedValues() from ReadsPdfFormFields for those.
      */
     private function textOf(string $storagePath): string
     {
-        $absolute = Storage::disk('private')->path($storagePath);
-
-        return (string) shell_exec('pdftotext ' . escapeshellarg($absolute) . ' -');
+        return $this->textOfStoredPdf($storagePath);
     }
 
     public function test_generated_82040_contains_vin_and_owner_name(): void
@@ -569,9 +553,7 @@ class HSMV82040GenerationTest extends TestCase
         // the typed values are assertable here.
         $this->assertStringContainsString('ACCORD SEDAN TOURING', $text);
 
-        $layout = (string) shell_exec(
-            'pdftotext -layout ' . escapeshellarg(Storage::disk('private')->path($path)) . ' -'
-        );
+        $layout = $this->textOfStoredPdf($path, layout: true);
 
         // The six mileage boxes sit at slightly different heights, so pdftotext
         // emits them out of order and across lines. Scope to the Section 6

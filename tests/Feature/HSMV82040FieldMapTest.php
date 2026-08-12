@@ -6,11 +6,9 @@ use App\Models\User;
 use App\Models\UserCase;
 use App\Models\Vehicle;
 use App\Services\PDFGeneratorService;
-use App\Support\PdftkBinary;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
-use mikehaertl\pdftk\Pdf;
-use ReflectionMethod;
+use Tests\Concerns\ReadsPdfFormFields;
 use Tests\TestCase;
 
 /**
@@ -26,14 +24,18 @@ use Tests\TestCase;
  * 'Owner's City' a plain ASCII one — which makes that failure mode likely
  * rather than theoretical.
  *
- * Production flattens the PDF, which bakes values into the page and removes the
- * form fields, so a flattened file has nothing to read back. These tests fill
- * the same template with the same values through the same pdftk binary and skip
- * only the flatten step, leaving the fields machine-readable.
+ * The fill-unflattened-and-read-back mechanics live in ReadsPdfFormFields, so
+ * the next form's suite inherits them rather than copying them.
  */
 class HSMV82040FieldMapTest extends TestCase
 {
     use DatabaseTransactions;
+    use ReadsPdfFormFields;
+
+    protected function formKey(): string
+    {
+        return 'hsmv_82040';
+    }
 
     /**
      * A case with every column the map can draw on populated, so no assertion
@@ -86,87 +88,16 @@ class HSMV82040FieldMapTest extends TestCase
     }
 
     /**
-     * The exact field => value set the generator hands to pdftk, through the
-     * real config, prepareFormData() and mapFields().
-     */
-    private function stampedValues(UserCase $case): array
-    {
-        $service = app(PDFGeneratorService::class);
-
-        $prepare = new ReflectionMethod($service, 'prepareFormData');
-        $map = new ReflectionMethod($service, 'mapFields');
-        $prepare->setAccessible(true);
-        $map->setAccessible(true);
-
-        return $map->invoke(
-            $service,
-            config('hsmv_forms.hsmv_82040.fields'),
-            $prepare->invoke($service, $case)
-        );
-    }
-
-    /**
-     * Fill the official template unflattened and read every field back.
-     *
-     * @return array<string, string> pdf field name => value inside the document
-     */
-    private function fieldValuesInFilledPdf(UserCase $case): array
-    {
-        $out = tempnam(sys_get_temp_dir(), '82040_') . '.pdf';
-
-        $pdf = new Pdf(
-            base_path(config('hsmv_forms.hsmv_82040.template')),
-            ['command' => PdftkBinary::path()]
-        );
-
-        $filled = $pdf
-            ->fillForm($this->stampedValues($case))
-            ->needAppearances()
-            ->saveAs($out);
-
-        $this->assertNotFalse($filled, 'pdftk could not fill the 82040: ' . $pdf->getError());
-
-        $dump = (string) shell_exec(
-            escapeshellarg(PdftkBinary::path()) . ' ' . escapeshellarg($out)
-            . ' dump_data_fields_utf8'
-        );
-
-        @unlink($out);
-
-        // Each record is a blank-line-separated block of Key: value lines.
-        $values = [];
-
-        foreach (preg_split('/\n(?=---)/', $dump) as $block) {
-            if (!preg_match('/^FieldName: (.*)$/m', $block, $name)) {
-                continue;
-            }
-
-            preg_match('/^FieldValue: (.*)$/m', $block, $value);
-
-            $values[trim($name[1])] = isset($value[1]) ? trim($value[1]) : '';
-        }
-
-        return $values;
-    }
-
-    /**
      * The whole point of the suite: a name in the map that is not in the
      * document is silently dropped by pdftk and prints a blank box.
      */
     public function test_every_mapped_field_name_exists_in_the_official_template(): void
     {
-        $dump = (string) shell_exec(
-            escapeshellarg(PdftkBinary::path()) . ' '
-            . escapeshellarg(base_path(config('hsmv_forms.hsmv_82040.template')))
-            . ' dump_data_fields_utf8'
-        );
-
-        preg_match_all('/^FieldName: (.*)$/m', $dump, $matches);
-        $realNames = array_map('trim', $matches[1]);
+        $realNames = $this->fieldNamesInTemplate();
 
         $this->assertNotEmpty($realNames, 'Could not read any field names from the 82040 template.');
 
-        foreach (array_keys(config('hsmv_forms.hsmv_82040.fields')) as $mapped) {
+        foreach (array_keys($this->mappedFields()) as $mapped) {
             $this->assertContains(
                 $mapped,
                 $realNames,
@@ -302,9 +233,7 @@ class HSMV82040FieldMapTest extends TestCase
 
         Storage::disk('private')->assertExists($path);
 
-        $text = (string) shell_exec(
-            'pdftotext ' . escapeshellarg(Storage::disk('private')->path($path)) . ' -'
-        );
+        $text = $this->textOfStoredPdf($path);
 
         foreach (['Miami-Dade', 'kelvyn.quiroz@example.test', '3055550142', '0123456789'] as $value) {
             $this->assertStringContainsString(

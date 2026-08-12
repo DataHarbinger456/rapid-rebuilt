@@ -5,10 +5,10 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\UserCase;
 use App\Models\Vehicle;
-use App\Services\PDFGeneratorService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\ReadsPdfFormFields;
 use Tests\TestCase;
 
 /**
@@ -19,6 +19,12 @@ use Tests\TestCase;
 class CaseIntakeVehicleTypeTest extends TestCase
 {
     use DatabaseTransactions;
+    use ReadsPdfFormFields;
+
+    protected function formKey(): string
+    {
+        return 'hsmv_82040';
+    }
 
     /**
      * A complete, valid case submission.
@@ -39,25 +45,6 @@ class CaseIntakeVehicleTypeTest extends TestCase
                 ['type' => 'hood', 'source' => 'used', 'source_vin' => '2HGFB2F59DH512345'],
             ],
         ], $overrides);
-    }
-
-    /**
-     * The exact field => value set the generator would stamp for a case.
-     */
-    private function stampedValues(UserCase $case): array
-    {
-        $service = app(PDFGeneratorService::class);
-
-        $prepare = new \ReflectionMethod($service, 'prepareFormData');
-        $map = new \ReflectionMethod($service, 'mapFields');
-        $prepare->setAccessible(true);
-        $map->setAccessible(true);
-
-        return $map->invoke(
-            $service,
-            config('hsmv_forms.hsmv_82040.fields'),
-            $prepare->invoke($service, $case)
-        );
     }
 
     /**
