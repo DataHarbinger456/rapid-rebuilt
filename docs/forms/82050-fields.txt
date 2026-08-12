@@ -1,0 +1,253 @@
+---
+FieldType: Button
+FieldName: Notice of Sale Seller must complete sections 1  3 The purchasers signature in section 3 is optional
+FieldNameAlt: Notice of Sale (Seller must complete sections 1 & 3). The purchaser’s signature in section 3 is optional
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Bill of Sale Seller and purchaser must complete sections 1 2 when applicable  3
+FieldNameAlt: Bill of Sale (Seller and purchaser must complete sections 1, 2 (when applicable) & 3
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Year
+FieldNameAlt: Year
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: MakeManufacturer
+FieldNameAlt: Make/Manufacturer
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Body Type
+FieldNameAlt: Body Type
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Model
+FieldNameAlt: Model
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Color
+FieldNameAlt: Color
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Iwe do hereby sell or have sold and delivered the above described motor vehicle mobile home
+FieldNameAlt: I/we do hereby sell or have sold and delivered the above described motor vehicle, mobile home
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Current Title Issue Date
+FieldNameAlt: Current Title Issue Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: VehicleVessel Identification Number
+FieldNameAlt: Vehicle/Vessel Identification Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Print Names of Purchasers
+FieldNameAlt: Print Name(s) of Purchaser(s)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Address City State Zip Code
+FieldNameAlt: Address City State Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: 2
+FieldNameAlt: 2
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Odometer Disclosure Statement Required For a Motor Vehicle
+FieldNameAlt: Odometer Disclosure Statement (Required For a Motor Vehicle
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: 5 DIGIT OR
+FieldNameAlt: 5 DIGIT OR
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: 6 DIGIT ODOMETER NOW READS
+FieldNameAlt: 6 DIGIT ODOMETER NOW READS
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: undefined_2
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Failure to
+FieldNameAlt: Failure to
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: undefined_3
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: xx
+FieldNameAlt: xx
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: undefined_4
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: undefined_5
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: AND WE HEREBY CERTIFY THAT TO THE BEST OF OUR KNOWLEDGE
+FieldNameAlt: AND WE HEREBY CERTIFY THAT TO THE BEST OF OUR KNOWLEDGE
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: 1 REFLECTS THE ACTUAL MILEAGE
+FieldNameAlt: 1. REFLECTS THE ACTUAL MILEAGE
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: 2 IS IN EXCESS OF ITS MECHANICAL LIMITS
+FieldNameAlt: 2. IS IN EXCESS OF ITS MECHANICAL LIMITS
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: 3 IS NOT THE ACTUAL MILEAGE
+FieldNameAlt: 3. IS NOT THE ACTUAL MILEAGE
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: Affidavit When applicableRow1
+FieldNameAlt: Affidavit (When applicable):_Row_1
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Affidavit When applicableRow2
+FieldNameAlt: Affidavit (When applicable):_Row_2
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Sellers Printed Name
+FieldNameAlt: Seller's Printed Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date
+FieldNameAlt: Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Sellers Address City State Zip Code
+FieldNameAlt: Seller's Address City State Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: CoSellers Printed Name when applicable
+FieldNameAlt: Co-Seller's Printed Name (when applicable)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date_2
+FieldNameAlt: Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: CoSellers Address when applicable City State Zip Code
+FieldNameAlt: Co-Seller's Address (when applicable) City State Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Purchasers Printed Name
+FieldNameAlt: Purchaser's Printed Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date_3
+FieldNameAlt: Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: CoPurchasers Printed name when applicable
+FieldNameAlt: Co-Purchaser's Printed name (when applicable)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date_4
+FieldNameAlt: Date
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Federal and State law requires that you state the mileage in connection with the transfer of ownership
+FieldNameAlt: Federal and State law requires that you state the mileage in connection with the transfer of ownership
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Text1
+FieldFlags: 0
+FieldJustification: Left
