@@ -20,15 +20,20 @@ two pages, of which page 2 is instructions with no fields.
 ⚠ marks a field where the correct source is genuinely ambiguous and should be confirmed
 with the client rather than guessed. Those are collected at the end.
 
-There is no `hsmv_82042` entry in `config/hsmv_forms.php`, so **class A is empty by
-definition**: nothing on this form is mapped yet.
+> **Updated 11 Aug 2026.** The 20 clean class B fields are now mapped and the class
+> counts below have moved accordingly: A is 20, B is down to the single ⚠ field.
+> `generateHSMV82042()` exists, and `HSMV82042FieldMapTest` covers the map. Everything
+> still marked ⚠ or D is untouched and still waiting on the client.
 
-The 82042 is further behind than the other unmapped forms. `PDFGeneratorService` has a
+There was no `hsmv_82042` entry in `config/hsmv_forms.php` when this audit was written, so
+class A started empty.
+
+The 82042 was further behind than the other unmapped forms. `PDFGeneratorService` has a
 `generateHSMV82050()`, `generateHSMV82053()`, `generateHSMV84490()` and
 `generateHSMV84491()`, all of which reach `fillForm()` and throw the "still in
-development" `RuntimeException` for want of a field map. **There is no
-`generateHSMV82042()` at all**, so mapping this form also means adding the entry point,
-and `generateFullPackage()` has no line for it either.
+development" `RuntimeException` for want of a field map. There was no
+`generateHSMV82042()` at all; it has since been added. `generateFullPackage()` still has
+no line for it, pending ambiguity 1 below.
 
 ---
 
@@ -130,8 +135,8 @@ The notary seal and all Part B signatures are wet and have no form fields.
 
 | Class | Fields | Share |
 |---|---|---|
-| **A** — already mapped | 0 | 0% |
-| **B** — mappable now, no new data | 20 (+1 ⚠) | 60% |
+| **A** — already mapped | 20 | 57% |
+| **B** — mappable now, no new data | 0 (+1 ⚠) | 3% |
 | **C** — in the DB, needs surfacing | 0 | 0% |
 | **D** — data we do not have | 14 (all ⚠ but one) | 40% |
 

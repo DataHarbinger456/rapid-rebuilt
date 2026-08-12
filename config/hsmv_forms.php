@@ -193,4 +193,69 @@ return [
         ],
     ],
 
+    'hsmv_82042' => [
+
+        // Vehicle Identification Number and Odometer Verification.
+        'template' => 'docs/forms/82042.pdf',
+
+        // Part A only. Every key here is one the 82040 already derives, so
+        // this map adds no keys to prepareFormData(): see docs/82042-coverage.md.
+        //
+        // Part B, the certifier's VIN verification, is entirely unmapped. It is
+        // the same open question as the 82040's Section 8 — which of the five
+        // authorities the client's inspectors are — and until that is answered,
+        // naming one on a form sworn under penalty of perjury would be a false
+        // certification. Its three certifier-type buttons also export 'Yes'
+        // rather than 'On', which is pinned by test so the mapping cannot get
+        // it wrong later.
+        'fields' => [
+
+            // PART A: VEHICLE IDENTIFICATION.
+            'Vehicle Identification Number' => 'vin',
+            'Year' => 'year',
+            'Make' => 'make',
+            'Color' => 'color',
+            'Body Type' => 'body_type',
+            'Previous State Vehicle Titled In' => 'previous_state_of_issue',
+
+            // PART A: ODOMETER DECLARATION.
+            //
+            // The digits are split one box per place, most significant first,
+            // exactly as on the 82040.
+            'Hundred thousands place that the odometer number now reads' => 'odometer_digit_100000',
+            'Ten thousands place that the odometer number now reads' => 'odometer_digit_10000',
+            'Thousands place that the odometer number now reads' => 'odometer_digit_1000',
+            'Hundreds place that the odometer number now reads' => 'odometer_digit_100',
+            'Tens place that the odometer number now reads' => 'odometer_digit_10',
+            'Ones place that the odometer number now reads' => 'odometer_digit_1',
+
+            'Two-digit month of odometer reading' => 'odometer_date_mm',
+            'Two-digit day of odometer reading' => 'odometer_date_dd',
+            'Four-digit year of odometer reading' => 'odometer_date_yyyy',
+
+            // 'Select if 5 digit odometer reading' is left unmapped for the
+            // same reason as on the 82040: only a human can swear to it.
+            'Select if 6 digit odometer reading' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
+
+            // WARNING: the 82040 and the 82042 number these three differently.
+            //
+            //             82040                        82042
+            //   1   reflects actual mileage      reflects actual mileage
+            //   2   is NOT the actual mileage    is IN EXCESS of its limits
+            //   3   is IN EXCESS of its limits   is NOT the actual mileage
+            //
+            // Options 2 and 3 are swapped between the forms. Each key below is
+            // matched to the SENTENCE in its field name, never to the leading
+            // digit; mapping by number would swear that a rolled-over odometer
+            // had been tampered with, or the reverse.
+            '1. reflects ACTUAL MILEAGE' => ['checkbox' => 'is_odometer_actual', 'on' => 'On'],
+            '2. is IN EXCESS OF ITS MECHANICAL LIMITS' => ['checkbox' => 'is_odometer_exceeds_limits', 'on' => 'On'],
+            '3. is NOT THE ACTUAL MILEAGE' => ['checkbox' => 'is_odometer_not_actual', 'on' => 'On'],
+
+            // PART A: SIGNATURES. The printed owner name only; both signatures
+            // are wet, and the seller is someone we never store.
+            'Owner/Purchaser Name' => 'owner_name',
+        ],
+    ],
+
 ];

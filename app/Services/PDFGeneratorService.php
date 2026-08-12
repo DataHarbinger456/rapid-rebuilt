@@ -47,6 +47,23 @@ class PDFGeneratorService
     }
 
     /**
+     * Generate HSMV 82042 - Vehicle Identification Number and Odometer
+     * Verification.
+     *
+     * Part A is the owner's own affidavit and fills from the same data as the
+     * 82040. Part B is the certifier's VIN verification and is deliberately
+     * left blank for a wet signature: which of the five authorities may sign it
+     * is still an open question with the client, and guessing would put a false
+     * certification on a form sworn under penalty of perjury.
+     */
+    public function generateHSMV82042(UserCase $case): string
+    {
+        $data = $this->prepareFormData($case);
+
+        return $this->renderPdf($case, 'HSMV_82042', $data);
+    }
+
+    /**
      * Generate HSMV 84490 - Statement of Builder
      */
     public function generateHSMV84490(UserCase $case, Inspection $inspection): string
