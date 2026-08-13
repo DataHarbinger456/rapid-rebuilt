@@ -239,6 +239,89 @@ class DocumentPackageTest extends TestCase
     }
 
     /**
+     * End to end through the endpoint staff actually call.
+     *
+     * This is the whole change in one test. Before it, POST
+     * .../generate-documents answered 422 with "Cover Letter cannot be
+     * generated yet" for every case ever submitted, because the composed
+     * documents were attempted first and threw. A passed inspection produced
+     * no package at all.
+     */
+    public function test_the_endpoint_returns_a_package_instead_of_a_422(): void
+    {
+        Storage::fake('private');
+
+        $case = $this->passedCase();
+        $inspection = $case->inspection;
+
+        $response = $this->actingAs($inspection->inspector)
+            ->postJson('/api/inspections/' . $inspection->id . '/generate-documents');
+
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+
+        $path = $response->json('data.package_path');
+        $this->assertNotEmpty($path, 'The response carries no package path.');
+        Storage::disk('private')->assertExists($path);
+
+        // The three forms with a field map are in the folder.
+        $entries = $this->entriesIn($path);
+
+        foreach (['HSMV_82040', 'HSMV_82042', 'HSMV_82050'] as $form) {
+            $this->assertTrue(
+                (bool) array_filter(
+                    $entries,
+                    fn (string $e): bool => str_starts_with($e, "Generated_Forms/{$form}_")
+                ),
+                "{$form} is mapped and should be in Generated_Forms/."
+            );
+        }
+
+        // The three without one are named in the manifest as manual.
+        $manifest = $this->manifestIn($path);
+
+        foreach (['HSMV 84490', 'HSMV 84491', 'HSMV 82053'] as $form) {
+            $this->assertStringContainsString($form, $manifest, "{$form} should be listed as manual.");
+        }
+
+        // And they are under the manual heading, not the generated one.
+        [$manualSection, $generatedSection] = explode('GENERATED AND ENCLOSED', $manifest, 2);
+
+        foreach (['HSMV 84490', 'HSMV 84491', 'HSMV 82053'] as $form) {
+            $this->assertStringContainsString($form, $manualSection);
+            $this->assertStringNotContainsString($form, $generatedSection);
+        }
+
+        foreach (['HSMV 82040', 'HSMV 82042', 'HSMV 82050'] as $form) {
+            $this->assertStringContainsString($form, $generatedSection);
+        }
+    }
+
+    /**
+     * A generated form is filed as an approved document, so without an
+     * exclusion it would also be swept into Supporting_Documents. The list was
+     * hardcoded and had already drifted: it never learned about the 82042.
+     */
+    public function test_a_generated_form_is_not_also_filed_as_a_supporting_document(): void
+    {
+        Storage::fake('private');
+
+        $path = app(PDFGeneratorService::class)->generateFullPackage($this->passedCase());
+
+        foreach ($this->entriesIn($path) as $entry) {
+            if (!str_starts_with($entry, 'Supporting_Documents/')) {
+                continue;
+            }
+
+            $this->assertStringNotContainsStringIgnoringCase(
+                'hsmv',
+                $entry,
+                "[{$entry}] duplicates a generated form into Supporting_Documents."
+            );
+        }
+    }
+
+    /**
      * The case still advances, because the packet is genuinely ready for staff
      * to finish and send.
      */

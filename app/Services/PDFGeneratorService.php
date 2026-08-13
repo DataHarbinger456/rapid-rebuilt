@@ -149,13 +149,15 @@ class PDFGeneratorService
      * fillForm() only ever produced the "still in development" error. They are
      * reported in the manifest instead: see COMPOSED_DOCUMENTS.
      *
-     * The 82042 is also absent. It is mapped, but its own instructions say it
-     * is for vehicles not currently titled in Florida, so whether it belongs in
-     * every packet is ambiguity 1 in docs/82042-coverage.md and a decision for
-     * the client rather than this method.
+     * The 82042 is included in every packet. Its own instructions say it is for
+     * vehicles not currently titled in Florida, so it may prove to be
+     * out-of-state only, which is ambiguity 1 in docs/82042-coverage.md. Until
+     * the client rules on that, an unnecessary extra form in the folder costs
+     * staff a moment and a missing one costs a trip back to the counter.
      */
     protected const PACKAGE_FORMS = [
         'HSMV_82040' => 'Application for Certificate of Title',
+        'HSMV_82042' => 'VIN and Odometer Verification',
         'HSMV_84490' => 'Statement of Builder',
         'HSMV_84491' => 'Rebuilt Vehicle Inspection Application',
         'HSMV_82050' => 'Notice of Sale / Bill of Sale',
@@ -256,6 +258,7 @@ class PDFGeneratorService
     {
         return match ($formName) {
             'HSMV_82040' => $this->generateHSMV82040($case),
+            'HSMV_82042' => $this->generateHSMV82042($case),
             'HSMV_84490' => $this->generateHSMV84490($case, $inspection),
             'HSMV_84491' => $this->generateHSMV84491($case),
             'HSMV_82050' => $this->generateHSMV82050($case),
@@ -756,10 +759,18 @@ class PDFGeneratorService
             $zip->addFromString("Generated_Forms/{$filename}", $content);
         }
 
-        // Add uploaded documents (approved only)
+        // Add uploaded documents (approved only).
+        //
+        // savePDF() files every generated form as an approved UploadedFile, so
+        // without this they would appear a second time under
+        // Supporting_Documents. The list is derived from PACKAGE_FORMS rather
+        // than written out, because the hardcoded version had already drifted:
+        // it never learned about the 82042.
+        $generatedTypes = array_map('strtolower', array_keys(self::PACKAGE_FORMS));
+
         $uploadedDocs = UploadedFile::where('user_case_id', $case->id)
             ->where('status', 'approved')
-            ->whereNotIn('document_type', ['hsmv_82040', 'hsmv_84490', 'hsmv_84491', 'hsmv_82050', 'hsmv_82053'])
+            ->whereNotIn('document_type', $generatedTypes)
             ->get();
 
         foreach ($uploadedDocs as $doc) {
