@@ -141,41 +141,200 @@ class PDFGeneratorService
     }
 
     /**
-     * Generate complete document package
+     * Every form in the packet, in the order they belong in the folder.
+     *
+     * Cover_Letter and Document_Checklist are absent on purpose. They are
+     * documents we compose, not government forms with a fillable template, so
+     * they have no entry in config/hsmv_forms.php and routing them through
+     * fillForm() only ever produced the "still in development" error. They are
+     * reported in the manifest instead: see COMPOSED_DOCUMENTS.
+     *
+     * The 82042 is also absent. It is mapped, but its own instructions say it
+     * is for vehicles not currently titled in Florida, so whether it belongs in
+     * every packet is ambiguity 1 in docs/82042-coverage.md and a decision for
+     * the client rather than this method.
+     */
+    protected const PACKAGE_FORMS = [
+        'HSMV_82040' => 'Application for Certificate of Title',
+        'HSMV_84490' => 'Statement of Builder',
+        'HSMV_84491' => 'Rebuilt Vehicle Inspection Application',
+        'HSMV_82050' => 'Notice of Sale / Bill of Sale',
+        'HSMV_82053' => 'Power of Attorney',
+    ];
+
+    /**
+     * Documents the packet is expected to contain but this service cannot
+     * build yet, with the reason the manifest should give.
+     */
+    protected const COMPOSED_DOCUMENTS = [
+        'Cover_Letter' => 'Cover letter for the Tax Collector',
+        'Document_Checklist' => 'Checklist of the documents enclosed',
+    ];
+
+    /**
+     * Generate the complete document package.
+     *
+     * Generates everything it can and records what it could not, rather than
+     * abandoning the packet at the first unmapped form. Before this, a single
+     * form without a field map threw all the way out and staff got nothing at
+     * all: no 82040, no supporting documents, no inspection photos, for a case
+     * whose inspection had already passed.
+     *
+     * A packet that is nine tenths done and honest about the last tenth is more
+     * use than no packet, because the missing forms are ones staff already know
+     * how to complete by hand. MANIFEST.txt in the zip says which those are.
      */
     public function generateFullPackage(UserCase $case): string
     {
         $inspection = $case->inspection;
 
+        // Unchanged: the packet asserts an inspection passed, so it may not be
+        // built for a case where one has not.
         if (!$inspection || $inspection->result !== 'passed') {
             throw new \Exception('Case must have a passed inspection to generate package');
         }
 
-        // Generate all documents
         $documents = [];
-        $documents[] = $this->generateCoverLetter($case);
-        $documents[] = $this->generateDocumentChecklist($case);
-        $documents[] = $this->generateHSMV82040($case);
-        $documents[] = $this->generateHSMV84490($case, $inspection);
-        $documents[] = $this->generateHSMV84491($case);
-        $documents[] = $this->generateHSMV82050($case);
-        $documents[] = $this->generateHSMV82053($case);
+        $generated = [];
+        $manual = [];
 
-        // Create ZIP file
-        $zipPath = $this->createZipPackage($case, $documents);
+        foreach (self::PACKAGE_FORMS as $formName => $description) {
+            try {
+                $documents[] = $this->generatePackageForm($case, $inspection, $formName);
+                $generated[$formName] = $description;
+            } catch (RuntimeException $e) {
+                // Only the "cannot fill this form" failures are collected. A
+                // broken template or a pdftk crash raises the same class, and
+                // both are equally a form staff must now complete by hand, so
+                // the message is carried through rather than reinterpreted.
+                $manual[$formName] = [$description, $e->getMessage()];
+            }
+        }
 
-        // Update case status
+        foreach (self::COMPOSED_DOCUMENTS as $formName => $description) {
+            $manual[$formName] = [
+                $description,
+                'This is a document we compose rather than a government form, and '
+                . 'it is not built yet. Nothing to fill in: it has no template.',
+            ];
+        }
+
+        $zipPath = $this->createZipPackage(
+            $case,
+            $documents,
+            $this->packageManifest($case, $generated, $manual)
+        );
+
         $case->updateStatus('ready_for_dmv');
 
         CaseTimeline::log(
             $case->id,
             'documents_generated',
             'Document package generated',
-            'All HSMV forms have been generated and are ready for submission',
-            ['documents' => count($documents)]
+            $manual === []
+                ? 'All HSMV forms have been generated and are ready for submission'
+                : count($generated) . ' of ' . (count($generated) + count($manual))
+                    . ' documents generated. The rest must be completed by hand; '
+                    . 'see MANIFEST.txt in the package.',
+            [
+                'documents' => count($documents),
+                'generated' => array_keys($generated),
+                'manual' => array_keys($manual),
+            ]
         );
 
         return $zipPath;
+    }
+
+    /**
+     * Dispatch one packet form to its generator.
+     *
+     * Only the 84490 needs the inspection, so the signatures differ and a
+     * generic [$this, 'generate' . $formName] call would not do.
+     */
+    protected function generatePackageForm(UserCase $case, Inspection $inspection, string $formName): string
+    {
+        return match ($formName) {
+            'HSMV_82040' => $this->generateHSMV82040($case),
+            'HSMV_84490' => $this->generateHSMV84490($case, $inspection),
+            'HSMV_84491' => $this->generateHSMV84491($case),
+            'HSMV_82050' => $this->generateHSMV82050($case),
+            'HSMV_82053' => $this->generateHSMV82053($case),
+            default => throw new RuntimeException("No generator for {$formName}."),
+        };
+    }
+
+    /**
+     * The plain-text manifest that ships inside the zip.
+     *
+     * Written for whoever opens the package at the counter, so it leads with
+     * what still needs doing rather than what went right.
+     *
+     * @param array<string, string>              $generated form name => description
+     * @param array<string, array{0: string, 1: string}> $manual form name => [description, reason]
+     */
+    protected function packageManifest(UserCase $case, array $generated, array $manual): string
+    {
+        $rule = str_repeat('=', 70);
+        $lines = [
+            $rule,
+            'DOCUMENT PACKAGE MANIFEST',
+            $rule,
+            '',
+            'Case:      ' . $case->case_number,
+            'Generated: ' . now()->format('d M Y, H:i'),
+            '',
+        ];
+
+        if ($manual === []) {
+            $lines[] = 'Every form in this package was filled automatically.';
+        } else {
+            $lines[] = count($manual) . ' of ' . (count($generated) + count($manual))
+                . ' documents could NOT be filled automatically and must be';
+            $lines[] = 'completed by hand before this package is submitted.';
+        }
+
+        $lines[] = '';
+        $lines[] = $rule;
+        $lines[] = 'COMPLETE THESE BY HAND (' . count($manual) . ')';
+        $lines[] = $rule;
+        $lines[] = '';
+
+        if ($manual === []) {
+            $lines[] = '  Nothing. The package is complete.';
+            $lines[] = '';
+        } else {
+            foreach ($manual as $formName => [$description, $reason]) {
+                $lines[] = '  ' . str_replace('_', ' ', $formName);
+                $lines[] = '      ' . $description;
+                $lines[] = '      Why: ' . $reason;
+                $lines[] = '';
+            }
+        }
+
+        $lines[] = $rule;
+        $lines[] = 'GENERATED AND ENCLOSED (' . count($generated) . ')';
+        $lines[] = $rule;
+        $lines[] = '';
+
+        if ($generated === []) {
+            $lines[] = '  None. Every form in this package needs completing by hand.';
+        } else {
+            foreach ($generated as $formName => $description) {
+                $lines[] = '  ' . str_replace('_', ' ', $formName)
+                    . ' — ' . $description;
+            }
+        }
+
+        $lines[] = '';
+        $lines[] = 'Filled forms are in Generated_Forms/. Customer uploads are in';
+        $lines[] = 'Supporting_Documents/, and inspection photos in Inspection_Photos/.';
+        $lines[] = '';
+        $lines[] = 'A generated form still needs checking and signing. Signatures, and';
+        $lines[] = 'any box marked as sworn, are never filled automatically.';
+        $lines[] = '';
+
+        return implode("\n", $lines);
     }
 
     /**
@@ -561,7 +720,11 @@ class PDFGeneratorService
     /**
      * Create ZIP package of all documents
      */
-    protected function createZipPackage(UserCase $case, array $documentPaths): string
+    /**
+     * @param array<int, string> $documentPaths generated PDFs on the private disk
+     * @param string|null        $manifest      plain-text MANIFEST.txt for the zip root
+     */
+    protected function createZipPackage(UserCase $case, array $documentPaths, ?string $manifest = null): string
     {
         $zipFilename = "RapidRebuilt_{$case->case_number}_Package.zip";
         $basePath = str_replace('{case_id}', $case->id, $this->storagePath);
@@ -578,6 +741,12 @@ class PDFGeneratorService
 
         if ($zip->open($tempZipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             throw new \Exception('Cannot create ZIP file');
+        }
+
+        // At the zip root rather than inside a folder, so it is the first thing
+        // seen when the package is opened.
+        if ($manifest !== null) {
+            $zip->addFromString('MANIFEST.txt', $manifest);
         }
 
         // Add all generated documents
