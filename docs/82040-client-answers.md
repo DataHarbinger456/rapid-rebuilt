@@ -47,7 +47,7 @@ Anything else: Not at this time
 | 02 | "Varies per inspection" | **Still blocked** — answers *when*, not *who* |
 | 03 | Leave blank | **Settled** — already the behaviour |
 | 04 | Leave GVW blank | **Settled** — already the behaviour |
-| 05 | Inspectors record it on site | **Needs building** — changes current behaviour |
+| 05 | Inspectors record it on site | **Built** — inspector value wins, model year is the fallback |
 | 06 | Rapid Rebuilt fills it | **Still blocked** — no numbers supplied |
 | 07 | Leave blank | **Settled** — already the behaviour |
 | 08 | Leave both blank | **Settled** — already the behaviour |
@@ -89,21 +89,48 @@ Florida dealer, FLHSMV or tax collector — and the licence/badge number field o
 came back empty. Section 8 of the 82040 and the whole of Part B of the 82042 stay
 unmapped, which is 12 fields on the 82042 alone.
 
-Worth confirming "vessels" was a slip for "vehicles" before relying on the rule at all.
+**On "vessels": probably not a slip.** The 29 July call (`.gg/uploads/`, not in `docs/`)
+has Ebe describing the business as covering "not just cars" — boats, trailers, golf carts,
+go-karts, semis, "anything that has a title attached to it". He also uses "vessel" loosely,
+as a synonym for any titled thing ("now that vessel is usable, you can sell it, you can
+drive it"). And **the HSMV forms themselves use the word literally**: both the 82040 and
+the 82050 are titled for a "Motor Vehicle, Mobile Home, Off-Highway Vehicle or Vessel".
 
-### 05 — Needs building, and it changes three forms.
+So Genesis may have meant actual boats, or may have meant "anything titled". The call does
+not settle it, and the two readings scope the Section 8 rule very differently. Still worth
+asking, but as a real question rather than a typo check.
+
+### 05 — Built, 13 Aug.
 
 Today `is_six_digit_odometer` is derived from the model year: true for 1995 onward, and
 the 5-digit box is never ticked automatically on any form. The answer is that inspectors
 should record what the odometer physically shows.
 
-That means an inspector-entered value replacing a derived one, which touches:
+Delivered as `inspections.odometer_digit_count`, a nullable tiny integer holding 5 or 6,
+with the model-year rule kept as a fallback:
 
-- a new field on the inspection, and somewhere for the inspector to enter it
-- `prepareFormData()`, where the model-year rule currently lives
-- three field maps that already consume the key: 82040, 82042 and 82050
+| Inspector recorded | Model year | 6-digit box | 5-digit box |
+|---|---|---|---|
+| 6 | any | **On** | blank |
+| 5 | any | blank | **On** |
+| nothing yet | 1995+ | **On** | blank |
+| nothing yet | pre-1995 | blank | blank |
 
-It also lets the 5-digit box be ticked for the first time, which no form does today.
+The inspector wins wherever the two disagree. The fallback may only ever assert **six**
+digits: a pre-1995 car might have either cluster, so an uninspected old vehicle still
+leaves both boxes blank for a human. That asymmetry is the whole point, and it has its own
+test.
+
+The 5-digit box is now mapped on all three forms for the first time; nothing could tick it
+before. `OdometerDigitCountTest` covers both values on all three, plus the fallback paths.
+
+**One gap.** The data path is complete and tested end to end through the API, but the
+inspector's checklist *view* cannot enter it. That view
+(`resources/views/inspector/inspection/checklist.blade.php`) is pre-existing broken
+scaffolding: it writes to a `checklist_data` column that does not exist, and iterates the
+checklist template one level too shallow, so it renders the literal words "title" and
+"items" as checkboxes. Every one of the 15 checklist items is affected, not just this one.
+Repairing it is a separate piece of work.
 
 ### 06 — Still blocked. "Per dealer information" is not a number.
 

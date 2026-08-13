@@ -10,6 +10,12 @@ class Inspection extends Model
     use HasFactory;
 
     /**
+     * The only two answers the HSMV forms accept for how many digits the
+     * odometer physically displays. Each form has one box per value.
+     */
+    public const ODOMETER_DIGIT_COUNTS = [5, 6];
+
+    /**
      * inspections.result => [staff-facing label, bootstrap colour].
      *
      * Lives here rather than in a view so every screen describes an
@@ -35,6 +41,7 @@ class Inspection extends Model
         'vin_no_alterations',
         'odometer_reading_verified',
         'odometer_functional',
+        'odometer_digit_count',
         'components_verified',
         'all_receipts_match',
         'brakes_functional',
@@ -61,6 +68,7 @@ class Inspection extends Model
         'vin_no_alterations' => 'boolean',
         'odometer_reading_verified' => 'integer',
         'odometer_functional' => 'boolean',
+        'odometer_digit_count' => 'integer',
         'components_verified' => 'array',
         'all_receipts_match' => 'boolean',
         'brakes_functional' => 'boolean',
@@ -251,6 +259,16 @@ class Inspection extends Model
                 'items' => [
                     'odometer_reading_verified' => ['label' => 'Current reading', 'type' => 'number', 'required' => true],
                     'odometer_functional' => ['label' => 'Odometer functional', 'type' => 'boolean', 'required' => true],
+                    // Three HSMV forms ask how many digits the cluster shows,
+                    // and only someone looking at it can answer. Required: the
+                    // inspector is already reading the odometer for the box
+                    // above, and a guess here goes onto a sworn declaration.
+                    'odometer_digit_count' => [
+                        'label' => 'Digits shown on the odometer',
+                        'type' => 'choice',
+                        'options' => self::ODOMETER_DIGIT_COUNTS,
+                        'required' => true,
+                    ],
                 ]
             ],
             'safety_systems' => [

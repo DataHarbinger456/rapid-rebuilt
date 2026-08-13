@@ -384,17 +384,35 @@ class PDFGeneratorService
 
         // "5 or 6-digit odometer" asks how many digits the instrument cluster
         // physically displays, which the title never states and the reading
-        // cannot imply: 62,712 miles looks the same on either. The model year
-        // does answer it, though. Five-digit odometers disappeared from US
-        // production well before the mid 1990s, so anything from 1995 on is
-        // six-digit beyond realistic doubt.
+        // cannot imply: 62,712 miles looks the same on either.
         //
-        // Below that cutoff, and when the year is unknown, both boxes stay
-        // blank for a human who has seen the car. This is a declaration sworn
-        // under penalty of perjury; a blank is a question, a wrong tick is a
-        // false statement.
+        // The inspector answers it now (client, 13 Aug). They are standing in
+        // front of the cluster, so their answer beats any inference we make
+        // from here, and it is the only source that can justify ticking the
+        // 5-digit box at all.
+        //
+        // When no inspection has happened yet, or the inspector left it blank,
+        // the model year is still a good guess: five-digit odometers
+        // disappeared from US production well before the mid 1990s, so
+        // anything from 1995 on is six-digit beyond realistic doubt. That
+        // fallback can only ever assert SIX digits, never five, because a
+        // pre-1995 car might have either.
+        //
+        // Below the cutoff, and when the year is unknown, both boxes stay blank
+        // for a human who has seen the car. This is a declaration sworn under
+        // penalty of perjury; a blank is a question, a wrong tick is a false
+        // statement.
+        $recordedDigitCount = $inspection?->odometer_digit_count;
         $modelYear = $vehicle?->year;
-        $isSixDigitOdometer = $modelYear !== null && (int) $modelYear >= self::SIX_DIGIT_ODOMETER_FROM_YEAR;
+
+        if ($recordedDigitCount !== null) {
+            $isSixDigitOdometer = $recordedDigitCount === 6;
+            $isFiveDigitOdometer = $recordedDigitCount === 5;
+        } else {
+            $isSixDigitOdometer = $modelYear !== null
+                && (int) $modelYear >= self::SIX_DIGIT_ODOMETER_FROM_YEAR;
+            $isFiveDigitOdometer = false;
+        }
 
         return [
             'case' => $case,
@@ -470,13 +488,15 @@ class PDFGeneratorService
             'odometer_date_mm' => $odometerDate?->format('m'),
             'odometer_date_dd' => $odometerDate?->format('d'),
             'odometer_date_yyyy' => $odometerDate?->format('Y'),
+            // The digit-count pair is mutually exclusive and may be neither.
+            // Only an inspector who has seen the cluster can tick the 5-digit
+            // box; the model-year fallback can assert six or stay silent.
+            'is_six_digit_odometer' => $isSixDigitOdometer,
+            'is_five_digit_odometer' => $isFiveDigitOdometer,
             // The three declaration boxes are mutually exclusive. An unknown or
             // missing status ticks none of them: this declaration is sworn
             // under penalty of perjury, so a blank for staff to complete beats
             // a guess.
-            // Never both, and never the 5-digit box: a pre-1995 vehicle leaves
-            // the pair blank rather than asserting the smaller cluster.
-            'is_six_digit_odometer' => $isSixDigitOdometer,
             'is_odometer_actual' => $odometerStatus === 'actual',
             'is_odometer_not_actual' => $odometerStatus === 'not_actual',
             'is_odometer_exceeds_limits' => $odometerStatus === 'exceeds_limits',

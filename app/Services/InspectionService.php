@@ -69,7 +69,7 @@ class InspectionService
     {
         $allowedFields = [
             'vin_verified', 'vin_location_1', 'vin_location_2', 'vin_plates_match', 'vin_no_alterations',
-            'odometer_reading_verified', 'odometer_functional',
+            'odometer_reading_verified', 'odometer_functional', 'odometer_digit_count',
             'brakes_functional', 'lights_functional', 'steering_functional',
             'horn_functional', 'wipers_functional', 'airbags_present', 'seatbelts_functional',
             'all_receipts_match', 'inspector_notes',

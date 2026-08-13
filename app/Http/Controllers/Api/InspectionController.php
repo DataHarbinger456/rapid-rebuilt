@@ -11,6 +11,7 @@ use App\Services\InspectionService;
 use App\Services\PDFGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 
 class InspectionController extends Controller
 {
@@ -113,6 +114,14 @@ class InspectionController extends Controller
             'vin_no_alterations' => 'sometimes|boolean',
             'odometer_reading_verified' => 'sometimes|nullable|integer|min:0',
             'odometer_functional' => 'sometimes|boolean',
+            // Only 5 or 6: those are the two boxes the HSMV forms offer, and
+            // any other value would tick neither while looking answered.
+            'odometer_digit_count' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                Rule::in(Inspection::ODOMETER_DIGIT_COUNTS),
+            ],
             'brakes_functional' => 'sometimes|boolean',
             'lights_functional' => 'sometimes|boolean',
             'steering_functional' => 'sometimes|boolean',

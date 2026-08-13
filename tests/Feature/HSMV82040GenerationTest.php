@@ -493,9 +493,13 @@ class HSMV82040GenerationTest extends TestCase
             $this->assertNotSame('On', $values['6-digit odometer now reads'] ?? 'Off');
         }
 
-        // Never ticked automatically. It is only right for genuinely old
-        // vehicles, where the year alone cannot justify a sworn statement.
-        $this->assertArrayNotHasKey('5-digit odometer now reads', $values);
+        // Never ticked from the model year alone. Only an inspector who has
+        // seen the cluster can assert five digits, because a pre-1995 car
+        // might have either. These cases have no inspection on file.
+        //
+        // The box became mapped on 13 Aug, so it is present and Off rather
+        // than absent; what must not change is that nothing ticks it here.
+        $this->assertNotSame('On', $values['5-digit odometer now reads'] ?? 'Off');
     }
 
     public static function odometerDigitCountYears(): array
@@ -531,7 +535,7 @@ class HSMV82040GenerationTest extends TestCase
         $values = $this->stampedValues($case);
 
         $this->assertNotSame('On', $values['6-digit odometer now reads'] ?? 'Off');
-        $this->assertArrayNotHasKey('5-digit odometer now reads', $values);
+        $this->assertNotSame('On', $values['5-digit odometer now reads'] ?? 'Off');
     }
 
     public function test_section_6_survives_into_the_generated_pdf(): void

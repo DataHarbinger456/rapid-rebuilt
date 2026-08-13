@@ -192,13 +192,16 @@ return [
 
             // How many digits the instrument cluster shows. The title never
             // states it and the reading cannot imply it, but the model year
-            // can: see prepareFormData(). Ticked only from 1995 onwards.
+            // can: see prepareFormData().
             //
-            // '5-digit odometer now reads' is deliberately left unmapped. It is
-            // only correct for genuinely old vehicles, where the year alone is
-            // not enough to justify a sworn statement, so that box is always
-            // left for a human.
+            // Both boxes are mapped now that inspectors record what the cluster
+            // actually shows (client, 13 Aug). Before that only the 6-digit box
+            // was mapped, because the model-year fallback can justify "six" but
+            // never "five": a pre-1995 car might have either. With no
+            // inspection on file that fallback still applies and the 5-digit
+            // box stays blank.
             '6-digit odometer now reads' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
+            '5-digit odometer now reads' => ['checkbox' => 'is_five_digit_odometer', 'on' => 'On'],
 
             // Section 8: MOTOR VEHICLE IDENTIFICATION NUMBER VERIFICATION.
             // The VIN is restated here for the inspector's certification. The
@@ -255,9 +258,12 @@ return [
             'Two-digit day of odometer reading' => 'odometer_date_dd',
             'Four-digit year of odometer reading' => 'odometer_date_yyyy',
 
-            // 'Select if 5 digit odometer reading' is left unmapped for the
-            // same reason as on the 82040: only a human can swear to it.
+            // Both boxes, since inspectors now record what the cluster shows.
+            // With no inspection on file the model-year fallback applies, which
+            // can assert six digits but never five, so the 5-digit box stays
+            // blank rather than guessing. Same rule on all three forms.
             'Select if 6 digit odometer reading' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
+            'Select if 5 digit odometer reading' => ['checkbox' => 'is_five_digit_odometer', 'on' => 'On'],
 
             // WARNING: the 82040 and the 82042 number these three differently.
             //
@@ -325,9 +331,12 @@ return [
 
             // SECTION 2: ODOMETER DISCLOSURE STATEMENT.
             //
-            // '5 DIGIT OR' is left unmapped, as on the other two forms: only a
-            // human can swear to what an old odometer physically displays.
+            // Both boxes, since inspectors now record what the cluster shows.
+            // With no inspection on file the model-year fallback applies, which
+            // can assert six digits but never five, so the 5-digit box stays
+            // blank rather than guessing. Same rule on all three forms.
             '6 DIGIT ODOMETER NOW READS' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
+            '5 DIGIT OR' => ['checkbox' => 'is_five_digit_odometer', 'on' => 'On'],
 
             // The six digit boxes are one row at top=383, in this order by left
             // edge: 437, 456, 474, 497, 515, 533. The gap between the third and

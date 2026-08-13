@@ -392,12 +392,15 @@ Four are settled, one is done, and three are still open despite having a reply.
    inspection, out of state vessels only require this confirmation", says *when* the
    section applies rather than *which* of the five authorities signs it, and the
    licence/badge number came back empty. Blocks Section 8 here and all of Part B on the
-   82042. Also worth confirming "vessels" was meant as "vehicles".
+   82042. On "vessels": the 29 July call shows the business really does handle boats,
+   trailers and golf carts, and the forms themselves say "Motor Vehicle, Mobile Home,
+   Off-Highway Vehicle or Vessel", so this is a real question rather than a typo.
 4. ~~**GVW.**~~ **Settled: leave blank.** Weight continues to come off the title.
-5. ~~**5- vs 6-digit odometer.**~~ **Answered, needs building.** Inspectors record it on
-   site, replacing the current model-year rule. Touches the inspection record, an
-   inspector input, `prepareFormData()`, and the three field maps that consume
-   `is_six_digit_odometer`.
+5. ~~**5- vs 6-digit odometer.**~~ **Answered and built.** Inspectors record it on site in
+   `inspections.odometer_digit_count`; the model-year rule survives as a fallback that can
+   assert six digits but never five. The 5-digit box is mapped on all three forms for the
+   first time. The inspector checklist *view* still cannot enter it, being pre-existing
+   broken scaffolding that writes to a non-existent column.
 6. **Section 7 dealer fields** — **still open.** Rapid Rebuilt does fill this section, but
    both numbers came back as "Per dealer information" rather than digits, and
    `settings.prvip_license_number` and `settings.tax_id` are both empty.
