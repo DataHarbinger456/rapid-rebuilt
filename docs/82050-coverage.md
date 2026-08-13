@@ -20,9 +20,14 @@ Off-Highway Vehicle or Vessel**, one page.
 ⚠ marks a field where the correct source is genuinely ambiguous and should be confirmed
 with the client rather than guessed. Those are collected at the end.
 
-There is no `hsmv_82042`-style entry for this form in `config/hsmv_forms.php`, so **class A
-is empty**. `generateHSMV82050()` exists and reaches `fillForm()`, where it throws the
-"still in development" `RuntimeException` for want of a field map.
+> **Updated 11 Aug 2026.** The 20 clean class B fields are now mapped, so class A is 20
+> and B is down to the three ⚠ fields; the counts below have moved accordingly. Everything
+> still marked ⚠ or D is untouched and still waiting on the client.
+
+There was no entry for this form in `config/hsmv_forms.php` when this audit was written, so
+class A started empty. `generateHSMV82050()` already existed and reached `fillForm()`,
+where it threw the "still in development" `RuntimeException` for want of a field map; with
+the map in place it now produces a filled form.
 
 ---
 
@@ -158,8 +163,8 @@ All four signatures are wet and have no form fields; only the printed names and 
 
 | Class | Fields | Share |
 |---|---|---|
-| **A** — already mapped | 0 | 0% |
-| **B** — mappable now, no new data | 20 (+3 ⚠) | 57.5% |
+| **A** — already mapped | 20 | 50% |
+| **B** — mappable now, no new data | 0 (+3 ⚠) | 7.5% |
 | **C** — in the DB, needs surfacing | 0 | 0% |
 | **D** — data we do not have | 12 (+5 ⚠) | 42.5% |
 

@@ -258,4 +258,129 @@ return [
         ],
     ],
 
+    'hsmv_82050' => [
+
+        // Notice of Sale and/or Bill of Sale for a Motor Vehicle, Mobile Home,
+        // Off-Highway Vehicle or Vessel.
+        'template' => 'docs/forms/82050.pdf',
+
+        // WARNING: the field names in this form are auto-generated and most of
+        // them lie. Acrobat named each box after whatever text sat nearest when
+        // the form was authored, so the Certificate of Title Number box is
+        // called 'Iwe do hereby sell or have sold and delivered...' and the six
+        // odometer digits are called Text1, 'Federal and State law requires...',
+        // undefined_2, 'Failure to', undefined_3 and 'xx'.
+        //
+        // Each of those was decoded by reading the widget rectangles out of the
+        // PDF and sorting by position on the page, and that evidence is recorded
+        // above the mapping it justifies. Coordinates are points from the
+        // top-left of the single page. Never map one of these from its name,
+        // and never copy a name from another form: see docs/82050-coverage.md.
+        //
+        // Section 6 of the 82040 and Part A of the 82042 ask these same
+        // questions, so every key here is one prepareFormData() already derives.
+        'fields' => [
+
+            // SECTION 1: VEHICLE DESCRIPTION.
+            'Year' => 'year',
+            'MakeManufacturer' => 'make',
+            'Body Type' => 'body_type',
+            'Model' => 'model',
+            'Color' => 'color',
+
+            // Certificate of Title Number. Leftmost box (left=46) of the
+            // three-box row at top=206, whose printed labels read
+            // "Certificate of Title Number | Current Title Issue Date |
+            // Vehicle/Vessel Identification Number"; the other two boxes in that
+            // row sit at left=197 and left=329 and are named honestly, which
+            // leaves this one as the title number by elimination.
+            //
+            // Unlike the 82040's box this one is not state-qualified, so it
+            // takes the title number whichever state issued it.
+            'Iwe do hereby sell or have sold and delivered the above described motor vehicle mobile home' => 'title_number',
+
+            'VehicleVessel Identification Number' => 'vin',
+
+            // SECTION 2: ODOMETER DISCLOSURE STATEMENT.
+            //
+            // '5 DIGIT OR' is left unmapped, as on the other two forms: only a
+            // human can swear to what an old odometer physically displays.
+            '6 DIGIT ODOMETER NOW READS' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
+
+            // The six digit boxes are one row at top=383, in this order by left
+            // edge: 437, 456, 474, 497, 515, 533. The gap between the third and
+            // fourth is 11pt where every other gap is 6pt, and that wider gap is
+            // where the form prints the thousands comma. So the row splits
+            // hundred-thousands / ten-thousands / thousands, comma, then
+            // hundreds / tens / ones: most significant first.
+            'Text1' => 'odometer_digit_100000',
+            'Federal and State law requires that you state the mileage in connection with the transfer of ownership' => 'odometer_digit_10000',
+            'undefined_2' => 'odometer_digit_1000',
+            'Failure to' => 'odometer_digit_100',
+            'undefined_3' => 'odometer_digit_10',
+            'xx' => 'odometer_digit_1',
+
+            // The three date boxes are the next row down at top=397, by left
+            // edge: 181, 219, 256. The printed rule above them reads
+            // "DATE READ ____/____/____", so the order is month, day, year.
+            'undefined_4' => 'odometer_date_mm',
+            'undefined_5' => 'odometer_date_dd',
+            'AND WE HEREBY CERTIFY THAT TO THE BEST OF OUR KNOWLEDGE' => 'odometer_date_yyyy',
+
+            // The declarations. This form and the 82042 agree with each other
+            // and disagree with the 82040, which swaps options 2 and 3:
+            //
+            //             82040                      82042 and 82050
+            //   1   reflects actual mileage     reflects actual mileage
+            //   2   is NOT the actual mileage   is IN EXCESS of its limits
+            //   3   is IN EXCESS of its limits  is NOT the actual mileage
+            //
+            // Every key below is matched to the SENTENCE in its field name,
+            // never to the leading digit. All three forms also word that same
+            // sentence differently, so these names cannot be copied from the
+            // other maps even where the meaning is identical.
+            '1 REFLECTS THE ACTUAL MILEAGE' => ['checkbox' => 'is_odometer_actual', 'on' => 'On'],
+            '2 IS IN EXCESS OF ITS MECHANICAL LIMITS' => ['checkbox' => 'is_odometer_exceeds_limits', 'on' => 'On'],
+            '3 IS NOT THE ACTUAL MILEAGE' => ['checkbox' => 'is_odometer_not_actual', 'on' => 'On'],
+
+            // TODO: eight fields are blocked on who signs this form.
+            //
+            // The 82050 is completed by the SELLER. For a rebuilt title case
+            // our customer is the purchaser: they bought a salvage vehicle,
+            // which is what config/documents.php already calls the bill of sale
+            // we collect from them. But if the customer already holds that
+            // document, generating a second one that only the original seller
+            // can sign is of little use, which suggests the packet's copy may
+            // be for selling the rebuilt vehicle afterwards, with the customer
+            // as the seller instead.
+            //
+            // The two readings are mirror images: under one, these eight take
+            // owner_name and the owner address keys; under the other, most of
+            // them are a party we never store. Mapping either way now would put
+            // the customer's name on the wrong side of a document signed under
+            // penalty of perjury, so all eight stay out of the map until the
+            // client answers. This is ambiguity 1 in docs/82050-coverage.md.
+            //
+            // Names are verbatim from dump_data_fields_utf8. The two header
+            // buttons contain a DOUBLE SPACE, in 'sections 1  3' and in
+            // 'when applicable  3', which has to survive copy and paste or the
+            // mapping will silently miss and the box will print blank.
+            //
+            //   'Notice of Sale Seller must complete sections 1  3 The purchasers signature in section 3 is optional'
+            //   'Bill of Sale Seller and purchaser must complete sections 1 2 when applicable  3'
+            //   'Print Names of Purchasers'
+            //   'Address City State Zip Code'
+            //   'Sellers Printed Name'
+            //   'Date'
+            //   'Sellers Address City State Zip Code'
+            //   'Purchasers Printed Name'
+            //
+            // Three of the eight need nothing else once the answer lands:
+            // Print Names of Purchasers and Purchasers Printed Name are
+            // owner_name, and Address City State Zip Code is one box for four
+            // keys, which the array form already handles:
+            // ['owner_address', 'owner_city', 'owner_state', 'owner_zip'].
+        ],
+    ],
+
 ];

@@ -605,8 +605,23 @@ class HSMV82040GenerationTest extends TestCase
         return $this->sortedDigits($matches[1]);
     }
 
+    /**
+     * A form with no field map must fail loudly rather than hand back a
+     * document that looks official and is entirely blank.
+     *
+     * This has to name a form that is still unmapped, so it moves as the
+     * mapping work progresses: it was the 82050 until that form was mapped.
+     * The guard turns the next such move into an explicit instruction rather
+     * than a puzzling "expected exception not thrown".
+     */
     public function test_unmapped_form_throws_instead_of_producing_a_blank_pdf(): void
     {
+        $this->assertNull(
+            config('hsmv_forms.hsmv_82053'),
+            'The 82053 now has a field map, so it no longer throws. Point this '
+            . 'test at a form that is still unmapped (84490 or 84491).'
+        );
+
         Storage::fake('private');
 
         $customer = User::factory()->create();
@@ -614,6 +629,6 @@ class HSMV82040GenerationTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
 
-        app(PDFGeneratorService::class)->generateHSMV82050($case);
+        app(PDFGeneratorService::class)->generateHSMV82053($case);
     }
 }
