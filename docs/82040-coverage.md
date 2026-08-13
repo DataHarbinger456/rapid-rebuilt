@@ -372,21 +372,35 @@ type).
   `vehicles.vehicle_type`, collected at intake, with `title_brand` left to the BRAND boxes
   it actually describes.
 
-## Ambiguous — confirm before mapping
+## Ambiguous — answered 13 Aug 2026
 
-All eight are written up for the client in `docs/82040-client-questions.html`, a
-self-contained form he fills in and returns, with `docs/82040-client-questions-email.md`
-as the covering email. Record answers here as they come back.
+All eight went to the client in `docs/82040-client-questions-gdoc.html`. Genesis answered
+on 13 Aug; the answers and their consequences are recorded in
+`docs/82040-client-answers.md`. **Ebe has not answered**, so items 1, 3 and 6 below rest on
+one person's reading.
 
-1. **Mailing vs residential address.** We store one address and the form has two blocks.
-   Do they always match, or does the customer need a second input?
-2. **Request to print Certificate of Title** — No / Yes in office / Yes mailed. A standing
-   business policy, not per-case data.
-3. **Certifying inspector type** in Section 8 — notary, dealer, law enforcement, FLHSMV or
-   tax collector. Determines which of five sub-blocks gets filled.
-4. **GVW.** Distinct from Weight on this form, and we persist neither GVWR nor GVW.
-5. **5- vs 6-digit odometer.** Not recorded anywhere.
-6. **Sections 7 dealer fields.** Whether Rapid Rebuilt ever fills these, or they belong to
-   the selling dealer.
-7. **"Other"** (Section 2). Probably the second Van Use box; unconfirmed from the dump alone.
-8. **"Full Name of Applicant" / "_2"** — which of Sections 10 and 11 they belong to.
+Four are settled, one is done, and three are still open despite having a reply.
+
+1. ~~**Mailing vs residential address.**~~ **Answered and mapped.** The driver licence
+   address goes in both blocks. Applying it exposed a bug: we had been filling the street
+   from the residential row and the city, state and zip from the mailing row, so neither
+   row was a complete address. Both rows are now filled from the same keys. Open follow-up:
+   intake asks for "Address", not the licence address we now print.
+2. ~~**Request to print Certificate of Title.**~~ **Settled: leave blank** for the customer
+   to tick on the day, which is what the code already does.
+3. **Certifying inspector type** in Section 8 — **still open.** The reply, "it varies per
+   inspection, out of state vessels only require this confirmation", says *when* the
+   section applies rather than *which* of the five authorities signs it, and the
+   licence/badge number came back empty. Blocks Section 8 here and all of Part B on the
+   82042. Also worth confirming "vessels" was meant as "vehicles".
+4. ~~**GVW.**~~ **Settled: leave blank.** Weight continues to come off the title.
+5. ~~**5- vs 6-digit odometer.**~~ **Answered, needs building.** Inspectors record it on
+   site, replacing the current model-year rule. Touches the inspection record, an
+   inspector input, `prepareFormData()`, and the three field maps that consume
+   `is_six_digit_odometer`.
+6. **Section 7 dealer fields** — **still open.** Rapid Rebuilt does fill this section, but
+   both numbers came back as "Per dealer information" rather than digits, and
+   `settings.prvip_license_number` and `settings.tax_id` are both empty.
+7. ~~**"Other"** (Section 2).~~ **Settled: leave blank.** The client does not know what it
+   is for either.
+8. ~~**"Full Name of Applicant" / "_2".**~~ **Settled: leave both blank.**

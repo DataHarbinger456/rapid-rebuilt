@@ -105,12 +105,34 @@ return [
                 'owner_last_name',
             ],
 
-            // Note the plain apostrophe here versus the curly one above.
-            // The form is inconsistent; both spellings are verbatim from the
-            // PDF. There is also an 'Owners Mailing Address' box, unmapped
-            // until we decide whether it should mirror this or be its own
-            // input.
+            // THE ADDRESS BLOCKS. Client decision, 13 Aug: the address printed
+            // here is the one on the owner's driver licence, and it goes in
+            // both blocks.
+            //
+            // That answer also fixed a real bug. The form has two address rows,
+            // and measuring the widget positions shows which box belongs to
+            // which:
+            //
+            //   row top=232  Owners Mailing Address | Owner's City | State | Zip
+            //   row top=255  Owner's Residential Street Address | Owner’s Residential City | State | Zip
+            //
+            // Before this change we filled the street from the RESIDENTIAL row
+            // and the city, state and zip from the MAILING row, so a printed
+            // form carried a street with no city on one line and a city with no
+            // street on the next. Neither row was a complete address.
+            //
+            // Both rows are now filled from the same keys, which is what the
+            // client asked for and leaves each row complete on its own.
+            //
+            // Apostrophes are verbatim and inconsistent: 'Owners Mailing
+            // Address' has none, "Owner's City" is plain ASCII, and the three
+            // Residential City/State/Zip boxes are curly (U+2019). Copy them
+            // from the dump, never retype.
+            'Owners Mailing Address' => 'owner_address',
             'Owner\'s Residential Street Address' => 'owner_address',
+            'Owner’s Residential City' => 'owner_city',
+            'Owner’s Residential State' => 'owner_state',
+            'Owner’s Residential Zip Code' => 'owner_zip',
 
             // Application Type, top of page 1. Florida title = Original,
             // out-of-state title = Transfer (client, 5 Aug). They are two

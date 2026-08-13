@@ -158,11 +158,11 @@ class HSMV82040FieldMapTest extends TestCase
         $values = $this->fieldValuesInFilledPdf($this->fullyPopulatedCase());
 
         $mustStayBlank = [
-            // Awaiting the client's answer on mailing vs residential address.
-            'Owners Mailing Address',
-            'Owner’s Residential City',
-            'Owner’s Residential State',
-            'Owner’s Residential Zip Code',
+            // The owner's own mailing and residential boxes used to be listed
+            // here, awaiting the client's answer. They are filled now: the
+            // printed address is the one on the driver licence and it goes in
+            // both blocks (client, 13 Aug). See the address-row test below.
+            //
             // Scenarios this business does not handle at all.
             'Mail To’s City',
             'Mail To’s Email (Voluntary)',
@@ -179,6 +179,60 @@ class HSMV82040FieldMapTest extends TestCase
                 "[{$field}] is not mapped and must print blank, but the PDF carries a value."
             );
         }
+    }
+
+    /**
+     * Both address rows must carry the same complete address.
+     *
+     * The form has two of them, and measuring the widget positions shows that
+     * 'Owner's City/State/Zip' sit on the MAILING row at top=232 while the
+     * street box mapped beside them, 'Owner's Residential Street Address',
+     * sits on the RESIDENTIAL row at top=255.
+     *
+     * Until 13 Aug we filled the street from one row and the city, state and
+     * zip from the other, so a printed form showed a street with no city on one
+     * line and a city with no street on the next, and neither row was a
+     * complete address. The client's answer is that the driver licence address
+     * goes in both blocks, so both rows are now filled from the same keys.
+     */
+    public function test_both_address_rows_carry_the_same_complete_address(): void
+    {
+        $values = $this->fieldValuesInFilledPdf($this->fullyPopulatedCase());
+
+        $mailingRow = [
+            $values['Owners Mailing Address'] ?? '',
+            $values["Owner's City"] ?? '',
+            $values["Owner's State"] ?? '',
+            $values["Owner's Zip Code"] ?? '',
+        ];
+
+        $residentialRow = [
+            $values["Owner's Residential Street Address"] ?? '',
+            $values['Owner’s Residential City'] ?? '',
+            $values['Owner’s Residential State'] ?? '',
+            $values['Owner’s Residential Zip Code'] ?? '',
+        ];
+
+        $expected = ['1841 NW 21st Terrace', 'Miami', 'FL', '33142'];
+
+        $this->assertSame(
+            $expected,
+            $mailingRow,
+            'The mailing row is not a complete address on its own.'
+        );
+
+        $this->assertSame(
+            $expected,
+            $residentialRow,
+            'The residential row is not a complete address on its own.'
+        );
+
+        $this->assertSame(
+            $mailingRow,
+            $residentialRow,
+            'The two address rows disagree. The client asked for the driver '
+            . 'licence address in both blocks.'
+        );
     }
 
     /**
