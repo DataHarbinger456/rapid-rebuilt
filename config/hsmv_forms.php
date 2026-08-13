@@ -203,6 +203,26 @@ return [
             '6-digit odometer now reads' => ['checkbox' => 'is_six_digit_odometer', 'on' => 'On'],
             '5-digit odometer now reads' => ['checkbox' => 'is_five_digit_odometer', 'on' => 'On'],
 
+            // Section 7: DEALER SALES TAX REPORT, page 2. Filled only when the
+            // case belongs to a dealer; a private customer leaves the whole
+            // block blank, which is what the heading's "(If applicable)" asks
+            // for. Both keys resolve to null for a non-dealer, and mapFields()
+            // omits an empty text value, so the boxes are never written.
+            //
+            // These are the DEALER's own numbers, off their user record. They
+            // are not Setting::get('prvip_license_number'), which is one
+            // company-wide value for a box that differs per dealer.
+            //
+            // 'Date of Sale' and 'Amount of Tax' sit in the same row and stay
+            // unmapped: neither is stored, and both are per-sale facts rather
+            // than dealer facts.
+            //
+            // Not to be confused with 'Sales Tax Registration Number' further
+            // down page 2, which belongs to the rental-use exemption claim and
+            // is a different declaration entirely.
+            'Florida Sales Tax Registration Number' => 'dealer_sales_tax_number',
+            'Dealer License Number' => 'dealer_license',
+
             // Section 8: MOTOR VEHICLE IDENTIFICATION NUMBER VERIFICATION.
             // The VIN is restated here for the inspector's certification. The
             // rest of this section — inspector name, date and signature — waits

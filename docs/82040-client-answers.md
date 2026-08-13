@@ -48,7 +48,7 @@ Anything else: Not at this time
 | 03 | Leave blank | **Settled** — already the behaviour |
 | 04 | Leave GVW blank | **Settled** — already the behaviour |
 | 05 | Inspectors record it on site | **Built** — inspector value wins, model year is the fallback |
-| 06 | Rapid Rebuilt fills it | **Still blocked** — no numbers supplied |
+| 06 | Rapid Rebuilt fills it | **Built** — "per dealer information" meant per-dealer data |
 | 07 | Leave blank | **Settled** — already the behaviour |
 | 08 | Leave both blank | **Settled** — already the behaviour |
 
@@ -132,14 +132,32 @@ checklist template one level too shallow, so it renders the literal words "title
 "items" as checkboxes. Every one of the 15 checklist items is affected, not just this one.
 Repairing it is a separate piece of work.
 
-### 06 — Still blocked. "Per dealer information" is not a number.
+### 06 — Built, 13 Aug. The answer was better than it first looked.
 
-The answer is that Rapid Rebuilt completes the dealer section, but both number fields came
-back as "Per dealer information" rather than digits. `settings.prvip_license_number` and
-`settings.tax_id` both exist and are **empty**, so there is nothing to fall back on.
+Read as a request for two digits, "Per dealer information" looks like a non-answer. Read
+literally it is the answer: **the numbers come per dealer**, not per company. Section 7 is
+headed "DEALER SALES TAX REPORT … (If applicable)" and belongs to whichever dealer is
+filing, so two dealers using this portal have two different numbers and no single value
+could ever have been right.
 
-Section 7 needs the actual sales tax registration number and dealer licence number before
-any of it can be filled.
+That also explains why nothing printed before: the block was wired to
+`Setting::get('prvip_license_number')`, one company-wide value, which is empty.
+
+Delivered as:
+
+- `users.sales_tax_registration_number`, nullable, collected at dealer signup and optional
+  there — a dealer may not have it to hand, and it is not needed until a form is generated
+- Section 7 filled from the case's own owner when that owner is a dealer
+- `Dealer License Number` joining the two columns we already had, printed `VI-1043277`
+- a private customer's form leaving the whole block blank
+
+`Date of Sale` and `Amount of Tax` stay blank on purpose: both are per-sale facts we do not
+store, and an invented number on a sales tax report is worse than an empty box.
+
+**One thing to confirm.** The licence prints as `VI-1043277`, the class code and number
+joined with a hyphen. That is the usual way Florida prints them, but it is a display
+convention rather than something the form states, and it is a one-line change if the
+dealers write theirs differently.
 
 ### 03, 04, 07, 08 — Settled, no code change.
 
@@ -157,7 +175,7 @@ guess that they might change. They are now decisions rather than assumptions:
 
 1. **Ebe's answers.** Nothing here has been cross-checked.
 2. **Who signs Section 8** — the actual question from FIELD 02, still unanswered.
-3. **The dealer numbers** — the actual digits for FIELD 06.
-4. **"Vessels" or "vehicles"** in the FIELD 02 rule.
+3. **"Vessels" or "vehicles"** in the FIELD 02 rule.
+4. **Whether `VI-1043277` is the right format** for a printed dealer licence.
 5. **Whether intake should ask for the driver licence address**, now that we print it as
    though it is one.

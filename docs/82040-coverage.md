@@ -401,9 +401,11 @@ Four are settled, one is done, and three are still open despite having a reply.
    assert six digits but never five. The 5-digit box is mapped on all three forms for the
    first time. The inspector checklist *view* still cannot enter it, being pre-existing
    broken scaffolding that writes to a non-existent column.
-6. **Section 7 dealer fields** — **still open.** Rapid Rebuilt does fill this section, but
-   both numbers came back as "Per dealer information" rather than digits, and
-   `settings.prvip_license_number` and `settings.tax_id` are both empty.
+6. ~~**Section 7 dealer fields.**~~ **Answered and built.** "Per dealer information" was
+   not a missing answer, it was the answer: the numbers vary per dealer. Section 7 now
+   reads the licence and sales tax number off the case's own dealer user record, and a
+   private customer's form leaves the whole block blank. `sales_tax_registration_number`
+   was added to `users` and is collected at dealer signup.
 7. ~~**"Other"** (Section 2).~~ **Settled: leave blank.** The client does not know what it
    is for either.
 8. ~~**"Full Name of Applicant" / "_2".**~~ **Settled: leave both blank.**

@@ -48,6 +48,11 @@ class RegisterController extends Controller
                 'dealer_name' => 'required|string|max:255',
                 'license_type' => 'required|in:VI,VW,VA,SD,VF',
                 'license_number' => 'required|numeric',
+                // Section 7 of the HSMV 82040 asks for this, but a dealer may
+                // not have it to hand at signup and it is not needed until a
+                // form is generated, so it is optional here rather than a
+                // barrier to registering.
+                'sales_tax_registration_number' => 'nullable|string|max:255',
                 'region' => 'required|numeric',
                 'zones' => 'required|string|max:255',
             ]);
@@ -102,6 +107,7 @@ class RegisterController extends Controller
                 'dealer_name' => $request->dealer_name,
                 'license_type' => $request->license_type,
                 'license_number' => $request->license_number,
+                'sales_tax_registration_number' => $request->sales_tax_registration_number,
                 'region' => $request->region,
                 'zones' => $request->zones,
             ]);

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Models\UserCase;
 use App\Models\Inspection;
 use App\Models\UploadedFile;
@@ -503,6 +504,26 @@ class PDFGeneratorService
     }
 
     /**
+     * A Florida dealer licence as it is printed: the class code and the number,
+     * joined, e.g. VI-1043277.
+     *
+     * Either part missing gives whichever one we hold rather than a half-formed
+     * string with a stray hyphen. Nothing at all gives null, so the box stays
+     * blank instead of printing a bare separator.
+     */
+    protected function dealerLicense(?User $dealer): ?string
+    {
+        $type = trim((string) ($dealer?->license_type ?? ''));
+        $number = trim((string) ($dealer?->license_number ?? ''));
+
+        if ($type !== '' && $number !== '') {
+            return "{$type}-{$number}";
+        }
+
+        return $type !== '' ? $type : ($number !== '' ? $number : null);
+    }
+
+    /**
      * Prepare common form data
      */
     protected function prepareFormData(UserCase $case): array
@@ -510,6 +531,20 @@ class PDFGeneratorService
         $vehicle = $case->vehicle;
         $owner = $case->user;
         $inspection = $case->inspection;
+
+        // Section 7 of the 82040 is the DEALER sales tax report, and it belongs
+        // to the dealer filing this application rather than to Rapid Rebuilt.
+        // Two dealers submitting through this portal have two different licence
+        // and sales tax numbers, so these come off the case's own user record.
+        //
+        // This block used to read Setting::get('prvip_license_number'), a
+        // single company-wide value that is also empty, so the box printed
+        // nothing for anyone.
+        //
+        // A private customer has no Section 7 at all: every key below stays
+        // null and the whole block prints blank, which is what "(If applicable)"
+        // in the section heading asks for.
+        $dealer = $owner?->isDealer() ? $owner : null;
 
         // Application Type, top of the 82040. Client confirmed 5 Aug: a
         // Florida title is an Original application, an out-of-state title is a
@@ -677,6 +712,14 @@ class PDFGeneratorService
             'is_application_transfer' => $isTransfer,
             // Owner info
             'owner_name' => $owner?->full_name,
+            // Section 7, dealer block. Null for every non-dealer case.
+            'dealer_sales_tax_number' => $dealer?->sales_tax_registration_number,
+            // The form has one box for what we store as two columns. A Florida
+            // dealer licence is a letter code and a number, printed together as
+            // VI-1043277, so they are joined here rather than with mapFields()'
+            // space join. Both parts are needed: the number alone does not name
+            // the licence class.
+            'dealer_license' => $this->dealerLicense($dealer),
             'owner_first_name' => $owner?->first_name,
             'owner_last_name' => $owner?->last_name,
             'owner_address' => $owner?->address_1,

@@ -35,6 +35,7 @@ class User extends Authenticatable
         'dealer_name',
         'license_type',
         'license_number',
+        'sales_tax_registration_number',
         'region',
         'zones',
         'verification_token',

@@ -81,8 +81,17 @@
 										<input type="number" class="form-control" name="license_number" placeholder="License Number" value="{{ old('license_number') }}">
 									</div>
 								</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label>Florida Sales Tax Registration Number <span class="text-muted">(optional)</span></label>
+											<input type="text" class="form-control" name="sales_tax_registration_number" placeholder="Florida Sales Tax Registration Number" value="{{ old('sales_tax_registration_number') }}">
+											<small class="form-text text-muted">Printed in Section 7 of the title application. You can add this later.</small>
+										</div>
+									</div>
+								</div>
 							</div>
-						</div>
 
 						<!-- Common fields -->
 						<div class="row">
