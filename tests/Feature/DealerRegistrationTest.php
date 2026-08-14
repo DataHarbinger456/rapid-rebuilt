@@ -40,7 +40,7 @@ class DealerRegistrationTest extends TestCase
             'county' => 'Miami-Dade',
             'dealer_name' => 'Rapid Rebuilt Motors',
             'license_type' => 'VI',
-            'license_number' => '1043277',
+            'license_number' => '1142356-1',
             'region' => '5',
             'zones' => 'A',
             'sales_tax_registration_number' => '78-8012345678-4',
@@ -59,7 +59,43 @@ class DealerRegistrationTest extends TestCase
         $this->assertSame('dealer', $dealer->user_type);
         $this->assertSame('78-8012345678-4', $dealer->sales_tax_registration_number);
         $this->assertSame('VI', $dealer->license_type);
-        $this->assertSame('1043277', $dealer->license_number);
+        $this->assertSame('1142356-1', $dealer->license_number);
+    }
+
+    /**
+     * A Florida dealer licence number carries a suffix, as in 1142356-1. The
+     * rule was 'numeric', which rejected every real one, so no dealer could
+     * register at all.
+     */
+    public function test_a_real_licence_number_with_a_suffix_is_accepted(): void
+    {
+        foreach (['1142356-1', '1101136-1', '1129986-1'] as $licence) {
+            $payload = $this->dealerPayload(['license_number' => $licence]);
+
+            $this->post('/register', $payload)->assertRedirect();
+
+            $this->assertSame(
+                $licence,
+                User::where('email', $payload['email'])->value('license_number'),
+                "[{$licence}] is a real Florida dealer licence number and must be accepted."
+            );
+        }
+    }
+
+    /**
+     * Still a licence number, not free text.
+     */
+    public function test_a_licence_number_that_is_not_one_is_rejected(): void
+    {
+        foreach (['not a licence', 'VI-1142356-1', '<script>x</script>'] as $bad) {
+            $payload = $this->dealerPayload(['license_number' => $bad]);
+
+            $this->post('/register', $payload)
+                ->assertRedirect()
+                ->assertSessionHasErrors('license_number');
+
+            $this->assertNull(User::where('email', $payload['email'])->first());
+        }
     }
 
     /**

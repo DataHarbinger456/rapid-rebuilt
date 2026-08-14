@@ -504,23 +504,22 @@ class PDFGeneratorService
     }
 
     /**
-     * A Florida dealer licence as it is printed: the class code and the number,
-     * joined, e.g. VI-1043277.
+     * The dealer licence number as the state writes it, e.g. 1142356-1.
      *
-     * Either part missing gives whichever one we hold rather than a half-formed
-     * string with a stray hyphen. Nothing at all gives null, so the box stays
-     * blank instead of printing a bare separator.
+     * The licence class and the number are two separate things on a dealer's
+     * own record — LIC TYPE "VI", LIC NUM "1142356-1" — and the number already
+     * carries a hyphenated suffix of its own. An earlier version joined them
+     * into VI-1142356-1, which is not a licence number anyone would recognise.
+     *
+     * Section 7's box asks for the number alone, so that is what it gets. The
+     * class code has no box of its own on this form; Section 8's dealer block
+     * does have one, and stays unmapped pending the certifier question.
      */
     protected function dealerLicense(?User $dealer): ?string
     {
-        $type = trim((string) ($dealer?->license_type ?? ''));
         $number = trim((string) ($dealer?->license_number ?? ''));
 
-        if ($type !== '' && $number !== '') {
-            return "{$type}-{$number}";
-        }
-
-        return $type !== '' ? $type : ($number !== '' ? $number : null);
+        return $number !== '' ? $number : null;
     }
 
     /**
@@ -714,11 +713,8 @@ class PDFGeneratorService
             'owner_name' => $owner?->full_name,
             // Section 7, dealer block. Null for every non-dealer case.
             'dealer_sales_tax_number' => $dealer?->sales_tax_registration_number,
-            // The form has one box for what we store as two columns. A Florida
-            // dealer licence is a letter code and a number, printed together as
-            // VI-1043277, so they are joined here rather than with mapFields()'
-            // space join. Both parts are needed: the number alone does not name
-            // the licence class.
+            // The licence NUMBER only, e.g. 1142356-1. The class code is a
+            // separate field on the dealer's record and has no box in Section 7.
             'dealer_license' => $this->dealerLicense($dealer),
             'owner_first_name' => $owner?->first_name,
             'owner_last_name' => $owner?->last_name,

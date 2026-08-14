@@ -78,7 +78,8 @@
 								<div class="col-md-8">
 									<div class="form-group">
 										<label>License Number</label>
-										<input type="number" class="form-control" name="license_number" placeholder="License Number" value="{{ old('license_number') }}">
+										{{-- Not type=number: a real licence carries a suffix, as in 1142356-1, which a number input will not accept. --}}
+										<input type="text" class="form-control" name="license_number" placeholder="e.g. 1142356-1" value="{{ old('license_number') }}">
 									</div>
 								</div>
 								</div>

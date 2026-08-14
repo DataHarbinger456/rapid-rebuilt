@@ -82,7 +82,8 @@ class HSMV82040DealerBlockTest extends TestCase
             'user_type' => 'dealer',
             'dealer_name' => 'Rapid Rebuilt Motors',
             'license_type' => 'VI',
-            'license_number' => '1043277',
+            // A real Florida dealer licence number, suffix and all.
+            'license_number' => '1142356-1',
             'sales_tax_registration_number' => '78-8012345678-4',
             'address_1' => '1841 NW 21st Terrace',
             'city' => 'Miami',
@@ -111,8 +112,21 @@ class HSMV82040DealerBlockTest extends TestCase
 
         $this->assertSame('78-8012345678-4', $values['Florida Sales Tax Registration Number']);
 
-        // One box for two columns: the licence class and its number.
-        $this->assertSame('VI-1043277', $values['Dealer License Number']);
+        // The number exactly as the state writes it, suffix included and no
+        // licence class glued on the front.
+        $this->assertSame('1142356-1', $values['Dealer License Number']);
+    }
+
+    /**
+     * The licence class is a separate field on the dealer's record, and
+     * Section 7 has no box for it. Printing VI-1142356-1 would be a licence
+     * number nobody would recognise.
+     */
+    public function test_the_licence_class_is_not_glued_onto_the_number(): void
+    {
+        $values = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer()));
+
+        $this->assertStringNotContainsString('VI', $values['Dealer License Number']);
     }
 
     /**
@@ -161,31 +175,23 @@ class HSMV82040DealerBlockTest extends TestCase
         );
 
         $this->assertSame('', $values['Florida Sales Tax Registration Number'] ?? '');
-        $this->assertSame('VI-1043277', $values['Dealer License Number']);
+        $this->assertSame('1142356-1', $values['Dealer License Number']);
     }
 
     /**
-     * A half-populated licence prints what we hold, never a stray separator.
+     * A dealer with no licence number on file leaves the box blank rather than
+     * printing a separator or a partial value.
      */
-    public function test_a_partial_licence_never_prints_a_bare_hyphen(): void
+    public function test_a_dealer_without_a_licence_number_leaves_that_box_blank(): void
     {
-        $numberOnly = $this->fieldValuesInFilledPdf(
-            $this->caseFor($this->dealer(['license_type' => null]))
-        );
-
-        $this->assertSame('1043277', $numberOnly['Dealer License Number']);
-
-        $typeOnly = $this->fieldValuesInFilledPdf(
+        $values = $this->fieldValuesInFilledPdf(
             $this->caseFor($this->dealer(['license_number' => null]))
         );
 
-        $this->assertSame('VI', $typeOnly['Dealer License Number']);
+        $this->assertSame('', $values['Dealer License Number'] ?? '');
 
-        $neither = $this->fieldValuesInFilledPdf(
-            $this->caseFor($this->dealer(['license_type' => null, 'license_number' => null]))
-        );
-
-        $this->assertSame('', $neither['Dealer License Number'] ?? '');
+        // The neighbouring box is unaffected.
+        $this->assertSame('78-8012345678-4', $values['Florida Sales Tax Registration Number']);
     }
 
     /**
@@ -216,12 +222,12 @@ class HSMV82040DealerBlockTest extends TestCase
 
         $second = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer([
             'license_type' => 'VW',
-            'license_number' => '9900123',
+            'license_number' => '1101136-1',
             'sales_tax_registration_number' => '39-0099887766-1',
         ])));
 
-        $this->assertSame('VI-1043277', $first['Dealer License Number']);
-        $this->assertSame('VW-9900123', $second['Dealer License Number']);
+        $this->assertSame('1142356-1', $first['Dealer License Number']);
+        $this->assertSame('1101136-1', $second['Dealer License Number']);
         $this->assertNotSame(
             $first['Florida Sales Tax Registration Number'],
             $second['Florida Sales Tax Registration Number']

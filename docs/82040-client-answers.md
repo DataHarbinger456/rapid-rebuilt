@@ -154,10 +154,16 @@ Delivered as:
 `Date of Sale` and `Amount of Tax` stay blank on purpose: both are per-sale facts we do not
 store, and an invented number on a sales tax report is worse than an empty box.
 
-**One thing to confirm.** The licence prints as `VI-1043277`, the class code and number
-joined with a hyphen. That is the usual way Florida prints them, but it is a display
-convention rather than something the form states, and it is a one-line change if the
-dealers write theirs differently.
+**Format confirmed 13 Aug, and it found a second bug.** The client's dealer list keeps LIC
+TYPE and LIC NUM as separate columns, with numbers like `1142356-1`, `1101136-1`,
+`1129986-1`. So Section 7 prints the number alone; an earlier version joined the class code
+on the front and would have produced `VI-1142356-1`, which is not a licence number anyone
+would recognise.
+
+The real find is that the number is not numeric. Registration validated `license_number`
+as `numeric` and the signup input was `type="number"`, so **every real Florida dealer
+licence was rejected and no dealer could register at all**. Both are fixed, with the rule
+now accepting digits and hyphens.
 
 ### 03, 04, 07, 08 — Settled, no code change.
 

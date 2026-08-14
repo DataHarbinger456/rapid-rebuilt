@@ -47,7 +47,10 @@ class RegisterController extends Controller
                 'county' => 'required|string|max:255',
                 'dealer_name' => 'required|string|max:255',
                 'license_type' => 'required|in:VI,VW,VA,SD,VF',
-                'license_number' => 'required|numeric',
+                // A Florida dealer licence number is not a number. It carries a
+                // suffix, as in 1142356-1, so the previous 'numeric' rule
+                // rejected every real one and no dealer could register at all.
+                'license_number' => ['required', 'string', 'max:255', 'regex:/^[0-9][0-9\-]*$/'],
                 // Section 7 of the HSMV 82040 asks for this, but a dealer may
                 // not have it to hand at signup and it is not needed until a
                 // form is generated, so it is optional here rather than a
