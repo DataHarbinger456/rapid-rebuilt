@@ -33,7 +33,7 @@ The 82042 was further behind than the other unmapped forms. `PDFGeneratorService
 `generateHSMV84491()`, all of which reach `fillForm()` and throw the "still in
 development" `RuntimeException` for want of a field map. There was no
 `generateHSMV82042()` at all; it has since been added. `generateFullPackage()` still has
-no line for it, pending ambiguity 1 below.
+no line for it. Ambiguity 1 is resolved: the form is gated on out-of-state titles.
 
 ---
 
@@ -201,13 +201,20 @@ in `Seller's Name`** — but the `Yes` export values are a fresh way to fail sil
 Two of these are new. The rest are the Part B certifier block, which is one question, and
 it is already question 2 in `docs/82040-client-questions-gdoc.html`.
 
-1. **When is this form required at all?** ⚠ The instructions say it is for used vehicles
-   *not currently titled in Florida*, with a net weight of 2,000 lb or more, and that it
-   should **not** be completed for a new vehicle, a mobile home, a light trailer, a travel
-   trailer, or an off-highway vehicle. That maps closely to the 82040's Transfer case
-   (`title_state` is not FL). If that is right, the app should offer this form only for
-   out-of-state titles, and generating it for a Florida salvage title would be wrong.
-   Worth confirming before it appears in the packet.
+1. ~~**When is this form required at all?**~~ **Resolved 16 Aug: out-of-state titles only.**
+   The instructions say it is for used vehicles *not currently titled in Florida*, and the
+   client's 13 Aug answer says the same of the certification it carries: "out of state
+   vessels only require this confirmation". `generateFullPackage()` now gates it on the
+   same `title_state` test that drives the 82040's Transfer checkbox, so the two answers
+   cannot drift apart, and a skipped form is named in the manifest under NOT REQUIRED FOR
+   THIS CASE rather than dropped silently.
+
+   Two narrower conditions in the instructions are **not** implemented: the 2,000 lb net
+   weight floor, and the exclusions for new vehicles, mobile homes, light and travel
+   trailers, and off-highway vehicles. `vehicles.weight` is free text off the title and
+   often blank, and nothing records those body classes, so both would be guesses. A Florida
+   dealer handling only rebuilt cars is unaffected; a business doing trailers and golf
+   carts, which this one does, would eventually want them.
 2. **Date - Part A.** ⚠ The date the owner physically inspected their own vehicle. We have
    no such date and it is not our inspection date. Likely left blank for the owner to
    write on the day, but confirm.

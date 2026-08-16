@@ -151,11 +151,9 @@ class PDFGeneratorService
      * fillForm() only ever produced the "still in development" error. They are
      * reported in the manifest instead: see COMPOSED_DOCUMENTS.
      *
-     * The 82042 is included in every packet. Its own instructions say it is for
-     * vehicles not currently titled in Florida, so it may prove to be
-     * out-of-state only, which is ambiguity 1 in docs/82042-coverage.md. Until
-     * the client rules on that, an unnecessary extra form in the folder costs
-     * staff a moment and a missing one costs a trip back to the counter.
+     * Not every form here goes in every packet. inapplicableReason() decides,
+     * and a form it turns down is named in the manifest as not required rather
+     * than silently dropped.
      */
     protected const PACKAGE_FORMS = [
         'HSMV_82040' => 'Application for Certificate of Title',
@@ -201,8 +199,17 @@ class PDFGeneratorService
         $documents = [];
         $generated = [];
         $manual = [];
+        $notApplicable = [];
 
         foreach (self::PACKAGE_FORMS as $formName => $description) {
+            $inapplicable = $this->inapplicableReason($case, $formName);
+
+            if ($inapplicable !== null) {
+                $notApplicable[$formName] = [$description, $inapplicable];
+
+                continue;
+            }
+
             try {
                 $documents[] = $this->generatePackageForm($case, $inspection, $formName);
                 $generated[$formName] = $description;
@@ -226,7 +233,7 @@ class PDFGeneratorService
         $zipPath = $this->createZipPackage(
             $case,
             $documents,
-            $this->packageManifest($case, $generated, $manual)
+            $this->packageManifest($case, $generated, $manual, $notApplicable)
         );
 
         $case->updateStatus('ready_for_dmv');
@@ -236,18 +243,62 @@ class PDFGeneratorService
             'documents_generated',
             'Document package generated',
             $manual === []
-                ? 'All HSMV forms have been generated and are ready for submission'
+                ? 'All forms required for this case have been generated and are ready for submission'
                 : count($generated) . ' of ' . (count($generated) + count($manual))
-                    . ' documents generated. The rest must be completed by hand; '
-                    . 'see MANIFEST.txt in the package.',
+                    . ' required documents generated. The rest must be completed by '
+                    . 'hand; see MANIFEST.txt in the package.',
             [
                 'documents' => count($documents),
                 'generated' => array_keys($generated),
                 'manual' => array_keys($manual),
+                // A form that does not apply to this case is neither generated
+                // nor outstanding, so it is counted separately.
+                'not_applicable' => array_keys($notApplicable),
             ]
         );
 
         return $zipPath;
+    }
+
+    /**
+     * Why this form does not belong in this case's packet, or null when it does.
+     *
+     * The 82042 is the only one gated today. Its own instructions limit it to
+     * used vehicles "not currently titled in Florida", and the client said the
+     * same of the certification it carries on 13 Aug: "out of state vessels only
+     * require this confirmation" (docs/82040-client-answers.md).
+     *
+     * The out-of-state test is the one that already drives the 82040's Transfer
+     * checkbox, deliberately: a packet whose 82040 says Transfer and whose
+     * folder has no 82042 would contradict itself, so the two answers come from
+     * the same expression rather than two that could drift apart.
+     *
+     * An unknown title state is not treated as out of state. It reads as a data
+     * gap in the manifest instead, because silently omitting a form the state
+     * wanted is the expensive half of this decision.
+     */
+    protected function inapplicableReason(UserCase $case, string $formName): ?string
+    {
+        if ($formName !== 'HSMV_82042') {
+            return null;
+        }
+
+        $titleState = $case->vehicle?->title_state;
+
+        // Same test as $isTransfer in prepareFormData().
+        if (filled($titleState) && $titleState !== 'FL') {
+            return null;
+        }
+
+        if (filled($titleState)) {
+            return 'Not required. This form is for used vehicles not currently '
+                . 'titled in Florida, and this vehicle holds a Florida title.';
+        }
+
+        return 'Skipped because no title state is recorded for this vehicle. '
+            . 'This form is required for a vehicle not currently titled in '
+            . 'Florida, so add the title state to the case and generate again '
+            . 'if this vehicle is titled out of state.';
     }
 
     /**
@@ -275,11 +326,20 @@ class PDFGeneratorService
      * Written for whoever opens the package at the counter, so it leads with
      * what still needs doing rather than what went right.
      *
-     * @param array<string, string>              $generated form name => description
-     * @param array<string, array{0: string, 1: string}> $manual form name => [description, reason]
+     * A form that does not apply to this case is reported separately from one
+     * that could not be filled. Listing it as "complete by hand" would send
+     * staff off to fill in a form the state does not want for this vehicle.
+     *
+     * @param array<string, string>                      $generated     form => description
+     * @param array<string, array{0: string, 1: string}> $manual        form => [description, reason]
+     * @param array<string, array{0: string, 1: string}> $notApplicable form => [description, reason]
      */
-    protected function packageManifest(UserCase $case, array $generated, array $manual): string
-    {
+    protected function packageManifest(
+        UserCase $case,
+        array $generated,
+        array $manual,
+        array $notApplicable = []
+    ): string {
         $rule = str_repeat('=', 70);
         $lines = [
             $rule,
@@ -292,11 +352,11 @@ class PDFGeneratorService
         ];
 
         if ($manual === []) {
-            $lines[] = 'Every form in this package was filled automatically.';
+            $lines[] = 'Every form required for this case was filled automatically.';
         } else {
             $lines[] = count($manual) . ' of ' . (count($generated) + count($manual))
-                . ' documents could NOT be filled automatically and must be';
-            $lines[] = 'completed by hand before this package is submitted.';
+                . ' required documents could NOT be filled automatically and must';
+            $lines[] = 'be completed by hand before this package is submitted.';
         }
 
         $lines[] = '';
@@ -310,6 +370,26 @@ class PDFGeneratorService
             $lines[] = '';
         } else {
             foreach ($manual as $formName => [$description, $reason]) {
+                $lines[] = '  ' . str_replace('_', ' ', $formName);
+                $lines[] = '      ' . $description;
+                $lines[] = '      Why: ' . $reason;
+                $lines[] = '';
+            }
+        }
+
+        // Only shown when something was skipped, so an ordinary packet does not
+        // carry an empty heading staff have to read past.
+        if ($notApplicable !== []) {
+            $lines[] = $rule;
+            $lines[] = 'NOT REQUIRED FOR THIS CASE (' . count($notApplicable) . ')';
+            $lines[] = $rule;
+            $lines[] = '';
+            $lines[] = '  Do NOT complete these. They are listed so their absence';
+            $lines[] = '  from the folder is explained rather than looking like an';
+            $lines[] = '  oversight.';
+            $lines[] = '';
+
+            foreach ($notApplicable as $formName => [$description, $reason]) {
                 $lines[] = '  ' . str_replace('_', ' ', $formName);
                 $lines[] = '      ' . $description;
                 $lines[] = '      Why: ' . $reason;

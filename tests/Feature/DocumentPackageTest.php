@@ -251,7 +251,9 @@ class DocumentPackageTest extends TestCase
     {
         Storage::fake('private');
 
-        $case = $this->passedCase();
+        // Titled in Georgia, so all three mapped forms apply. A Florida title
+        // gates the 82042 out, which the branch tests below cover.
+        $case = $this->passedCase(['title_state' => 'GA']);
         $inspection = $case->inspection;
 
         $response = $this->actingAs($inspection->inspector)
@@ -294,6 +296,191 @@ class DocumentPackageTest extends TestCase
 
         foreach (['HSMV 82040', 'HSMV 82042', 'HSMV 82050'] as $form) {
             $this->assertStringContainsString($form, $generatedSection);
+        }
+    }
+
+    /**
+     * The 82042's own instructions limit it to used vehicles not currently
+     * titled in Florida, and the client said the same on 13 Aug. A Florida car
+     * does not need one, so the folder must not contain it.
+     */
+    public function test_a_florida_titled_vehicle_skips_the_82042(): void
+    {
+        Storage::fake('private');
+
+        $case = $this->passedCase(['title_state' => 'FL']);
+        $inspection = $case->inspection;
+
+        $response = $this->actingAs($inspection->inspector)
+            ->postJson('/api/inspections/' . $inspection->id . '/generate-documents');
+
+        $response->assertOk();
+
+        $path = $response->json('data.package_path');
+
+        foreach ($this->entriesIn($path) as $entry) {
+            $this->assertStringNotContainsString(
+                'HSMV_82042',
+                $entry,
+                'A Florida-titled vehicle does not need an 82042.'
+            );
+        }
+
+        // The other two mapped forms are unaffected.
+        $entries = $this->entriesIn($path);
+
+        foreach (['HSMV_82040', 'HSMV_82050'] as $form) {
+            $this->assertTrue(
+                (bool) array_filter(
+                    $entries,
+                    fn (string $e): bool => str_starts_with($e, "Generated_Forms/{$form}_")
+                ),
+                "{$form} applies to every case and should still be generated."
+            );
+        }
+    }
+
+    /**
+     * Skipping it silently would look like a bug at the counter, so the reason
+     * is on the manifest.
+     */
+    public function test_the_manifest_explains_why_the_82042_was_skipped(): void
+    {
+        Storage::fake('private');
+
+        $path = app(PDFGeneratorService::class)
+            ->generateFullPackage($this->passedCase(['title_state' => 'FL']));
+
+        $manifest = $this->manifestIn($path);
+
+        $this->assertStringContainsString('NOT REQUIRED FOR THIS CASE', $manifest);
+        $this->assertStringContainsString('HSMV 82042', $manifest);
+        $this->assertStringContainsString('not currently titled in Florida', $manifest);
+    }
+
+    /**
+     * The distinction that matters at the counter: a skipped form must not be
+     * listed as one to complete by hand, or staff will go and fill in a form
+     * the state does not want for this vehicle.
+     */
+    public function test_a_skipped_form_is_not_listed_as_one_to_complete_by_hand(): void
+    {
+        Storage::fake('private');
+
+        $path = app(PDFGeneratorService::class)
+            ->generateFullPackage($this->passedCase(['title_state' => 'FL']));
+
+        $manifest = $this->manifestIn($path);
+
+        [$byHand, $rest] = explode('NOT REQUIRED FOR THIS CASE', $manifest, 2);
+        [$notRequired, $enclosed] = explode('GENERATED AND ENCLOSED', $rest, 2);
+
+        $this->assertStringNotContainsString('HSMV 82042', $byHand);
+        $this->assertStringContainsString('HSMV 82042', $notRequired);
+        $this->assertStringNotContainsString('HSMV 82042', $enclosed);
+
+        // The genuinely unfillable forms stay where they were.
+        foreach (['HSMV 84490', 'HSMV 84491', 'HSMV 82053'] as $form) {
+            $this->assertStringContainsString($form, $byHand);
+        }
+    }
+
+    /**
+     * An out-of-state vehicle gets the form, and no "not required" heading is
+     * printed when nothing was skipped.
+     */
+    public function test_an_out_of_state_vehicle_gets_the_82042(): void
+    {
+        Storage::fake('private');
+
+        $path = app(PDFGeneratorService::class)
+            ->generateFullPackage($this->passedCase(['title_state' => 'GA']));
+
+        $this->assertTrue(
+            (bool) array_filter(
+                $this->entriesIn($path),
+                fn (string $e): bool => str_starts_with($e, 'Generated_Forms/HSMV_82042_')
+            ),
+            'A vehicle titled outside Florida needs an 82042.'
+        );
+
+        $this->assertStringNotContainsString(
+            'NOT REQUIRED FOR THIS CASE',
+            $this->manifestIn($path),
+            'Nothing was skipped, so that heading should not appear at all.'
+        );
+    }
+
+    /**
+     * An unknown title state is a data gap, not an out-of-state vehicle. The
+     * form is held back, and the manifest says to fix the case rather than
+     * implying the vehicle is Floridian.
+     *
+     * vehicles.title_state is varchar(2) NOT NULL DEFAULT 'FL', so it is only
+     * unknown when the column is blank or the case has no vehicle row at all.
+     */
+    public function test_an_unknown_title_state_is_reported_as_a_data_gap(): void
+    {
+        Storage::fake('private');
+
+        $path = app(PDFGeneratorService::class)
+            ->generateFullPackage($this->passedCase(['title_state' => '']));
+
+        $manifest = $this->manifestIn($path);
+
+        $this->assertStringContainsString('no title state is recorded', $manifest);
+        $this->assertStringNotContainsString('holds a Florida title', $manifest);
+    }
+
+    public function test_a_case_with_no_vehicle_holds_the_82042_back(): void
+    {
+        Storage::fake('private');
+
+        $case = $this->passedCase();
+        $case->vehicle->delete();
+
+        $path = app(PDFGeneratorService::class)->generateFullPackage($case->fresh());
+
+        $this->assertStringContainsString('no title state is recorded', $this->manifestIn($path));
+
+        foreach ($this->entriesIn($path) as $entry) {
+            $this->assertStringNotContainsString('HSMV_82042', $entry);
+        }
+    }
+
+    /**
+     * The 82040's Transfer checkbox and the 82042's presence answer the same
+     * question, so they must never disagree: a packet claiming a transfer with
+     * no 82042 in the folder would contradict itself.
+     */
+    public function test_the_82042_agrees_with_the_82040_transfer_checkbox(): void
+    {
+        Storage::fake('private');
+
+        $service = app(PDFGeneratorService::class);
+
+        $prepare = new \ReflectionMethod($service, 'prepareFormData');
+        $prepare->setAccessible(true);
+
+        foreach (['GA' => true, 'FL' => false] as $state => $expectTransfer) {
+            $case = $this->passedCase(['title_state' => $state]);
+
+            $this->assertSame(
+                $expectTransfer,
+                $prepare->invoke($service, $case)['is_application_transfer'],
+                "The 82040 Transfer checkbox is wrong for a {$state} title."
+            );
+
+            $hasForm = (bool) array_filter(
+                $this->entriesIn($service->generateFullPackage($case)),
+                fn (string $e): bool => str_starts_with($e, 'Generated_Forms/HSMV_82042_')
+            );
+
+            $this->assertSame(
+                $expectTransfer,
+                $hasForm,
+                "The 82042's presence disagrees with the Transfer checkbox for a {$state} title."
+            );
         }
     }
 
