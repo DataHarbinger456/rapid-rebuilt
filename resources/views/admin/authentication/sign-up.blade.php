@@ -86,9 +86,9 @@
 								<div class="row">
 									<div class="col-md-12">
 										<div class="form-group">
-											<label>Florida Sales Tax Registration Number <span class="text-muted">(optional)</span></label>
-											<input type="text" class="form-control" name="sales_tax_registration_number" placeholder="Florida Sales Tax Registration Number" value="{{ old('sales_tax_registration_number') }}">
-											<small class="form-text text-muted">Printed in Section 7 of the title application. You can add this later.</small>
+											<label>Sales Tax Registration Number <span class="text-muted">(optional)</span></label>
+											<input type="text" class="form-control" name="sales_tax_registration_number" placeholder="e.g. 78-8012345678-4" value="{{ old('sales_tax_registration_number') }}">
+											<small class="form-text text-muted">Florida dealers: the 13-digit number from your Certificate of Registration (DR-11), e.g. 78-8012345678-4. Printed in Section 7 of the title application. You can add this later.</small>
 										</div>
 									</div>
 								</div>

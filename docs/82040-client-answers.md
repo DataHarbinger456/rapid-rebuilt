@@ -147,6 +147,9 @@ Delivered as:
 
 - `users.sales_tax_registration_number`, nullable, collected at dealer signup and optional
   there — a dealer may not have it to hand, and it is not needed until a form is generated
+- validated for Florida dealers as the 13 digits of a DR-11 certificate, stored as digits
+  and printed back in the `78-8012345678-4` grouping; out-of-state dealers keep free text,
+  since their state's format is one we cannot verify
 - Section 7 filled from the case's own owner when that owner is a dealer
 - `Dealer License Number` joining the two columns we already had, printed `VI-1043277`
 - a private customer's form leaving the whole block blank

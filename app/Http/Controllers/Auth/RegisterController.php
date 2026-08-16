@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\SalesTaxNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -55,7 +56,31 @@ class RegisterController extends Controller
                 // not have it to hand at signup and it is not needed until a
                 // form is generated, so it is optional here rather than a
                 // barrier to registering.
-                'sales_tax_registration_number' => 'nullable|string|max:255',
+                //
+                // A Florida dealer's number comes off a DR-11 certificate and is
+                // thirteen digits, so a typo is catchable here rather than on a
+                // filed form. Other states print their own formats, which we
+                // cannot verify, so those stay free text.
+                'sales_tax_registration_number' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    function (string $attribute, mixed $value, \Closure $fail) use ($request): void {
+                        if (trim((string) $value) === '' || !SalesTaxNumber::isFlorida($request->states)) {
+                            return;
+                        }
+
+                        if (!SalesTaxNumber::isValidFlorida($value)) {
+                            $count = strlen(SalesTaxNumber::digits($value));
+
+                            $fail(
+                                'A Florida sales tax registration number has '
+                                . SalesTaxNumber::FLORIDA_LENGTH . ' digits, like 78-8012345678-4. '
+                                . "This one has {$count}."
+                            );
+                        }
+                    },
+                ],
                 'region' => 'required|numeric',
                 'zones' => 'required|string|max:255',
             ]);
@@ -110,7 +135,13 @@ class RegisterController extends Controller
                 'dealer_name' => $request->dealer_name,
                 'license_type' => $request->license_type,
                 'license_number' => $request->license_number,
-                'sales_tax_registration_number' => $request->sales_tax_registration_number,
+                // Stored as digits for a Florida dealer, since the dashes are
+                // presentation and go back on at print time. Kept verbatim for
+                // any other state.
+                'sales_tax_registration_number' => SalesTaxNumber::forStorage(
+                    $request->sales_tax_registration_number,
+                    $request->states
+                ),
                 'region' => $request->region,
                 'zones' => $request->zones,
             ]);

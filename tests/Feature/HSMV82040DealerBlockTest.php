@@ -84,7 +84,9 @@ class HSMV82040DealerBlockTest extends TestCase
             'license_type' => 'VI',
             // A real Florida dealer licence number, suffix and all.
             'license_number' => '1142356-1',
-            'sales_tax_registration_number' => '78-8012345678-4',
+            // Stored as digits, which is what registration writes; the dashes
+            // go back on at print time.
+            'sales_tax_registration_number' => '7880123456784',
             'address_1' => '1841 NW 21st Terrace',
             'city' => 'Miami',
             'states' => 'FL',
@@ -110,6 +112,8 @@ class HSMV82040DealerBlockTest extends TestCase
     {
         $values = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer()));
 
+        // Stored as 7880123456784, printed in the 2-10-1 grouping the DR-11
+        // certificate uses, so the box matches the paper in the dealer's hand.
         $this->assertSame('78-8012345678-4', $values['Florida Sales Tax Registration Number']);
 
         // The number exactly as the state writes it, suffix included and no
@@ -195,6 +199,48 @@ class HSMV82040DealerBlockTest extends TestCase
     }
 
     /**
+     * An out-of-state dealer's number is free text in a format we cannot
+     * verify, so it prints exactly as typed rather than being forced into
+     * Florida's grouping.
+     */
+    public function test_an_out_of_state_number_prints_exactly_as_stored(): void
+    {
+        $values = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer([
+            'states' => 'GA',
+            'sales_tax_registration_number' => 'R-12345-6',
+        ])));
+
+        $this->assertSame('R-12345-6', $values['Florida Sales Tax Registration Number']);
+    }
+
+    /**
+     * A Florida row predating the digit validation may still hold dashes. It
+     * must print correctly rather than being double-formatted.
+     */
+    public function test_a_legacy_dashed_value_still_prints_correctly(): void
+    {
+        $values = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer([
+            'sales_tax_registration_number' => '78-8012345678-4',
+        ])));
+
+        $this->assertSame('78-8012345678-4', $values['Florida Sales Tax Registration Number']);
+    }
+
+    /**
+     * A Florida row holding something that is not 13 digits, from before the
+     * validation existed, prints as stored rather than being mangled into a
+     * grouping it does not have.
+     */
+    public function test_a_malformed_legacy_florida_value_is_not_mangled(): void
+    {
+        $values = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer([
+            'sales_tax_registration_number' => 'pending',
+        ])));
+
+        $this->assertSame('pending', $values['Florida Sales Tax Registration Number']);
+    }
+
+    /**
      * Page 2 carries a second box named 'Sales Tax Registration Number', which
      * belongs to the rental-use exemption claim rather than to Section 7.
      * Filling it would assert an exemption nobody claimed.
@@ -223,7 +269,7 @@ class HSMV82040DealerBlockTest extends TestCase
         $second = $this->fieldValuesInFilledPdf($this->caseFor($this->dealer([
             'license_type' => 'VW',
             'license_number' => '1101136-1',
-            'sales_tax_registration_number' => '39-0099887766-1',
+            'sales_tax_registration_number' => '3900998877661',
         ])));
 
         $this->assertSame('1142356-1', $first['Dealer License Number']);

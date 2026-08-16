@@ -57,9 +57,99 @@ class DealerRegistrationTest extends TestCase
 
         $this->assertNotNull($dealer, 'The dealer was not created.');
         $this->assertSame('dealer', $dealer->user_type);
-        $this->assertSame('78-8012345678-4', $dealer->sales_tax_registration_number);
         $this->assertSame('VI', $dealer->license_type);
         $this->assertSame('1142356-1', $dealer->license_number);
+
+        // Stored as digits: the dashes are presentation and go back on when
+        // the 82040 is printed.
+        $this->assertSame('7880123456784', $dealer->sales_tax_registration_number);
+    }
+
+    /**
+     * A Florida number is 13 digits off a DR-11 certificate, however the dealer
+     * chose to punctuate it.
+     */
+    public function test_a_florida_number_is_accepted_dashed_or_bare(): void
+    {
+        foreach (['78-8012345678-4', '7880123456784', '78 8012345678 4'] as $typed) {
+            $payload = $this->dealerPayload([
+                'states' => 'FL',
+                'sales_tax_registration_number' => $typed,
+            ]);
+
+            $this->post('/register', $payload)->assertRedirect()->assertSessionHasNoErrors();
+
+            $this->assertSame(
+                '7880123456784',
+                User::where('email', $payload['email'])->value('sales_tax_registration_number'),
+                "[{$typed}] is the same Florida number and should store identically."
+            );
+        }
+    }
+
+    /**
+     * The typo this validation exists to catch: one digit short. Without it the
+     * number reaches a filed form and the state bounces the application.
+     */
+    public function test_a_florida_number_with_the_wrong_digit_count_is_rejected(): void
+    {
+        foreach (['78-801234567-4', '780123456784', '78-80123456789-4'] as $typo) {
+            $payload = $this->dealerPayload([
+                'states' => 'FL',
+                'sales_tax_registration_number' => $typo,
+            ]);
+
+            $this->post('/register', $payload)
+                ->assertRedirect()
+                ->assertSessionHasErrors('sales_tax_registration_number');
+
+            $this->assertNull(
+                User::where('email', $payload['email'])->first(),
+                "[{$typo}] is not a valid Florida number and must not register."
+            );
+        }
+    }
+
+    /**
+     * Every other state prints its own format, which we cannot verify, so an
+     * out-of-state dealer's number is kept as free text exactly as typed.
+     */
+    public function test_an_out_of_state_dealer_keeps_their_own_format(): void
+    {
+        foreach ([['GA', 'R-12345-6'], ['AL', 'SLS-9988776'], ['TX', '1-75-0123456-7']] as [$state, $number]) {
+            $payload = $this->dealerPayload([
+                'states' => $state,
+                'sales_tax_registration_number' => $number,
+            ]);
+
+            $this->post('/register', $payload)->assertRedirect()->assertSessionHasNoErrors();
+
+            $this->assertSame(
+                $number,
+                User::where('email', $payload['email'])->value('sales_tax_registration_number'),
+                "A {$state} dealer's number must be stored exactly as typed."
+            );
+        }
+    }
+
+    /**
+     * The Florida rule keys off the dealer's state, not off the shape of what
+     * they typed, so a number that would fail in Florida is fine elsewhere.
+     */
+    public function test_the_florida_rule_only_applies_to_florida_dealers(): void
+    {
+        $payload = $this->dealerPayload([
+            'states' => 'GA',
+            // Twelve digits: rejected for a Florida dealer, accepted here.
+            'sales_tax_registration_number' => '780123456784',
+        ]);
+
+        $this->post('/register', $payload)->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            '780123456784',
+            User::where('email', $payload['email'])->value('sales_tax_registration_number')
+        );
     }
 
     /**

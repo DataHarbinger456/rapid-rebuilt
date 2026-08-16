@@ -8,6 +8,7 @@ use App\Models\Inspection;
 use App\Models\UploadedFile;
 use App\Models\Setting;
 use App\Support\FuelType;
+use App\Support\SalesTaxNumber;
 use App\Models\CaseTimeline;
 use App\Support\PdftkBinary;
 use Illuminate\Support\Facades\Storage;
@@ -712,7 +713,14 @@ class PDFGeneratorService
             // Owner info
             'owner_name' => $owner?->full_name,
             // Section 7, dealer block. Null for every non-dealer case.
-            'dealer_sales_tax_number' => $dealer?->sales_tax_registration_number,
+            //
+            // Stored as digits for a Florida dealer, so the dashes go back on
+            // here and the box matches the DR-11 certificate in their hand. An
+            // out-of-state number prints exactly as they typed it.
+            'dealer_sales_tax_number' => SalesTaxNumber::format(
+                $dealer?->sales_tax_registration_number,
+                $dealer?->states
+            ),
             // The licence NUMBER only, e.g. 1142356-1. The class code is a
             // separate field on the dealer's record and has no box in Section 7.
             'dealer_license' => $this->dealerLicense($dealer),
