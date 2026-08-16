@@ -20,20 +20,18 @@ two pages, of which page 2 is instructions with no fields.
 ⚠ marks a field where the correct source is genuinely ambiguous and should be confirmed
 with the client rather than guessed. Those are collected at the end.
 
-> **Updated 11 Aug 2026.** The 20 clean class B fields are now mapped and the class
-> counts below have moved accordingly: A is 20, B is down to the single ⚠ field.
-> `generateHSMV82042()` exists, and `HSMV82042FieldMapTest` covers the map. Everything
-> still marked ⚠ or D is untouched and still waiting on the client.
+> **Updated 11 Aug 2026; revised 16 Aug.** The 20 clean class B fields are mapped, plus
+> the 5-digit odometer box since the client's FIELD 05 answer, so **A is 21** and B is
+> down to the single ⚠ field. `generateHSMV82042()` exists, `HSMV82042FieldMapTest`
+> covers the map, and `generatePackageForm()` dispatches the form into every packet,
+> gated on out-of-state titles. Everything still marked ⚠ or D below is untouched and
+> still waiting on the client.
 
 There was no `hsmv_82042` entry in `config/hsmv_forms.php` when this audit was written, so
-class A started empty.
-
-The 82042 was further behind than the other unmapped forms. `PDFGeneratorService` has a
-`generateHSMV82050()`, `generateHSMV82053()`, `generateHSMV84490()` and
-`generateHSMV84491()`, all of which reach `fillForm()` and throw the "still in
-development" `RuntimeException` for want of a field map. There was no
-`generateHSMV82042()` at all; it has since been added. `generateFullPackage()` still has
-no line for it. Ambiguity 1 is resolved: the form is gated on out-of-state titles.
+class A started empty, and there was no `generateHSMV82042()` at all — the form was
+behind even the other unmapped ones, which at least had generator methods that threw.
+Of the remaining forms, the 82050 is now mapped too; the 82053, 84490 and 84491 still
+throw for want of a field map.
 
 ---
 
@@ -60,8 +58,8 @@ below the table.
 
 | Field | Type | Class | Source / note |
 |---|---|---|---|
-| Select if 5 digit odometer reading | Button | D ⚠ | Same as the 82040. Deliberately never ticked automatically: the model year cannot justify a sworn statement about a genuinely old vehicle |
-| Select if 6 digit odometer reading | Button | B | `is_six_digit_odometer` (true for model year ≥ 1995) |
+| Select if 5 digit odometer reading | Button | A | **Mapped 13 Aug**, on all three forms. Ticked only by `inspections.odometer_digit_count`, which an inspector records on site (client's FIELD 05 answer); the model-year fallback can assert six digits but never five, so nothing but a human can tick this box |
+| Select if 6 digit odometer reading | Button | A | `is_six_digit_odometer`. Inspector-recorded count wins; the model-year fallback (≥ 1995) applies only when none was recorded |
 | Hundred thousands place that the odometer number now reads | Text | B | `odometer_digit_100000` |
 | Ten thousands place that the odometer number now reads | Text | B | `odometer_digit_10000` |
 | Thousands place that the odometer number now reads | Text | B | `odometer_digit_1000` |
@@ -135,10 +133,10 @@ The notary seal and all Part B signatures are wet and have no form fields.
 
 | Class | Fields | Share |
 |---|---|---|
-| **A** — already mapped | 20 | 57% |
+| **A** — already mapped | 21 | 60% |
 | **B** — mappable now, no new data | 0 (+1 ⚠) | 3% |
 | **C** — in the DB, needs surfacing | 0 | 0% |
-| **D** — data we do not have | 14 (all ⚠ but one) | 40% |
+| **D** — data we do not have | 13 (all ⚠ but one) | 37% |
 
 **The headline is how little new work this form needs.** Every class B field reuses a
 `prepareFormData()` key that already exists for the 82040 — there is nothing to add to
@@ -177,18 +175,17 @@ fields on each form. That table is the reason to map by meaning.
 
 ## Recommended order
 
-1. **The 20 clean class B fields.** No client input, no new data, no schema change. This
-   takes the form from unusable to essentially complete for the owner's half, and the
-   odometer group is already proven correct by the 82040 tests.
+1. ~~**The 20 clean class B fields.**~~ **Done 11 Aug**, plus the 5-digit box on 13 Aug:
+   21 fields mapped, proven by `HSMV82042FieldMapTest`'s fill-and-read-back tests.
 2. **Part B, once ambiguity 3 comes back.** One answer maps two or three fields and
-   permanently retires the other nine.
+   permanently retires the other nine. This is the only remaining work that touches
+   this form's config.
 3. **Seller's name**, if and when bill of sale extraction lands.
 
-One caveat on sequencing: the 82040 is still the only mapped form of the six. Adding a
-`generateHSMV82042()` to `generateFullPackage()` would not change that method's current
-behaviour, because it already throws on the first unmapped form it reaches
-(`generateHSMV84490()`). Whether the 82042 belongs in the package at all depends on
-ambiguity 1 below.
+The old sequencing caveat is obsolete: three of the six forms are now mapped (the 82040,
+this one and the 82050), `generateFullPackage()` collects each unmapped form's
+`RuntimeException` into the manifest instead of aborting the packet, and this form is
+dispatched in every packet and held back for Florida titles by `inapplicableReason()`.
 
 Reuse `HSMV82040FieldMapTest`'s approach when mapping: fill the real template unflattened
 through pdftk and read the values back, rather than asserting only the values handed to
@@ -220,8 +217,13 @@ it is already question 2 in `docs/82040-client-questions-gdoc.html`.
    write on the day, but confirm.
 3. **The Part B certifier block** (12 fields). ⚠ Same question as the 82040's Section 8,
    already with the client. One answer resolves every one of them.
-4. **The dealer number**, if the answer to 3 is "Florida licensed dealer." ⚠
-   `settings.prvip_license_number` exists; confirm whether that is the dealer licence
-   number the state wants here, or a different credential.
-5. **The 5-digit odometer box.** ⚠ Carried over from the 82040 for the same reason, and
-   covered by question 5 in the client form.
+4. **The dealer number**, if the answer to 3 is "Florida licensed dealer." ⚠ Still open.
+   Note the Section 7 work has since established the pattern: a dealer's licence number
+   lives on their own user record (`users.license_number`, e.g. `1142356-1`), and the
+   company-wide `settings.prvip_license_number` is empty and no longer used anywhere.
+   Part B would read the same column for whichever dealer certifies — the open part is
+   only *whether a dealer ever certifies*, which is ambiguity 3.
+5. ~~**The 5-digit odometer box.**~~ **Resolved 13 Aug: mapped.** The client's FIELD 05
+   answer is that inspectors record the digit count on site, so the box is driven by
+   `inspections.odometer_digit_count` on all three forms and only a recorded 5 can tick
+   it. See `OdometerDigitCountTest`.

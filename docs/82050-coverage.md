@@ -20,9 +20,10 @@ Off-Highway Vehicle or Vessel**, one page.
 ⚠ marks a field where the correct source is genuinely ambiguous and should be confirmed
 with the client rather than guessed. Those are collected at the end.
 
-> **Updated 11 Aug 2026.** The 20 clean class B fields are now mapped, so class A is 20
-> and B is down to the three ⚠ fields; the counts below have moved accordingly. Everything
-> still marked ⚠ or D is untouched and still waiting on the client.
+> **Updated 11 Aug 2026; revised 16 Aug.** The 20 clean class B fields are mapped, so
+> class A is 20, plus the 5-digit odometer box since the client's FIELD 05 answer, so
+> **A is 21**; B is down to the three ⚠ fields. `HSMV82050FieldMapTest` covers the map.
+> Everything still marked ⚠ or D is untouched and still waiting on the client.
 
 There was no entry for this form in `config/hsmv_forms.php` when this audit was written, so
 class A started empty. `generateHSMV82050()` already existed and reached `fillForm()`,
@@ -101,8 +102,8 @@ already derived.
 
 | Field | Type | Class | Source / note |
 |---|---|---|---|
-| 5 DIGIT OR | Button | D | Never ticked automatically, on any of the three forms: only a human can swear to what an old odometer physically displays |
-| 6 DIGIT ODOMETER NOW READS | Button | B | `is_six_digit_odometer` |
+| 5 DIGIT OR | Button | A | **Mapped 13 Aug.** Ticked only by `inspections.odometer_digit_count` when an inspector records 5 on site (client's FIELD 05 answer); the model-year fallback can assert six digits but never five. See `OdometerDigitCountTest` |
+| 6 DIGIT ODOMETER NOW READS | Button | A | `is_six_digit_odometer`. Inspector-recorded count wins; the model-year fallback (≥ 1995) applies only when none was recorded |
 | Text1 | Text | B | `odometer_digit_100000` |
 | Federal and State law requires that you state the mileage in connection with the transfer of ownership | Text | B | `odometer_digit_10000` |
 | undefined_2 | Text | B | `odometer_digit_1000` |
@@ -163,10 +164,10 @@ All four signatures are wet and have no form fields; only the printed names and 
 
 | Class | Fields | Share |
 |---|---|---|
-| **A** — already mapped | 20 | 50% |
+| **A** — already mapped | 21 | 52.5% |
 | **B** — mappable now, no new data | 0 (+3 ⚠) | 7.5% |
 | **C** — in the DB, needs surfacing | 0 | 0% |
-| **D** — data we do not have | 12 (+5 ⚠) | 42.5% |
+| **D** — data we do not have | 11 (+5 ⚠) | 40% |
 
 **Class C is empty for the third form running.** Every value this form needs that we hold
 is already surfaced by `prepareFormData()`, so mapping it adds no keys, no columns and no
@@ -219,9 +220,9 @@ and worth considering whether the box wants punctuation the join does not add.
 
 ## Recommended order
 
-1. **The 20 clean class B fields**, once a `generateHSMV82050()` field map exists. Same
-   shape as the 82042 work: reuse the keys, map declarations by sentence, add a readback
-   test with the `ReadsPdfFormFields` trait.
+1. ~~**The 20 clean class B fields**~~ **Done 11 Aug**: 21 fields mapped (the 20 plus the
+   5-digit box), declarations mapped by sentence, proven by `HSMV82050FieldMapTest`'s
+   fill-and-read-back tests through the `ReadsPdfFormFields` trait.
 2. **The eight role-dependent fields**, as soon as ambiguity 1 is answered. ⚠
 3. **Date of sale and selling price**, if bill-of-sale extraction lands. Both are on the
    document the customer already uploads, so an extractor could supply them the way the
