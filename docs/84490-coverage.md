@@ -46,7 +46,7 @@ The 84490 is not a data form with a signature at the bottom. It is a builder's
   Ticking one from a vehicle_type would be a false attestation.
 - **Section I items 4 and 5** are `(Initials)` boxes — a personal attestation that the
   vehicle is road operable / habitable. Initials cannot be typed truthfully by us.
-- **Section V** ends with its own perury statement: whoever completes it swears to the
+- **Section V** ends with its own perjury statement: whoever completes it swears to the
   Yes/No matrix "based on that inspection". Pre-filling a matrix answer our inspector did
   not personally verify would put words in a sworn statement.
 
@@ -198,7 +198,7 @@ recorded here from the dump because they cannot be assumed:
 
 | Fields | Type | Class | Source / note |
 |---|---|---|---|
-| All 22 buttons above | Button ×22 | D ⚠ | All sit under the page-4 perury clause, so an answer is a sworn statement by whoever gives it. Which rows a **PRVIP** inspector may answer, versus which wait for the HSMV Compliance Examiner, is the open question. Candidate data exists for some rows — `decal_number`, `is_flood`, `vin_verified`, `components_verified` — but recording a value is not the same as being entitled to swear to it |
+| All 22 buttons above | Button ×22 | D ⚠ | All sit under the page-4 perjury clause, so an answer is a sworn statement by whoever gives it. Which rows a **PRVIP** inspector may answer, versus which wait for the HSMV Compliance Examiner, is the open question. Candidate data exists for some rows — `decal_number`, `is_flood`, `vin_verified`, `components_verified` — but recording a value is not the same as being entitled to swear to it |
 
 | Field | Type | Class | Source / note |
 |---|---|---|---|
@@ -283,14 +283,21 @@ region numbers read `inspections`, and `CoAgy` reads a setting that is empty.
 
 ## Recommended order
 
-1. **The 26 class B fields.** Header build type, Section I description, Section IV left
-   column, Section V descriptive block, PRVIP printed name and date. All reuse proven
-   keys; same shape as the 82042's Part A.
-2. **Audit # and Region #.** Two class C fields, our own data, no ambiguity.
-3. **The parts table**, once ambiguity 6 (condition columns) is answered. The biggest
+1. **The 20 class B fields that are genuinely unblocked.** Header build type (3),
+   Section I description (7), the Section V descriptive block (8) — VIN, title pair,
+   odometer, year/make/body/color — and the PRVIP printed name and date (2), which are
+   the inspector's own recorded facts rather than an attestation. All reuse proven keys;
+   same shape as the 82042's Part A.
+2. **The Section IV applicant fields**, once ambiguity 1 (builder identity) is answered.
+   Six class B fields — the left column's printed name, street, city/state/zip and
+   phone — map to `owner_*` keys **only if the customer signs as builder**; line 152's
+   table carries the caveat on the name row. If Rapid Rebuilt is ever the builder, they
+   map to the shop instead, which is why they wait rather than shipping with item 1.
+3. **Audit # and Region #.** Two class C fields, our own data, no ambiguity.
+4. **The parts table**, once ambiguity 6 (condition columns) is answered. The biggest
    single win on the form: 30 fields.
-4. **CoAgy**, once the PRVIP number exists in settings.
-5. Everything else stays blank by design: the attestation boxes, the initials boxes, the
+5. **CoAgy**, once the PRVIP number exists in settings.
+6. Everything else stays blank by design: the attestation boxes, the initials boxes, the
    wet signatures, and the CE-only block.
 
 ## Ambiguous — confirm before mapping
@@ -314,7 +321,7 @@ answers, so asking them now would mean asking twice.
    — PRVIP is not one of the five authorities the 82042 lists, so if this is the role,
    the whole certifier mapping story changes.
 3. **Which of the eleven Yes/No rows may a PRVIP inspector answer?** All of them sit
-   under a perury clause. Some have candidate data (`decal_number`, `is_flood`,
+   under a perjury clause. Some have candidate data (`decal_number`, `is_flood`,
    `vin_verified`, `components_verified`); knowing which rows are ours decides whether
    the matrix is class D-forever or pre-fillable.
 4. **What are D-1 through D-4?** Four wide unlabelled boxes in Section V. Are they the
