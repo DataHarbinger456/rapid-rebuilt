@@ -295,6 +295,13 @@ region numbers read `inspections`, and `CoAgy` reads a setting that is empty.
 
 ## Ambiguous — confirm before mapping
 
+Five of these are with the client as round 2 of the questions form
+(`docs/82040-client-questions-gdoc.html`, 16 Aug): ambiguity 2 below is question 9 and
+leads, because its answer likely settles the 82040 Section 8 and 82042 Part B certifier
+question open since 5 Aug; ambiguity 1 is question 10, 4 is 11, 5 is 12, and 6 is 13.
+Ambiguities 3, 7 and 8 are not sent yet — they follow from the PRVIP and vehicle-class
+answers, so asking them now would mean asking twice.
+
 1. **Who is the builder on Section IV, and what is the second column for?** The
    certificate is "Statement of *Builder*" under a perjury clause. Is the applicant the
    customer (rebuilt by owner) or Rapid Rebuilt (rebuilt by shop)? And the form prints
