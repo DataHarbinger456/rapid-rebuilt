@@ -268,8 +268,14 @@ class InspectionController extends Controller
 
     /**
      * Print package view
+     *
+     * RedirectResponse joins the return union: the no-documents path calls
+     * back()->withErrors(), which is a redirect, and PHP enforces the declared
+     * return type at runtime — so an inspector visiting Print before
+     * generating anything hit a TypeError instead of the intended flash
+     * redirect.
      */
-    public function print(Request $request, Inspection $inspection): View|JsonResponse
+    public function print(Request $request, Inspection $inspection): View|JsonResponse|RedirectResponse
     {
         $user = $request->user();
 
