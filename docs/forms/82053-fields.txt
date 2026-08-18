@@ -1,0 +1,220 @@
+---
+FieldType: Button
+FieldName: Motor Vehicle
+FieldNameAlt: Motor Vehicle
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Mobile Home
+FieldNameAlt: Mobile Home
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Vessel
+FieldNameAlt: Vessel
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Vessel with an Untitled Trailer
+FieldNameAlt: Vessel with an Untitled Trailer
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: Vessel with a Titled Trailer
+FieldNameAlt: Vessel with a Titled Trailer
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: YearRow1
+FieldNameAlt: Year_Row_1
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: MakeManufacturerRow1
+FieldNameAlt: Make/Manufacturer_Row_1
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Body TypeRow1
+FieldNameAlt: Body Type_Row_1
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Title NumberRow1
+FieldNameAlt: Title Number_Row_1
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Vehicle Identification Number VIN Hull Identification Number HINRow1
+FieldNameAlt: Vehicle Identification Number (VIN)/ Hull Identification Number (HIN)_Row_1
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: YearRow2
+FieldNameAlt: Year_Row_2
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: MakeManufacturerRow2
+FieldNameAlt: Make/Manufacturer_Row_2
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Body TypeRow2
+FieldNameAlt: Body Type_Row_2
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Title NumberRow2
+FieldNameAlt: Title Number_Row_2
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Vehicle Identification Number VIN Hull Identification Number HINRow2
+FieldNameAlt: Vehicle Identification Number (VIN)/ Hull Identification Number (HIN)_Row_2
+FieldFlags: 0
+FieldJustification: Center
+---
+FieldType: Text
+FieldName: Legibly Printed Name of Owner Grantor
+FieldNameAlt: Legibly Printed Name of Owner (“Grantor”)
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Driver License Identification Card or FEID Number of Owner
+FieldNameAlt: Driver License, Identification Card or FEID Number of Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Birth of Owner if applicable
+FieldNameAlt: Date of Birth of Owner, if applicable
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Owners Address
+FieldNameAlt: Owner’s Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: City
+FieldNameAlt: City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: State
+FieldNameAlt: State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Zip Code
+FieldNameAlt: Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Legibly Printed Name of CoOwner Grantor if applicable
+FieldNameAlt: Legibly Printed Name of Co-Owner (“Grantor”), if applicable
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Driver License Identification Card or FEID Number of CoOwner
+FieldNameAlt: Driver License, Identification Card or FEID Number of Co-Owner
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Date of Birth of CoOwner if applicable
+FieldNameAlt: Date of Birth of Co-Owner, if applicable
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: CoOwners Address
+FieldNameAlt: Co-Owner’s Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: City_2
+FieldNameAlt: City
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: State_2
+FieldNameAlt: State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Zip Code_2
+FieldNameAlt: Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Month
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Day
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Full Legibly Printed Name is required
+FieldNameAlt: undefined
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of Owner Grantor
+FieldNameAlt: Signature of Owner ("Grantor")
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Signature
+FieldName: Signature of CoOwner Grantor
+FieldNameAlt: Signature of Co-Owner ("Grantor")
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: Year
+FieldNameAlt: Enter Year
+FieldFlags: 0
+FieldJustification: Left

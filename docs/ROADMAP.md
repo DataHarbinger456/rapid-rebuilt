@@ -70,9 +70,17 @@ with `pdftk dump_data_fields`. This was the main technical risk in S2 and it is 
 | 84490 | Statement of Builder | 134 |
 | 84491 | Statement of Builder — Additional Sheet | 122 |
 
-The previous build's code labelled 84490 "Rebuilt Motor Vehicle Inspection", 84491 "Major
-Component Parts Form" and 82053 "Odometer Disclosure Statement". All three were wrong.
-Corrected in `PDFGeneratorService`.
+The previous build's **inspector view** (`resources/views/inspector/inspection/documents.blade.php:27-31`)
+labelled 84490 "Rebuilt Motor Vehicle Inspection", 84491 "Major Component Parts Form",
+82050 "Statement of Builder" and 82053 "Odometer Disclosure Statement". All four are
+wrong, and **that view is still uncorrected** — recorded in `docs/82050-coverage.md`'s
+"Also found" section since 11 Aug, not yet fixed.
+
+`PDFGeneratorService` never carried those labels. Its own `PACKAGE_FORMS` labels were
+wrong for 84490 and 84491 at first and both are now corrected: 84490 to "Statement of
+Builder" on 11 Aug, 84491 from "Rebuilt Vehicle Inspection Application" to "Statement of
+Builder, Additional Sheet" on 16 Aug. The 82053's "Power of Attorney" was verified against
+the PDF's printed title on 16 Aug and was already correct.
 
 **Weight:** the 82040 has separate `Weight` and `GVW` fields. Client confirmed weight comes
 from what is printed on the title — so it is AI-extracted from the salvage title, never
