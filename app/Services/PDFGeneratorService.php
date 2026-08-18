@@ -145,6 +145,14 @@ class PDFGeneratorService
     /**
      * Every form in the packet, in the order they belong in the folder.
      *
+     * The canonical name AND the staff-facing description live here together,
+     * because this constant is the single source of truth for both: the
+     * manifest, the API and the inspector's documents view all render from
+     * it, so a form cannot be named one thing in the packet and another on
+     * screen. It grew out of a drift exactly like that — the inspector view
+     * carried its own list, mislabelled four of five forms and never learned
+     * the 82042 existed.
+     *
      * Cover_Letter and Document_Checklist are absent on purpose. They are
      * documents we compose, not government forms with a fillable template, so
      * they have no entry in config/hsmv_forms.php and routing them through
@@ -154,14 +162,34 @@ class PDFGeneratorService
      * Not every form here goes in every packet. inapplicableReason() decides,
      * and a form it turns down is named in the manifest as not required rather
      * than silently dropped.
+     *
+     * @var array<string, array{name: string, desc: string}>
      */
-    protected const PACKAGE_FORMS = [
-        'HSMV_82040' => 'Application for Certificate of Title',
-        'HSMV_82042' => 'VIN and Odometer Verification',
-        'HSMV_84490' => 'Statement of Builder',
-        'HSMV_84491' => 'Statement of Builder, Additional Sheet',
-        'HSMV_82050' => 'Notice of Sale / Bill of Sale',
-        'HSMV_82053' => 'Power of Attorney',
+    public const PACKAGE_FORMS = [
+        'HSMV_82040' => [
+            'name' => 'Application for Certificate of Title',
+            'desc' => 'Main title application form',
+        ],
+        'HSMV_82042' => [
+            'name' => 'VIN and Odometer Verification',
+            'desc' => 'Required when the vehicle is titled outside Florida',
+        ],
+        'HSMV_84490' => [
+            'name' => 'Statement of Builder',
+            'desc' => 'The builder\'s sworn statement of the rebuild',
+        ],
+        'HSMV_84491' => [
+            'name' => 'Statement of Builder, Additional Sheet',
+            'desc' => 'Overflow sheet for parts and repair details',
+        ],
+        'HSMV_82050' => [
+            'name' => 'Notice of Sale / Bill of Sale',
+            'desc' => 'Sale record with the odometer disclosure',
+        ],
+        'HSMV_82053' => [
+            'name' => 'Power of Attorney',
+            'desc' => 'Appoints someone to sign for the owner',
+        ],
     ];
 
     /**
@@ -201,24 +229,24 @@ class PDFGeneratorService
         $manual = [];
         $notApplicable = [];
 
-        foreach (self::PACKAGE_FORMS as $formName => $description) {
+        foreach (self::PACKAGE_FORMS as $formName => $form) {
             $inapplicable = $this->inapplicableReason($case, $formName);
 
             if ($inapplicable !== null) {
-                $notApplicable[$formName] = [$description, $inapplicable];
+                $notApplicable[$formName] = [$form['name'], $inapplicable];
 
                 continue;
             }
 
             try {
                 $documents[] = $this->generatePackageForm($case, $inspection, $formName);
-                $generated[$formName] = $description;
+                $generated[$formName] = $form['name'];
             } catch (RuntimeException $e) {
                 // Only the "cannot fill this form" failures are collected. A
                 // broken template or a pdftk crash raises the same class, and
                 // both are equally a form staff must now complete by hand, so
                 // the message is carried through rather than reinterpreted.
-                $manual[$formName] = [$description, $e->getMessage()];
+                $manual[$formName] = [$form['name'], $e->getMessage()];
             }
         }
 

@@ -21,15 +21,13 @@
                         <span>Generate official Florida DMV documents</span>
                     </div>
                     <div class="card-body">
-                        @php
-                            $forms = [
-                                'HSMV_82040' => ['name' => 'Application for Certificate of Title', 'desc' => 'Main title application form'],
-                                'HSMV_84490' => ['name' => 'Rebuilt Motor Vehicle Inspection', 'desc' => 'Inspection verification form'],
-                                'HSMV_84491' => ['name' => 'Major Component Parts Form', 'desc' => 'List of replaced major components'],
-                                'HSMV_82050' => ['name' => 'Statement of Builder', 'desc' => 'If vehicle was rebuilt by owner'],
-                                'HSMV_82053' => ['name' => 'Odometer Disclosure Statement', 'desc' => 'Required odometer reading disclosure'],
-                            ];
-                        @endphp
+                        {{-- PACKAGE_FORMS is the single source of truth: the same
+                             constant drives the packet manifest and this list,
+                             so a form can never be named one thing in the
+                             folder and another on screen. This view used to
+                             carry its own copy and mislabelled four of five
+                             forms while omitting the 82042 entirely. --}}
+                        @php $forms = \App\Services\PDFGeneratorService::PACKAGE_FORMS; @endphp
 
                         @foreach($forms as $formId => $form)
                             @php $generated = isset($generated_documents[$formId]); @endphp
@@ -67,7 +65,11 @@
                 @if($can_generate)
                     <div class="card">
                         <div class="card-body text-center">
-                            <form action="{{ route('api.inspections.generate-documents', $inspection) }}" method="POST">
+                            {{-- The endpoint lives in routes/api.php and is
+                                 unnamed; route('api.inspections.generate-documents')
+                                 does not exist and 500s the whole page. This view
+                                 never rendered until that was fixed. --}}
+                            <form action="{{ url('/api/inspections/' . $inspection->id . '/generate-documents') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-lg">
                                     <i data-feather="package"></i> Generate All Documents
