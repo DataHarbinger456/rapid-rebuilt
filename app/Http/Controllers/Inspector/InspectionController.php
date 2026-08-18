@@ -9,6 +9,7 @@ use App\Services\InspectionService;
 use App\Services\PDFGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class InspectionController extends Controller
@@ -223,6 +224,46 @@ class InspectionController extends Controller
         }
 
         return view('inspector.inspection.documents', $data);
+    }
+
+    /**
+     * Generate the document package, for the browser form on the documents
+     * screen.
+     *
+     * The /api/.../generate-documents endpoint answers JSON behind
+     * auth:sanctum, which a session-cookie form POST cannot satisfy while
+     * EnsureFrontendRequestsAreStateful is off — and JSON is the wrong shape
+     * for a form submit anyway. This twin runs the same service call and
+     * redirects back to the screen the inspector is already on, with a flash
+     * message carrying either the result or the reason nothing was generated.
+     */
+    public function generateDocuments(Request $request, Inspection $inspection): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($inspection->inspector_id !== $user->id && !$user->isStaff()) {
+            abort(403);
+        }
+
+        if ($inspection->result !== 'passed') {
+            return back()->withErrors(['error' => 'Documents can only be generated for passed inspections']);
+        }
+
+        $case = $inspection->userCase;
+
+        try {
+            $packagePath = $this->pdfService->generateFullPackage($case);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+
+        $generated = $this->pdfService->getGeneratedDocuments($case);
+
+        return back()->with('success',
+            'Document package generated: ' . count($generated)
+            . ' document' . (count($generated) === 1 ? '' : 's')
+            . '. See MANIFEST.txt inside for what still needs completing by hand.'
+        );
     }
 
     /**

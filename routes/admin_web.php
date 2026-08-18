@@ -126,6 +126,16 @@ Route::prefix('inspector')->middleware(['auth', 'role.inspector'])->group(functi
         Route::get('/summary', [InspectorInspectionController::class, 'summary'])->name('inspector.summary');
         Route::get('/documents', [InspectorInspectionController::class, 'documents'])->name('inspector.documents');
         Route::get('/print', [InspectorInspectionController::class, 'print'])->name('inspector.print');
+
+        // Session-authenticated twin of the /api/.../generate-documents
+        // endpoint. The documents view's Generate All button is a browser
+        // form POST; the API route sits behind auth:sanctum with
+        // EnsureFrontendRequestsAreStateful commented out, so a cookie POST
+        // is 401'd there — and that endpoint answers JSON regardless. This
+        // one goes through the web stack, calls the same service method and
+        // redirects back with a flash, which is what a form button wants.
+        Route::post('/generate-documents', [InspectorInspectionController::class, 'generateDocuments'])
+            ->name('inspector.documents.generate');
     });
 
     // History

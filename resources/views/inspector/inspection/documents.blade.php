@@ -65,11 +65,10 @@
                 @if($can_generate)
                     <div class="card">
                         <div class="card-body text-center">
-                            {{-- The endpoint lives in routes/api.php and is
-                                 unnamed; route('api.inspections.generate-documents')
-                                 does not exist and 500s the whole page. This view
-                                 never rendered until that was fixed. --}}
-                            <form action="{{ url('/api/inspections/' . $inspection->id . '/generate-documents') }}" method="POST">
+                            {{-- A named web route: the /api twin sits behind
+                                 auth:sanctum and answers JSON, neither of which
+                                 a browser form POST wants. --}}
+                            <form action="{{ route('inspector.documents.generate', $inspection) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-lg">
                                     <i data-feather="package"></i> Generate All Documents

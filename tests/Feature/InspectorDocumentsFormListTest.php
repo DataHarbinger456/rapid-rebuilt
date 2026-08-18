@@ -8,6 +8,7 @@ use App\Models\UserCase;
 use App\Models\Vehicle;
 use App\Services\PDFGeneratorService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -105,6 +106,79 @@ class InspectorDocumentsFormListTest extends TestCase
             $stray,
             'The view names HSMV forms that are not in PACKAGE_FORMS.'
         );
+    }
+
+    /**
+     * The Generate All button is a browser form POST, and this is the test
+     * that proves it works the way a browser actually submits it: session
+     * authenticated, through the web middleware stack, expecting a redirect
+     * back — not postJson to the API twin.
+     */
+    public function test_generate_all_submits_as_a_browser_form_and_redirects_back(): void
+    {
+        Storage::fake('private');
+
+        $inspector = $this->inspector();
+        $inspection = $this->passedInspection($inspector);
+
+        $response = $this->actingAs($inspector)
+            ->from('/inspector/inspections/' . $inspection->id . '/documents')
+            ->post('/inspector/inspections/' . $inspection->id . '/generate-documents');
+
+        $response->assertRedirect('/inspector/inspections/' . $inspection->id . '/documents');
+        $response->assertSessionHas('success');
+
+        $this->assertStringContainsString(
+            'document package generated',
+            strtolower(session('success'))
+        );
+
+        // The package really was generated, not just flashed about.
+        $this->assertNotEmpty(
+            app(\App\Services\PDFGeneratorService::class)
+                ->getGeneratedDocuments($inspection->userCase),
+            'The flash says success but no documents were filed.'
+        );
+
+        Storage::disk('private')->assertExists(
+            $inspection->userCase->fresh()->documents
+                ->firstWhere('document_type', 'hsmv_82040')
+                ->file_path
+        );
+    }
+
+    /**
+     * A failed inspection must not generate, and the failure must come back
+     * as a validation error redirect rather than JSON or a 500.
+     */
+    public function test_a_failed_inspection_redirects_back_with_an_error(): void
+    {
+        $inspector = $this->inspector();
+        $inspection = $this->passedInspection($inspector);
+        $inspection->update(['result' => 'failed']);
+
+        $response = $this->actingAs($inspector)
+            ->from('/inspector/inspections/' . $inspection->id . '/documents')
+            ->post('/inspector/inspections/' . $inspection->id . '/generate-documents');
+
+        $response->assertRedirect('/inspector/inspections/' . $inspection->id . '/documents');
+        $response->assertSessionHasErrors('error');
+    }
+
+    /**
+     * Another inspector cannot generate for someone else's inspection. The
+     * route sits inside role.inspector, so the guard here is the ownership
+     * check in the controller.
+     */
+    public function test_another_inspector_is_refused(): void
+    {
+        $owner = $this->inspector();
+        $inspection = $this->passedInspection($owner);
+
+        $response = $this->actingAs($this->inspector())
+            ->post('/inspector/inspections/' . $inspection->id . '/generate-documents');
+
+        $response->assertStatus(403);
     }
 
     /**
