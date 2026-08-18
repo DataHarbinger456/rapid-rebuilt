@@ -81,7 +81,9 @@
                         <h5>Upload Photos</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('api.inspections.photos', $inspection) }}" method="POST" enctype="multipart/form-data" id="upload-form">
+                        {{-- Same as the checklist form: the photo-upload endpoint
+                             is registered unnamed, so the URI is the reference. --}}
+                        <form action="{{ url('/api/inspections/' . $inspection->id . '/photos') }}" method="POST" enctype="multipart/form-data" id="upload-form">
                             @csrf
                             <div class="row">
                                 <div class="col-md-4">
@@ -89,11 +91,11 @@
                                         <label class="form-label">Photo Type</label>
                                         <select name="photo_type" class="form-select" required>
                                             <option value="">Select type...</option>
-                                            @foreach($required_photos as $type)
+                                            @foreach($required_photos as $type => $config)
                                                 <option value="{{ $type }}"
-                                                    {{ in_array($type, $missing_photos) ? '' : 'disabled' }}>
-                                                    {{ ucfirst(str_replace('_', ' ', $type)) }}
-                                                    {{ in_array($type, $missing_photos) ? '(Required)' : '(Done)' }}
+                                                    {{ isset($missing_photos[$type]) ? '' : 'disabled' }}>
+                                                    {{ $config['label'] }}
+                                                    {{ isset($missing_photos[$type]) ? '(Required)' : '(Done)' }}
                                                 </option>
                                             @endforeach
                                             <option value="other">Other</option>
@@ -131,7 +133,11 @@
             <div class="col-12">
                 <h5 class="mb-3">Required Photos</h5>
             </div>
-            @foreach($required_photos as $type)
+            {{-- required_photos is keyed type => [label, required]; iterating
+                 the values as $type passed arrays into e() and crashed the
+                 screen. missing_photos is likewise keyed type => label, so
+                 membership is a key check, not in_array on the labels. --}}
+            @foreach($required_photos as $type => $config)
                 @php
                     $photo = $photos->firstWhere('photo_type', $type);
                 @endphp
@@ -149,7 +155,7 @@
                                 <div class="text-center text-muted">
                                     <i data-feather="camera" style="width: 48px; height: 48px;"></i>
                                     <p class="mt-2 mb-0">{{ ucfirst(str_replace('_', ' ', $type)) }}</p>
-                                    <small class="text-danger">Required</small>
+                                    <small class="text-danger">{{ $config['required'] ? 'Required' : 'Optional' }}</small>
                                 </div>
                             </div>
                         @endif
@@ -159,7 +165,7 @@
         </div>
 
         <!-- Additional Photos -->
-        @php $additionalPhotos = $photos->filter(fn($p) => !in_array($p->photo_type, $required_photos)); @endphp
+        @php $additionalPhotos = $photos->filter(fn($p) => !array_key_exists($p->photo_type, $required_photos)); @endphp
         @if($additionalPhotos->count() > 0)
             <div class="row mt-4">
                 <div class="col-12">
@@ -186,9 +192,19 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body d-flex justify-content-between">
-                        <a href="{{ route('inspector.checklist', $inspection->scheduling) }}" class="btn btn-outline-secondary">
-                            <i data-feather="arrow-left"></i> Back to Checklist
-                        </a>
+                        {{-- An inspection always carries its scheduling when
+                             started from an appointment, but one created any
+                             other way has none, and route() with a null
+                             parameter 500s. Fall back to the summary. --}}
+                        @if($inspection->scheduling)
+                            <a href="{{ route('inspector.checklist', $inspection->scheduling) }}" class="btn btn-outline-secondary">
+                                <i data-feather="arrow-left"></i> Back to Checklist
+                            </a>
+                        @else
+                            <a href="{{ route('inspector.summary', $inspection) }}" class="btn btn-outline-secondary">
+                                <i data-feather="arrow-left"></i> Back to Summary
+                            </a>
+                        @endif
                         <a href="{{ route('inspector.components', $inspection) }}" class="btn btn-primary">
                             Next: Verify Components <i data-feather="arrow-right"></i>
                         </a>

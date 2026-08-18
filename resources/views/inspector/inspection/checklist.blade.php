@@ -100,17 +100,26 @@
 
             <!-- Checklist -->
             <div class="col-xl-8">
-                <form id="checklist-form" action="{{ route('api.inspections.update', $inspection) }}" method="POST">
+                {{-- routes/api.php registers this endpoint without a name, so
+                     route('api.inspections.update') does not exist — that
+                     name 500ed the whole screen. The URI is the reference. --}}
+                <form id="checklist-form" action="{{ url('/api/inspections/' . $inspection->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
-                    @foreach($checklist_template as $category => $items)
+                    {{-- The template is category => ['title' => …, 'items' =>
+                         key => ['label' => …]]. Iterating the outer array
+                         directly passed the 'title' string and the 'items'
+                         ARRAY into the label slot, which crashed the screen
+                         on htmlspecialchars(). One level deeper is the fix;
+                         the category key is a slug, so the header uses title. --}}
+                    @foreach($checklist_template as $category => $section)
                         <div class="card mb-3">
                             <div class="card-header">
-                                <h5>{{ $category }}</h5>
+                                <h5>{{ $section['title'] }}</h5>
                             </div>
                             <div class="card-body p-0">
-                                @foreach($items as $key => $label)
+                                @foreach($section['items'] as $key => $item)
                                     @php $isChecked = ($inspection->checklist_data[$key] ?? false); @endphp
                                     <div class="checklist-item {{ $isChecked ? 'checked' : '' }}">
                                         <div class="form-check d-flex align-items-center">
@@ -121,7 +130,7 @@
                                                    value="1"
                                                    {{ $isChecked ? 'checked' : '' }}>
                                             <label class="form-check-label flex-grow-1" for="check_{{ $key }}">
-                                                {{ $label }}
+                                                {{ $item['label'] }}
                                             </label>
                                         </div>
                                     </div>
