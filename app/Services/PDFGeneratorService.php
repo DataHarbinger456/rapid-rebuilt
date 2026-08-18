@@ -159,7 +159,7 @@ class PDFGeneratorService
         'HSMV_82040' => 'Application for Certificate of Title',
         'HSMV_82042' => 'VIN and Odometer Verification',
         'HSMV_84490' => 'Statement of Builder',
-        'HSMV_84491' => 'Rebuilt Vehicle Inspection Application',
+        'HSMV_84491' => 'Statement of Builder, Additional Sheet',
         'HSMV_82050' => 'Notice of Sale / Bill of Sale',
         'HSMV_82053' => 'Power of Attorney',
     ];
