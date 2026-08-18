@@ -40,15 +40,15 @@
                                         <div class="col-md-3">
                                             <p class="mb-1">
                                                 <strong>Case:</strong>
-                                                <a href="{{ route('customer.cases.show', $appointment->case) }}">
-                                                    #{{ $appointment->case->case_number }}
+                                                <a href="{{ route('customer.cases.show', $appointment->userCase) }}">
+                                                    #{{ $appointment->userCase->case_number }}
                                                 </a>
                                             </p>
-                                            @if($appointment->case->vehicle)
+                                            @if($appointment->userCase->vehicle)
                                                 <small class="text-muted">
-                                                    {{ $appointment->case->vehicle->year }}
-                                                    {{ $appointment->case->vehicle->make }}
-                                                    {{ $appointment->case->vehicle->model }}
+                                                    {{ $appointment->userCase->vehicle->year }}
+                                                    {{ $appointment->userCase->vehicle->make }}
+                                                    {{ $appointment->userCase->vehicle->model }}
                                                 </small>
                                             @endif
                                         </div>
@@ -108,14 +108,14 @@
                                         <tr>
                                             <td>{{ $appointment->start->format('M j, Y g:i A') }}</td>
                                             <td>
-                                                <a href="{{ route('customer.cases.show', $appointment->case) }}">
-                                                    #{{ $appointment->case->case_number }}
+                                                <a href="{{ route('customer.cases.show', $appointment->userCase) }}">
+                                                    #{{ $appointment->userCase->case_number }}
                                                 </a>
                                             </td>
                                             <td>
-                                                @if($appointment->case->vehicle)
-                                                    {{ $appointment->case->vehicle->year }}
-                                                    {{ $appointment->case->vehicle->make }}
+                                                @if($appointment->userCase->vehicle)
+                                                    {{ $appointment->userCase->vehicle->year }}
+                                                    {{ $appointment->userCase->vehicle->make }}
                                                 @endif
                                             </td>
                                             <td>

@@ -35,8 +35,11 @@ class UserFormSchedulingPolicy
      */
     public function view(User $user, UserFormScheduling $appointment): bool
     {
-        // Customer can view their appointments
-        if ($appointment->case && $user->id === $appointment->case->user_id) {
+        // Customer can view their appointments. The relation is userCase:
+        // ->case does not exist and silently evaluated to null, which made
+        // this (and update/cancel below) unreachable, so no customer could
+        // ever view or reschedule their own appointment.
+        if ($appointment->userCase && $user->id === $appointment->userCase->user_id) {
             return true;
         }
 
@@ -62,7 +65,7 @@ class UserFormSchedulingPolicy
     public function update(User $user, UserFormScheduling $appointment): bool
     {
         // Customer can reschedule their appointments
-        if ($appointment->case && $user->id === $appointment->case->user_id) {
+        if ($appointment->userCase && $user->id === $appointment->userCase->user_id) {
             return $appointment->canReschedule();
         }
 
@@ -80,7 +83,7 @@ class UserFormSchedulingPolicy
     public function cancel(User $user, UserFormScheduling $appointment): bool
     {
         // Customer can cancel
-        if ($appointment->case && $user->id === $appointment->case->user_id) {
+        if ($appointment->userCase && $user->id === $appointment->userCase->user_id) {
             return $appointment->canCancel();
         }
 

@@ -64,6 +64,30 @@ class UserFormScheduling extends Model
         return $this->belongsTo(UserCase::class);
     }
 
+    /**
+     * May the customer still move this appointment?
+     *
+     * Written for the policy, which had been calling it since the policy was
+     * written — unreachable until the ->case null bug was fixed, so its
+     * absence never crashed. An appointment that has started, completed or
+     * already ended can no longer be moved.
+     */
+    public function canReschedule(): bool
+    {
+        return in_array($this->status, ['pending', 'confirmed'])
+            && $this->end->isFuture();
+    }
+
+    /**
+     * May the customer still cancel this appointment? Slightly wider than
+     * rescheduling: an in-progress inspection can be abandoned but not moved.
+     */
+    public function canCancel(): bool
+    {
+        return in_array($this->status, ['pending', 'confirmed', 'in_progress'])
+            && $this->end->isFuture();
+    }
+
     public function inspector()
     {
         return $this->belongsTo(User::class, 'inspector_id');

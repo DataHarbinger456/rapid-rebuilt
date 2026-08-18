@@ -35,7 +35,7 @@ class AppointmentController extends Controller
             ->orderBy('start')
             ->get();
 
-        $pastAppointments = UserFormScheduling::with(['userCase.vehicle', 'inspection'])
+        $pastAppointments = UserFormScheduling::with(['userCase.vehicle', 'userCase.inspection'])
             ->whereHas('userCase', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
@@ -60,7 +60,11 @@ class AppointmentController extends Controller
     {
         $this->authorize('view', $appointment);
 
-        $appointment->load(['userCase.vehicle', 'inspector', 'inspection']);
+        // The inspection hangs off the case, not the appointment: an
+        // appointment has no inspection relation, and loading one threw
+        // RelationNotFoundException behind the policy bug that made this
+        // action unreachable anyway.
+        $appointment->load(['userCase.vehicle', 'userCase.inspection', 'inspector']);
 
         return view('customer.appointments.show', compact('appointment'));
     }
