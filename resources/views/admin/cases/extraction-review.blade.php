@@ -14,20 +14,6 @@
     @endcomponent
 
     <div class="container-fluid">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
         @if($extraction->status === \App\Models\DocumentExtraction::STATUS_FAILED)
             <div class="alert alert-danger">
                 <strong>This document could not be read.</strong>

@@ -71,6 +71,37 @@
                         <!-- Page Sidebar Ends-->
                         <div class="page-body">
                             <!-- Container-fluid starts-->
+                            {{-- One implementation of flash messages for every
+                                 screen extending this layout. The inspector's
+                                 Generate All flash, validation errors and every
+                                 redirect message render here; views used to
+                                 carry their own copies, which drifted and never
+                                 existed on inspector screens at all. --}}
+                            @if(session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+
+                            @if(session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ session('error') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+
+                            @if($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <ul class="mb-0">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            @endif
+
                             @yield('content')
                             <!-- Container-fluid Ends-->
                         </div>
