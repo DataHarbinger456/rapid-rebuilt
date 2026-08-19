@@ -193,13 +193,26 @@ class EveryScreenRendersTest extends TestCase
 
         $status = $response->status();
 
-        // The print screen's correct behaviour without a generated package
-        // is the flash redirect, not a render: its fixture seeds a passed
-        // inspection but never generates documents, and print() sends the
-        // inspector back with "No documents generated yet". Asserting that
-        // redirect keeps this suite honest about reachable states instead
-        // of generating a package just to paint the screen.
-        $expected = $uri === '/inspector/inspections/{inspection}/print' ? 302 : 200;
+        // Some screens' correct behaviour in this fixture is a redirect, not
+        // a render, and each is listed with its reason rather than quietly
+        // loosened to "any 2xx/3xx":
+        //
+        // - print: seeds a passed inspection but never generates documents,
+        //   and print() sends the inspector back with "No documents generated
+        //   yet". Asserting the redirect keeps the suite honest about
+        //   reachable states instead of generating a package just to paint
+        //   the screen.
+        // - payment-success: verifies its session_id against the real Stripe
+        //   API, and the fixture's fake session can never verify, so the
+        //   correct response is the "Could not verify payment" redirect. A
+        //   200 here would require mocking Stripe, which this suite does not
+        //   do; the payment flow belongs to its own tests.
+        $redirectsByDesign = [
+            '/inspector/inspections/{inspection}/print',
+            '/customer/cases/{case}/payment-success',
+        ];
+
+        $expected = in_array($uri, $redirectsByDesign, true) ? 302 : 200;
 
         $this->assertTrue(
             $status === $expected,
