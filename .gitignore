@@ -25,3 +25,12 @@ admin-rapid.sql
 
 # Self-contained pdftk staged by scripts/install-pdftk.sh (~161MB, JRE + jars)
 /vendor-bin
+
+# Throwaway Playwright browser drivers used while building/verifying screens.
+# Not part of the client deliverable; real tooling (demo-db.sh,
+# install-pdftk.sh, extract-samples.php, reset-password-e2e.php) stays tracked.
+scripts/demo-flow*.mjs
+scripts/demo-ids.mjs
+scripts/snap.mjs
+scripts/settings-flow.mjs
+scripts/shot-admin-users.cjs
