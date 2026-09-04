@@ -376,6 +376,10 @@ class NotificationService
      */
     protected function sendEmail(User $user, string $subject, string $template, array $data): void
     {
+        if (!$user->getPreference('notifications.email', true)) {
+            return;
+        }
+
         try {
             Mail::send($template, $data, function ($message) use ($user, $subject) {
                 $message->to($user->email, $user->full_name)
