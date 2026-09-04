@@ -73,7 +73,7 @@
                         <h5>Change Password</h5>
                     </div>
                     <div class="card-body">
-                        <form action="#" method="POST">
+                        <form action="{{ route('customer.settings.password') }}" method="POST">
                             @csrf
                             <div class="row mb-3">
                                 <div class="col-md-4">

@@ -5,6 +5,7 @@ use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Customer\CaseController;
 use App\Http\Controllers\Customer\DocumentController;
 use App\Http\Controllers\Customer\AppointmentController;
+use App\Http\Controllers\Customer\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,9 +82,9 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'verified'])->
         return view('customer.profile');
     })->name('profile');
 
-    Route::get('/settings', function () {
-        return view('customer.settings');
-    })->name('settings');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+    Route::post('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.preferences');
 
     // Support & FAQ
     Route::get('/support', function () {
