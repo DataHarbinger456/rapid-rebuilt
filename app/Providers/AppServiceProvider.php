@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Mail\Markdown;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Services\CaseService;
@@ -65,6 +66,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         $project_title = '| Rapid Rebuilt LLC';
-        View::share('title', $project_title);   
+        View::share('title', $project_title);
+
+        // The notification emails are markdown templates using mail::
+        // components, but NotificationService sends them through
+        // closure-based Mail::send, which renders plain Blade and never
+        // registers that namespace (only the Markdown renderer does) -- so
+        // every one of them died on "No hint path defined for [mail]" and
+        // was swallowed by sendEmail()'s catch. Register it globally, using
+        // the renderer's own resolved paths so the published theme in
+        // config('mail.markdown.paths') wins and the framework default
+        // remains the fallback.
+        View::addNamespace('mail', $this->app->make(Markdown::class)->htmlComponentPaths());
     }
 }

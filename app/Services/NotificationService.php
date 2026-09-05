@@ -29,14 +29,21 @@ class NotificationService
         $this->sendEmail(
             $case->user,
             'Case Submitted - ' . $case->case_number,
-            'emails.case-submitted',
-            ['case' => $case]
+            'emails.cases.submitted',
+            [
+                'case' => $case,
+                'user' => $case->user,
+                'vehicle' => $case->vehicle,
+                'dashboardUrl' => route('customer.dashboard'),
+            ]
         );
 
-        // Notify staff
+        // Notify staff. The case id is required: notifications.user_case_id
+        // is NOT NULL, and this notice is about that case.
         $this->notifyStaff(
             'New Case Submitted',
-            "New case {$case->case_number} from {$case->user->full_name} needs review."
+            "New case {$case->case_number} from {$case->user->full_name} needs review.",
+            $case->id
         );
     }
 
@@ -159,8 +166,13 @@ class NotificationService
         $this->sendEmail(
             $case->user,
             'Appointment Confirmation - ' . $case->case_number,
-            'emails.appointment-confirmation',
-            ['scheduling' => $scheduling, 'case' => $case]
+            'emails.appointments.confirmation',
+            [
+                'appointment' => $scheduling,
+                'case' => $case,
+                'vehicle' => $case->vehicle,
+                'detailsUrl' => route('customer.appointments.show', $scheduling),
+            ]
         );
 
         // Notify inspector
@@ -247,8 +259,14 @@ class NotificationService
         $this->sendEmail(
             $case->user,
             'Appointment Reminder - ' . $case->case_number,
-            'emails.appointment-reminder',
-            ['scheduling' => $scheduling, 'case' => $case, 'type' => $type]
+            'emails.appointments.reminder',
+            [
+                'appointment' => $scheduling,
+                'case' => $case,
+                'vehicle' => $case->vehicle,
+                'hoursUntil' => $type === '1h' ? 1 : 24,
+                'detailsUrl' => route('customer.appointments.show', $scheduling),
+            ]
         );
 
         // SMS reminder if enabled
@@ -304,8 +322,14 @@ class NotificationService
         $this->sendEmail(
             $case->user,
             "{$title} - " . $case->case_number,
-            'emails.inspection-result',
-            ['inspection' => $inspection, 'case' => $case]
+            'emails.inspections.completed',
+            [
+                'inspection' => $inspection,
+                'case' => $case,
+                'vehicle' => $case->vehicle,
+                'passed' => $passed,
+                'caseUrl' => route('customer.cases.show', $case),
+            ]
         );
     }
 
@@ -359,7 +383,7 @@ class NotificationService
         string $type,
         string $title,
         string $message,
-        ?int $caseId = null
+        int $caseId
     ): Notification {
         return Notification::create([
             'user_id' => $userId,
@@ -418,7 +442,7 @@ class NotificationService
     /**
      * Notify all staff members
      */
-    protected function notifyStaff(string $title, string $message): void
+    protected function notifyStaff(string $title, string $message, int $caseId): void
     {
         $staffMembers = User::staff()->get();
 
@@ -427,33 +451,31 @@ class NotificationService
                 $staff->id,
                 'staff_notification',
                 $title,
-                $message
+                $message,
+                $caseId
             );
         }
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read.
+     *
+     * There is no is_read column: read_at (nullable timestamp) and status
+     * are the real ones, and the model already stamps both, skipping rows
+     * that are already read.
      */
     public function markAsRead(Notification $notification): void
     {
-        $notification->update([
-            'is_read' => true,
-            'read_at' => now(),
-        ]);
+        $notification->markAsRead();
     }
 
     /**
-     * Mark all notifications as read for user
+     * Mark all notifications as read for user. Returns the number of rows
+     * that were still unread.
      */
-    public function markAllAsRead(User $user): void
+    public function markAllAsRead(User $user): int
     {
-        Notification::where('user_id', $user->id)
-            ->where('is_read', false)
-            ->update([
-                'is_read' => true,
-                'read_at' => now(),
-            ]);
+        return Notification::markAllAsReadForUser($user->id);
     }
 
     /**
@@ -461,9 +483,7 @@ class NotificationService
      */
     public function getUnreadCount(User $user): int
     {
-        return Notification::where('user_id', $user->id)
-            ->where('is_read', false)
-            ->count();
+        return Notification::forUser($user->id)->unread()->count();
     }
 
     /**
