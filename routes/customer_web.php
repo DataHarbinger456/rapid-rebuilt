@@ -5,6 +5,8 @@ use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Customer\CaseController;
 use App\Http\Controllers\Customer\DocumentController;
 use App\Http\Controllers\Customer\AppointmentController;
+use App\Http\Controllers\Customer\MessageController;
+use App\Http\Controllers\Customer\NotificationController;
 use App\Http\Controllers\Customer\SettingsController;
 
 /*
@@ -17,7 +19,7 @@ use App\Http\Controllers\Customer\SettingsController;
 |
 */
 
-Route::prefix('customer')->name('customer.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('customer')->name('customer.')->middleware(['auth'])->group(function () {
 
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -67,15 +69,9 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'verified'])->
     });
 
     // Messages
-    Route::get('/messages', function () {
-        // Placeholder - implement messages
-        return view('customer.messages.index');
-    })->name('messages');
-
-    Route::get('/messages/create', function () {
-        // Placeholder - implement message creation
-        return view('customer.messages.create');
-    })->name('messages.create');
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages');
+    Route::get('/messages/create', [MessageController::class, 'create'])->name('messages.create');
+    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 
     // Profile & Settings
     Route::get('/profile', function () {
@@ -96,7 +92,7 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'verified'])->
     })->name('faq');
 
     // Notifications
-    Route::get('/notifications', function () {
-        return view('customer.notifications');
-    })->name('notifications');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 });

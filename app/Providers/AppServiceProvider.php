@@ -78,5 +78,24 @@ class AppServiceProvider extends ServiceProvider
         // config('mail.markdown.paths') wins and the framework default
         // remains the fallback.
         View::addNamespace('mail', $this->app->make(Markdown::class)->htmlComponentPaths());
+
+        // The customer header's notification bell. Every customer screen
+        // renders this partial, so the data rides a composer instead of
+        // every controller having to remember to pass it.
+        View::composer('layouts.customer.partials.header', function ($view) {
+            $user = auth()->user();
+
+            if (!$user) {
+                $view->with(['notifications' => collect(), 'unreadNotifications' => 0]);
+                return;
+            }
+
+            $service = $this->app->make(NotificationService::class);
+
+            $view->with([
+                'notifications' => $service->getUserNotifications($user, 5),
+                'unreadNotifications' => $service->getUnreadCount($user),
+            ]);
+        });
     }
 }

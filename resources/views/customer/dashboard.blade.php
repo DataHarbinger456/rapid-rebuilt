@@ -220,7 +220,9 @@
                                             </span>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <p class="mb-1">{{ $notification->message }}</p>
+                                            {{-- There is no `message` attribute: the columns
+                                                 are `title` and `notification`. --}}
+                                            <p class="mb-1">{{ $notification->title ?? $notification->notification }}</p>
                                             <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                                         </div>
                                     </div>

@@ -37,11 +37,13 @@
                         @forelse($notifications ?? [] as $notification)
                             <li class="noti-{{ $notification->read_at ? '' : 'primary' }}">
                                 <div class="media">
-                                    <span class="notification-bg bg-light-{{ $notification->type ?? 'primary' }}">
-                                        <i data-feather="{{ $notification->icon ?? 'bell' }}"></i>
+                                    <span class="notification-bg bg-light-{{ $notification->color }}">
+                                        <i data-feather="{{ $notification->icon }}"></i>
                                     </span>
                                     <div class="media-body">
-                                        <p>{{ $notification->message ?? '' }}</p>
+                                        {{-- There is no `message` attribute: the columns are
+                                             `title` and `notification`. --}}
+                                        <p>{{ $notification->title ?? $notification->notification }}</p>
                                         <span>{{ $notification->created_at->diffForHumans() }}</span>
                                     </div>
                                 </div>
@@ -114,5 +116,11 @@
                 </li>
             </ul>
         </div>
+
+        {{-- Below lg the theme hides .nav-right > ul entirely (visibility:hidden)
+             until .open is added, which script.js binds to this button. Every
+             other layout's header ships it; without it the bell and profile
+             menu are unreachable on a phone. --}}
+        <div class="d-lg-none mobile-toggle pull-right w-auto"><i data-feather="more-horizontal"></i></div>
     </div>
 </div>

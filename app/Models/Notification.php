@@ -68,30 +68,41 @@ class Notification extends Model
         return $this->read_at !== null;
     }
 
+    /**
+     * Feather icon name. Every consumer feeds this straight to data-feather,
+     * so the values must be icons feather actually ships: the previous
+     * FontAwesome-style names (info-circle, exclamation-triangle,
+     * times-circle) silently rendered as nothing.
+     */
     public function getIconAttribute(): string
     {
         $icons = [
-            'info' => 'info-circle',
+            'info' => 'info',
             'success' => 'check-circle',
-            'warning' => 'exclamation-triangle',
-            'error' => 'times-circle',
+            'warning' => 'alert-triangle',
+            'error' => 'x-circle',
             'reminder' => 'bell',
         ];
 
         return $icons[$this->type] ?? 'bell';
     }
 
+    /**
+     * Theme colour token, for font-* / bg-light-* classes. Previously this
+     * returned plain colour names (blue, green, ...) that match no class in
+     * the stylesheet.
+     */
     public function getColorAttribute(): string
     {
         $colors = [
-            'info' => 'blue',
-            'success' => 'green',
-            'warning' => 'yellow',
-            'error' => 'red',
-            'reminder' => 'purple',
+            'info' => 'primary',
+            'success' => 'success',
+            'warning' => 'warning',
+            'error' => 'danger',
+            'reminder' => 'primary',
         ];
 
-        return $colors[$this->type] ?? 'gray';
+        return $colors[$this->type] ?? 'secondary';
     }
 
     // =====================
