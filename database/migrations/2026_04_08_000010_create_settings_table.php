@@ -51,13 +51,13 @@ return new class extends Migration
             ['key' => 'admin_notification_email', 'value' => 'admin@rapidrebuilt.com', 'type' => 'string', 'group' => 'notifications', 'description' => 'Email para notificaciones de admin'],
 
             // Empresa
-            ['key' => 'company_name', 'value' => 'Rapid Rebuilt', 'type' => 'string', 'group' => 'company', 'description' => 'Nombre de la empresa', 'is_public' => true],
+            ['key' => 'business_name', 'value' => 'Rapid Rebuilt', 'type' => 'string', 'group' => 'company', 'description' => 'Nombre de la empresa', 'is_public' => true],
             ['key' => 'company_address', 'value' => '', 'type' => 'string', 'group' => 'company', 'description' => 'Direccion de la empresa', 'is_public' => true],
             ['key' => 'company_city', 'value' => 'Tampa', 'type' => 'string', 'group' => 'company', 'description' => 'Ciudad', 'is_public' => true],
             ['key' => 'company_state', 'value' => 'FL', 'type' => 'string', 'group' => 'company', 'description' => 'Estado', 'is_public' => true],
             ['key' => 'company_zip', 'value' => '', 'type' => 'string', 'group' => 'company', 'description' => 'Codigo postal', 'is_public' => true],
             ['key' => 'company_phone', 'value' => '', 'type' => 'string', 'group' => 'company', 'description' => 'Telefono', 'is_public' => true],
-            ['key' => 'company_email', 'value' => 'info@rapidrebuilt.com', 'type' => 'string', 'group' => 'company', 'description' => 'Email de contacto', 'is_public' => true],
+            ['key' => 'business_email', 'value' => 'info@rapidrebuilt.com', 'type' => 'string', 'group' => 'company', 'description' => 'Email de contacto', 'is_public' => true],
             ['key' => 'prvip_license_number', 'value' => '', 'type' => 'string', 'group' => 'company', 'description' => 'Numero de licencia PRVIP'],
             ['key' => 'tax_id', 'value' => '', 'type' => 'string', 'group' => 'company', 'description' => 'Tax ID / EIN'],
 

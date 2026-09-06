@@ -196,11 +196,11 @@ class Setting extends Model
 
     public static function companyName(): string
     {
-        return self::get('company_name', 'Rapid Rebuilt');
+        return self::get('business_name', 'Rapid Rebuilt');
     }
 
     public static function companyEmail(): string
     {
-        return self::get('company_email', 'info@rapidrebuilt.com');
+        return self::get('business_email', 'info@rapidrebuilt.com');
     }
 }
