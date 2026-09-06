@@ -237,6 +237,120 @@ class CaseController extends Controller
     }
 
     /**
+     * Update a draft case.
+     *
+     * Mirrors store()'s contract minus the document uploads: drafts keep the
+     * documents they already have, which the separate documents screen owns.
+     * The policy permits update well past draft (paid, scheduling, ...), so
+     * the draft-only rule is enforced here exactly as edit() does it.
+     */
+    public function update(Request $request, UserCase $case)
+    {
+        $this->authorize('update', $case);
+
+        if ($case->status !== 'draft') {
+            return redirect()
+                ->route('customer.cases.show', $case)
+                ->with('error', 'Only draft cases can be edited.');
+        }
+
+        $request->validate([
+            'vin' => 'required|string|size:17',
+            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'make' => 'required|string|max:100',
+            'model' => 'required|string|max:100',
+            'color' => 'required|string|max:50',
+            'odometer' => 'required|integer|min:0',
+            'title_state' => ['required', Rule::in(array_keys(Vehicle::US_STATES))],
+            'vehicle_type' => ['required', Rule::in(array_keys(Vehicle::VEHICLE_TYPES))],
+            'components' => 'required|array|min:1',
+            'components.*.type' => ['required', Rule::in(array_keys(Component::PART_TYPES))],
+            'components.*.source' => ['required', Rule::in(array_keys(Component::CONDITIONS))],
+            'components.*.source_vin' => 'nullable|string|max:255',
+            'components.*.description' => 'nullable|string|max:255',
+        ], [
+            'components.*.type.in' => 'Please pick a component type from the list. Reload the page if the options look out of date.',
+            'components.*.source.in' => 'Please pick a source from the list. Reload the page if the options look out of date.',
+            'vehicle_type.in' => 'Please pick a vehicle type from the list. Reload the page if the options look out of date.',
+            'title_state.in' => 'Please pick a state from the list. Reload the page if the options look out of date.',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // updateOrCreate, not update: a draft saved before the vehicle step
+            // was completed has no vehicle row yet.
+            Vehicle::updateOrCreate(
+                ['user_case_id' => $case->id],
+                [
+                    'vin' => strtoupper($request->vin),
+                    'year' => $request->year,
+                    'make' => $request->make,
+                    'model' => $request->model,
+                    'body_type' => $request->body_style,
+                    'color' => $request->color,
+                    'engine_type' => $request->engine,
+                    'odometer_reading' => $request->odometer,
+                    'title_state' => $request->title_state,
+                    'vehicle_type' => $request->vehicle_type,
+                ]
+            );
+
+            // Replace the component set wholesale, using the same new-part
+            // receipt / salvaged-VIN split as store().
+            $case->components()->delete();
+
+            foreach ($request->components as $componentData) {
+                if (empty($componentData['type'])) continue;
+
+                $sourceReference = $componentData['source_vin'] ?? null;
+                $isNewPart = $componentData['source'] === 'new';
+
+                Component::create([
+                    'user_case_id' => $case->id,
+                    'part_type' => $componentData['type'],
+                    'condition' => $componentData['source'],
+                    'serial_number' => $isNewPart ? null : $sourceReference,
+                    'receipt_number' => $isNewPart ? $sourceReference : null,
+                    'other_description' => $componentData['description'] ?? null,
+                ]);
+            }
+
+            $case->update([
+                'status' => $request->has('save_draft') ? 'draft' : 'submitted',
+                'total_amount' => $this->calculateEstimate($request),
+            ]);
+
+            $case->timeline()->create([
+                'event_type' => 'status_changed',
+                'title' => $request->has('save_draft') ? 'Case Draft Updated' : 'Case Submitted',
+                'description' => $request->has('save_draft')
+                    ? 'Case draft was updated'
+                    : 'Case was submitted for processing',
+            ]);
+
+            DB::commit();
+
+            if ($request->has('save_draft')) {
+                return redirect()
+                    ->route('customer.cases.edit', $case)
+                    ->with('success', 'Draft updated successfully.');
+            }
+
+            return redirect()
+                ->route('customer.cases.show', $case)
+                ->with('success', 'Case submitted successfully!');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update case. Please try again.');
+        }
+    }
+
+    /**
      * Delete draft case
      */
     public function destroy(UserCase $case)
