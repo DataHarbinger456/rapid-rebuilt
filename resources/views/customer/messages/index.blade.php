@@ -2,6 +2,17 @@
 
 @section('title')Messages @endsection
 
+@push('css')
+<style>
+/* Unread accent. Deliberately not .bg-light: the theme pairs that class with
+   color:#fff (style.css:1762), which renders white text on a pale grey row. */
+.message-unread {
+    border-left: 3px solid #7366ff;
+    background-color: #fbfbfe;
+}
+</style>
+@endpush
+
 @section('content')
     @component('components.breadcrumb')
         @slot('breadcrumb_title')
@@ -15,6 +26,9 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    @if(session('success'))
+                        <div class="alert alert-success mb-0">{{ session('success') }}</div>
+                    @endif
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5>Your Messages</h5>
                         <a href="{{ route('customer.messages.create') }}" class="btn btn-primary">
@@ -23,27 +37,27 @@
                     </div>
                     <div class="card-body p-0">
                         <ul class="list-group list-group-flush">
-                            @forelse($messages ?? [] as $message)
-                                <li class="list-group-item {{ !$message->read_at ? 'bg-light' : '' }}">
+                            @forelse($messages as $message)
+                                @php($isIncoming = $message->recipient_id === auth()->id())
+                                <li class="list-group-item {{ $isIncoming && !$message->read_at ? 'message-unread' : '' }}">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
                                             <h6 class="mb-1">
-                                                @if(!$message->read_at)
+                                                {{-- Unread only means anything for messages sent TO you. --}}
+                                                @if($isIncoming && !$message->read_at)
                                                     <span class="badge badge-primary me-2">New</span>
                                                 @endif
-                                                {{ $message->subject }}
+                                                {{ $message->sender_id === auth()->id() ? 'You' : ($message->sender?->full_name ?? 'Support') }}
                                             </h6>
-                                            <p class="text-muted mb-1">{{ Str::limit($message->content, 100) }}</p>
+                                            <p class="text-muted mb-1">{{ Str::limit($message->message, 100) }}</p>
                                             <small class="text-muted">
                                                 {{ $message->created_at->diffForHumans() }}
-                                                @if($message->case)
-                                                    | Case #{{ $message->case->case_number }}
+                                                @if($message->userCase)
+                                                    | Case
+                                                    <a href="{{ route('customer.cases.show', $message->userCase) }}">{{ $message->userCase->case_number }}</a>
                                                 @endif
                                             </small>
                                         </div>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">
-                                            <i data-feather="eye"></i>
-                                        </a>
                                     </div>
                                 </li>
                             @empty
@@ -57,6 +71,11 @@
                             @endforelse
                         </ul>
                     </div>
+                    @if($messages->hasPages())
+                        <div class="card-footer">
+                            {{ $messages->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
