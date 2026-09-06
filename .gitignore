@@ -34,3 +34,4 @@ scripts/demo-ids.mjs
 scripts/snap.mjs
 scripts/settings-flow.mjs
 scripts/shot-admin-users.cjs
+scripts/prod-smoke.mjs
