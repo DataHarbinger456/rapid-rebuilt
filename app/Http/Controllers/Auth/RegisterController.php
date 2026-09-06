@@ -150,11 +150,6 @@ class RegisterController extends Controller
         // Create the user in the database
         $user = User::create($userData);
     
-        // Generate a verification token
-        $token = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        $user->verification_token = $token;
-        $user->save();
-    
         // Log in the user
         auth()->login($user);
     

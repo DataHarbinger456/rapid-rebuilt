@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DMVFormController;
-use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -97,11 +96,6 @@ Route::get('/magic-login/{user}', [MagicLinkController::class, 'login'])
 // Registration routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
-
-// Email verification routes
-Route::get('/verify-email', [VerificationController::class, 'showVerificationForm'])->name('verify-email-form');
-Route::post('/verify-email', [VerificationController::class, 'verify'])->name('verify-email');
-Route::get('/resend-verification', [VerificationController::class, 'resendVerificationToken'])->name('resend-verification');
 
 // Route to show the password reset form
 Route::get('/forget-password', [PasswordResetController::class, 'showForgetPasswordForm'])->name('forget-password');
