@@ -10,10 +10,14 @@ Your vehicle inspection has been confirmed. Please review the details below:
 
 **Time:** {{ $appointment->start->format('g:i A') }} - {{ $appointment->end->format('g:i A') }}
 
-**Type:** {{ $appointment->inspection_type === 'mobile' ? 'Mobile Inspection (We come to you)' : 'Office Inspection' }}
+{{-- There is no inspection_type/location column. A mobile booking is the
+     one with a customer address to travel to; office bookings store none
+     (AppointmentController::store). Guard on location_address, not
+     full_address, which still returns the default state for office rows. --}}
+**Type:** {{ $appointment->location_address ? 'Mobile Inspection (We come to you)' : 'Office Inspection' }}
 
-@if($appointment->location)
-**Location:** {{ $appointment->location }}
+@if($appointment->location_address)
+**Location:** {{ $appointment->full_address }}
 @else
 **Location:** Rapid Rebuilt Office
 123 Main Street, Miami, FL 33101

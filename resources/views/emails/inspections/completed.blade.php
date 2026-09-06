@@ -23,7 +23,7 @@ Unfortunately, the vehicle did not pass all inspection requirements at this time
 
 ## Inspection Notes:
 
-{{ $inspection->notes ?? 'Please contact us for detailed information about the inspection results.' }}
+{{ $inspection->inspector_notes ?? 'Please contact us for detailed information about the inspection results.' }}
 
 ## Next Steps:
 

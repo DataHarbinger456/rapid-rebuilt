@@ -10,8 +10,8 @@ This is a friendly reminder that your vehicle inspection is scheduled for **{{ $
 
 **Time:** {{ $appointment->start->format('g:i A') }}
 
-@if($appointment->location)
-**Location:** {{ $appointment->location }}
+@if($appointment->location_address)
+**Location:** {{ $appointment->full_address }}
 @else
 **Location:** Rapid Rebuilt Office
 @endif
