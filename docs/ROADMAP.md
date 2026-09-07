@@ -70,11 +70,13 @@ with `pdftk dump_data_fields`. This was the main technical risk in S2 and it is 
 | 84490 | Statement of Builder | 134 |
 | 84491 | Statement of Builder — Additional Sheet | 122 |
 
-The previous build's **inspector view** (`resources/views/inspector/inspection/documents.blade.php:27-31`)
+The previous build's **inspector view** (`resources/views/inspector/inspection/documents.blade.php`)
 labelled 84490 "Rebuilt Motor Vehicle Inspection", 84491 "Major Component Parts Form",
-82050 "Statement of Builder" and 82053 "Odometer Disclosure Statement". All four are
-wrong, and **that view is still uncorrected** — recorded in `docs/82050-coverage.md`'s
-"Also found" section since 11 Aug, not yet fixed.
+82050 "Statement of Builder" and 82053 "Odometer Disclosure Statement". All four were
+wrong. **Fixed on 17 Aug** (`a6b7134`): the view no longer carries its own labels and
+reads `PDFGeneratorService::PACKAGE_FORMS` instead, so the packet manifest and the screen
+can never disagree again. The stale "Also found" note in `docs/82050-coverage.md`
+describes this same, now-fixed bug.
 
 `PDFGeneratorService` never carried those labels. Its own `PACKAGE_FORMS` labels were
 wrong for 84490 and 84491 at first and both are now corrected: 84490 to "Statement of
