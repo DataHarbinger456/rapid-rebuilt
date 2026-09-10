@@ -623,7 +623,7 @@ class HSMV82040GenerationTest extends TestCase
         $this->assertNull(
             config('hsmv_forms.hsmv_82053'),
             'The 82053 now has a field map, so it no longer throws. Point this '
-            . 'test at a form that is still unmapped (84490 or 84491).'
+            . 'test at a form that is still unmapped (84491).'
         );
 
         Storage::fake('private');

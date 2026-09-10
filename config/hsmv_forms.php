@@ -434,4 +434,114 @@ return [
         ],
     ],
 
+    'hsmv_84490' => [
+
+        // Statement of Builder.
+        'template' => 'docs/forms/84490.pdf',
+
+        // STEP 1 ONLY: the 20 descriptive fields. See docs/84490-coverage.md.
+        //
+        // This form is a builder's DECLARATION, sworn twice, and its back half
+        // belongs to the state. Section IV's perjury clause covers the whole
+        // document — "I declare that I have read the foregoing document and
+        // that the facts provided herein are true" — so everything printed
+        // above the applicant's signature becomes their sworn statement.
+        //
+        // What is filled here is descriptive fact already on file: the
+        // vehicle, the title, and the inspector's own recorded name and date.
+        // 114 of the 134 fields stay deliberately blank, and each has a reason
+        // pinned by a test in HSMV84490FieldMapTest:
+        //
+        //   Section III's two boxes swear to USAGE INTENT and EQUIPMENT under
+        //   s.320.0863. is_custom/is_street_rod describe a vehicle TYPE and are
+        //   the obvious wrong mapping — ticking one would be a false
+        //   attestation only the owner can make.
+        //
+        //   The Section I initials boxes are a personal attestation.
+        //
+        //   Section IV's applicant block is blocked on ambiguity 1: whether
+        //   the customer or Rapid Rebuilt signs as builder. The owner_* keys
+        //   are only correct in the first case.
+        //
+        //   The parts table (30 fields) is blocked on ambiguity 6:
+        //   components.condition stores new/used/repaired/rebuilt/original,
+        //   the form offers New/Used/Repaired/Aftermarket/Homemade, and two
+        //   values on each side have no counterpart.
+        //
+        //   The page-4 Yes/No matrix (22 buttons) is blocked on ambiguity 3:
+        //   which rows a PRVIP inspector may swear to.
+        //
+        //   Audit # and Region # are ours and unambiguous, but they sit inside
+        //   the Section V office block; they land with step 3 rather than
+        //   ahead of the question about who completes that block.
+        //
+        //   CoAgy waits on settings.prvip_license_number, which is empty.
+        //
+        // TRAP: field names in this PDF cannot be retyped by hand. 'Motorcycly'
+        // is misspelled in Section I, 'Source/VIN 2' lacks the '#' its four
+        // siblings have, 'Check Box28' and 'Check Box 28' differ by one space
+        // and are different fields, and numbers 19-23 do not exist. Copy every
+        // name from docs/forms/84490-fields.txt.
+        //
+        // TRAP: this form mixes 'On' and 'Yes' exports on the same page. The
+        // three buttons mapped below export 'On', which is checkboxValue()'s
+        // default, but the 25 parts-table buttons export 'Yes' and five of the
+        // matrix buttons export 'On' where their neighbours export 'Yes'. Both
+        // sets are pinned by test so the next pass cannot guess.
+        'fields' => [
+
+            // HEADER: type of build. OTHER is unmapped — no key is derived for
+            // it, and the free-text description beside it has no source, so a
+            // ticked OTHER with no description says less than a blank pair.
+            'REBUILT' => ['checkbox' => 'is_rebuilt', 'on' => 'On'],
+            'ASPT' => ['checkbox' => 'is_assembled_from_parts', 'on' => 'On'],
+            'KIT CAR' => ['checkbox' => 'is_kit_car', 'on' => 'On'],
+
+            // SECTION I: description.
+            //
+            // The three vehicle-class buttons (Motor Vehicle / Motorcycle /
+            // Mobile Home) are unmapped: no vehicle-class column exists
+            // anywhere in the schema. Length and the second title pair have no
+            // source either.
+            'Year' => 'year',
+            'Make' => 'make',
+            'Identification Number' => 'vin',
+            'Color' => 'color',
+            'Body' => 'body_type',
+
+            // NOT the same rule as the 82040's Section 2. That box is labelled
+            // "Florida Title Number" and so takes florida_title_number, which
+            // is null for an out-of-state title. This box asks for the title
+            // number full stop, so the surrendered title's own number belongs
+            // here whatever state issued it.
+            'Title Number' => 'title_number',
+            'Title State' => 'title_state',
+
+            // SECTION V: the descriptive block on page 3.
+            //
+            // The form asks for the same vehicle a second time under different
+            // field names. Pre-filling it helps whoever completes the rest of
+            // the block, and nothing here is an attestation.
+            'VIN' => 'vin',
+            'Title #1' => 'title_number',
+            'Title State #1' => 'title_state',
+            'Year #1' => 'year',
+            'Make #1' => 'make',
+            'Body #1' => 'body_type',
+            'Color #1' => 'color',
+
+            // One plain box, unlike the per-digit rows on the 82040, 82042 and
+            // 82050. This is the first use of the whole-number odometer key.
+            'Odometer' => 'odometer',
+
+            // The PRVIP inspector's line. The signature above it is wet, but a
+            // printed name and a signing date are recorded facts rather than
+            // an attestation, and both keys already serve the 82040's
+            // Section 8. A case with no inspection leaves both blank rather
+            // than claiming an inspection happened.
+            'Print Name of PRVIP Inspector' => 'inspector_name',
+            'Date_4' => 'inspector_signed_date',
+        ],
+    ],
+
 ];

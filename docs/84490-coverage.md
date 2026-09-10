@@ -283,11 +283,24 @@ region numbers read `inspections`, and `CoAgy` reads a setting that is empty.
 
 ## Recommended order
 
-1. **The 20 class B fields that are genuinely unblocked.** Header build type (3),
-   Section I description (7), the Section V descriptive block (8) — VIN, title pair,
-   odometer, year/make/body/color — and the PRVIP printed name and date (2), which are
-   the inspector's own recorded facts rather than an attestation. All reuse proven keys;
-   same shape as the 82042's Part A.
+1. ~~**The 20 class B fields that are genuinely unblocked.**~~ **DONE.** Header build
+   type (3), Section I description (7), the Section V descriptive block (8) — VIN, title
+   pair, odometer, year/make/body/color — and the PRVIP printed name and date (2), which
+   are the inspector's own recorded facts rather than an attestation. All reuse proven
+   keys; same shape as the 82042's Part A.
+
+   Mapped in `config/hsmv_forms.php` under `hsmv_84490`, pinned by
+   `tests/Feature/HSMV84490FieldMapTest.php`. Two things came out of it worth knowing:
+
+   - `Title Number` here is **not** the 82040's rule. That form's box is labelled
+     "Florida Title Number" and takes `florida_title_number`, which is null for an
+     out-of-state title; this box asks for the title number full stop, so it takes
+     `title_number` whatever state issued it.
+   - The form now generates, so it moved out of the packet manifest's COMPLETE THESE BY
+     HAND list and into GENERATED AND ENCLOSED. Since only 20 of 134 boxes fill and the
+     enclosed copy is flattened, `PDFGeneratorService::PARTIALLY_FILLED_FORMS` prints a
+     PARTLY FILLED — NOT READY TO SUBMIT caveat under it. Remove that entry when every
+     box is either mapped or struck off, not merely when the map grows.
 2. **The Section IV applicant fields**, once ambiguity 1 (builder identity) is answered.
    Six class B fields — the left column's printed name, street, city/state/zip and
    phone — map to `owner_*` keys **only if the customer signs as builder**; line 152's

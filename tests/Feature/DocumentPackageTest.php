@@ -148,8 +148,9 @@ class DocumentPackageTest extends TestCase
         $path = app(PDFGeneratorService::class)->generateFullPackage($this->passedCase());
         $manifest = $this->manifestIn($path);
 
-        // Unmapped government forms.
-        $this->assertStringContainsString('HSMV 84490', $manifest);
+        // Unmapped government forms. The 84490 is no longer among them: it
+        // has a partial map and is generated, with a caveat of its own — see
+        // test_a_partially_filled_form_says_so_in_the_manifest().
         $this->assertStringContainsString('HSMV 84491', $manifest);
         $this->assertStringContainsString('HSMV 82053', $manifest);
 
@@ -266,10 +267,10 @@ class DocumentPackageTest extends TestCase
         $this->assertNotEmpty($path, 'The response carries no package path.');
         Storage::disk('private')->assertExists($path);
 
-        // The three forms with a field map are in the folder.
+        // The four forms with a field map are in the folder.
         $entries = $this->entriesIn($path);
 
-        foreach (['HSMV_82040', 'HSMV_82042', 'HSMV_82050'] as $form) {
+        foreach (['HSMV_82040', 'HSMV_82042', 'HSMV_82050', 'HSMV_84490'] as $form) {
             $this->assertTrue(
                 (bool) array_filter(
                     $entries,
@@ -279,22 +280,22 @@ class DocumentPackageTest extends TestCase
             );
         }
 
-        // The three without one are named in the manifest as manual.
+        // The two without one are named in the manifest as manual.
         $manifest = $this->manifestIn($path);
 
-        foreach (['HSMV 84490', 'HSMV 84491', 'HSMV 82053'] as $form) {
+        foreach (['HSMV 84491', 'HSMV 82053'] as $form) {
             $this->assertStringContainsString($form, $manifest, "{$form} should be listed as manual.");
         }
 
         // And they are under the manual heading, not the generated one.
         [$manualSection, $generatedSection] = explode('GENERATED AND ENCLOSED', $manifest, 2);
 
-        foreach (['HSMV 84490', 'HSMV 84491', 'HSMV 82053'] as $form) {
+        foreach (['HSMV 84491', 'HSMV 82053'] as $form) {
             $this->assertStringContainsString($form, $manualSection);
             $this->assertStringNotContainsString($form, $generatedSection);
         }
 
-        foreach (['HSMV 82040', 'HSMV 82042', 'HSMV 82050'] as $form) {
+        foreach (['HSMV 82040', 'HSMV 82042', 'HSMV 82050', 'HSMV 84490'] as $form) {
             $this->assertStringContainsString($form, $generatedSection);
         }
     }
@@ -380,7 +381,7 @@ class DocumentPackageTest extends TestCase
         $this->assertStringNotContainsString('HSMV 82042', $enclosed);
 
         // The genuinely unfillable forms stay where they were.
-        foreach (['HSMV 84490', 'HSMV 84491', 'HSMV 82053'] as $form) {
+        foreach (['HSMV 84491', 'HSMV 82053'] as $form) {
             $this->assertStringContainsString($form, $byHand);
         }
     }
