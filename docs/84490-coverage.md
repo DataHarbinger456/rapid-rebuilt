@@ -306,7 +306,17 @@ region numbers read `inspections`, and `CoAgy` reads a setting that is empty.
    phone — map to `owner_*` keys **only if the customer signs as builder**; line 152's
    table carries the caveat on the name row. If Rapid Rebuilt is ever the builder, they
    map to the shop instead, which is why they wait rather than shipping with item 1.
-3. **Audit # and Region #.** Two class C fields, our own data, no ambiguity.
+3. ~~**Audit # and Region #.**~~ **DONE.** Two class C fields, our own data, no
+   ambiguity in the mapping itself. Two things did need deciding:
+
+   - `Region #` (Section V, page 3) is ours; `Region` (page-4 CE block) is a state
+     officer's and stays blank. The names differ by one character.
+   - `region_number` carries `InspectionService`'s `'FL'` fallback whenever the
+     inspector has no region on file. `'FL'` is a state, not a region number, so
+     `prepareFormData()` drops it and the box prints blank — a question staff can
+     answer by hand beats a wrong value flattened onto a sworn form. Remove the guard
+     (`PDFGeneratorService::UNSET_REGION_FALLBACK`) once region is required of every
+     inspector.
 4. **The parts table**, once ambiguity 6 (condition columns) is answered. The biggest
    single win on the form: 30 fields.
 5. **CoAgy**, once the PRVIP number exists in settings.

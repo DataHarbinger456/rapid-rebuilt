@@ -109,7 +109,10 @@ class HSMV84490FieldMapTest extends TestCase
      * Every case here needs an inspection, because two of the 20 fields are
      * the inspector's own name and signing date.
      */
-    private function fullyPopulatedCase(array $vehicleOverrides = []): UserCase
+    private function fullyPopulatedCase(
+        array $vehicleOverrides = [],
+        array $inspectionOverrides = []
+    ): UserCase
     {
         $customer = User::factory()->create([
             'first_name' => 'Kelvyn',
@@ -150,7 +153,7 @@ class HSMV84490FieldMapTest extends TestCase
             'odometer_status' => 'actual',
         ], $vehicleOverrides));
 
-        Inspection::create([
+        Inspection::create(array_merge([
             'user_case_id' => $case->id,
             'inspector_id' => User::factory()->create([
                 'first_name' => 'Marcus',
@@ -162,7 +165,12 @@ class HSMV84490FieldMapTest extends TestCase
             'result' => 'passed',
             'signed_at' => '2026-03-09 14:20:00',
             'completed_at' => '2026-03-09 15:00:00',
-        ]);
+
+            // Both are set by InspectionService when the inspection starts, so
+            // a real passed inspection always carries them.
+            'audit_number' => 'RR-260309-A1B2',
+            'region_number' => '05',
+        ], $inspectionOverrides));
 
         return $case->fresh();
     }
@@ -230,6 +238,10 @@ class HSMV84490FieldMapTest extends TestCase
             'prvip printed name' => ['Print Name of PRVIP Inspector', 'Marcus Delgado'],
             'prvip date' => ['Date_4', '03/09/2026'],
 
+            // Section V office-use pair. Both are our own generated data,
+            // recorded on the inspection when it started.
+            'audit number' => ['Audit #', 'RR-260309-A1B2'],
+            'region number' => ['Region #', '05'],
         ];
     }
 
@@ -513,8 +525,96 @@ class HSMV84490FieldMapTest extends TestCase
         $this->assertSame('', $values['Print Name of PRVIP Inspector'] ?? '');
         $this->assertSame('', $values['Date_4'] ?? '');
 
+        // The office-use pair comes off the same inspection and goes with it.
+        $this->assertSame('', $values['Audit #'] ?? '');
+        $this->assertSame('', $values['Region #'] ?? '');
+
         // The vehicle description still fills: it does not depend on an inspection.
         $this->assertSame('1HGCV1F30LA123456', $values['Identification Number']);
+    }
+
+    /**
+     * The 'FL' fallback is a state, not a region number, and this box asks for
+     * a region number. InspectionService writes `$inspector->region ?? 'FL'`,
+     * so every inspection whose inspector has no region on file carries 'FL'
+     * in a column the form expects a number in.
+     *
+     * The call: print nothing. A blank box on a sworn document is a question
+     * for whoever completes it; 'FL' in a box labelled Region # is an answer,
+     * and a wrong one that looks deliberate. Staff can write the real region
+     * in by hand, which they cannot do once a wrong value is flattened onto
+     * the page.
+     */
+    public function test_the_fl_fallback_is_not_a_region_number_and_prints_blank(): void
+    {
+        $values = $this->fieldValuesInFilledPdf(
+            $this->fullyPopulatedCase([], ['region_number' => 'FL'])
+        );
+
+        $this->assertSame(
+            '',
+            $values['Region #'] ?? '',
+            "'FL' is InspectionService's fallback for an inspector with no region, "
+            . 'not a region number, and must not be printed in a box that asks for one.'
+        );
+
+        // The audit number beside it is unaffected: it has no such fallback.
+        $this->assertSame('RR-260309-A1B2', $values['Audit #']);
+    }
+
+    /**
+     * A real region number is not held back by the rule above.
+     */
+    public function test_a_real_region_number_still_prints(): void
+    {
+        foreach (['05', '5', 'R05'] as $region) {
+            $values = $this->fieldValuesInFilledPdf(
+                $this->fullyPopulatedCase([], ['region_number' => $region])
+            );
+
+            $this->assertSame($region, $values['Region #'] ?? '');
+        }
+    }
+
+    /**
+     * There are TWO region boxes on this form, and only one of them is ours.
+     *
+     * 'Region #' is the Section V office-use box on page 3, mapped above.
+     * 'Region' is a separate class D field in the page-4 Compliance Examiner
+     * block, which a CE completes alongside their own printed name and date.
+     * The names differ by one character, so a map that reached for the wrong
+     * one would fill a state officer's block with our number and pass every
+     * value assertion.
+     */
+    public function test_the_compliance_examiner_region_box_stays_blank(): void
+    {
+        $values = $this->fieldValuesInFilledPdf($this->fullyPopulatedCase());
+
+        $this->assertSame(
+            '',
+            $values['Region'] ?? '',
+            "[Region] is the Compliance Examiner's own box on page 4, not ours."
+        );
+
+        // The rest of the CE block stays blank with it.
+        foreach (['Print Name of HSMV', 'Date_3'] as $field) {
+            $this->assertSame('', $values[$field] ?? '', "[{$field}] is CE-only.");
+        }
+
+        // And our box on page 3 did fill, so this is not passing by accident.
+        $this->assertSame('05', $values['Region #']);
+    }
+
+    /**
+     * The two names are distinct fields in the template, which is the fact the
+     * test above depends on.
+     */
+    public function test_region_and_region_hash_are_different_fields(): void
+    {
+        $names = $this->fieldNamesInTemplate();
+
+        $this->assertContains('Region', $names);
+        $this->assertContains('Region #', $names);
     }
 
     /**

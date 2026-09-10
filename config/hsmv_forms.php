@@ -541,6 +541,20 @@ return [
             // than claiming an inspection happened.
             'Print Name of PRVIP Inspector' => 'inspector_name',
             'Date_4' => 'inspector_signed_date',
+
+            // The Section V office-use pair, on page 3. Our own reference
+            // numbers, recorded on the inspection when it starts.
+            //
+            // TRAP: the page-4 Compliance Examiner block has its own box named
+            // 'Region', one character from this one. That box belongs to a
+            // state officer and stays blank; putting our number in it would
+            // pass every value assertion while filling in someone else's
+            // block. HSMV84490FieldMapTest pins both.
+            //
+            // region_number is dropped by prepareFormData() when it holds the
+            // 'FL' fallback rather than a real region number.
+            'Audit #' => 'audit_number',
+            'Region #' => 'region_number',
         ],
     ],
 

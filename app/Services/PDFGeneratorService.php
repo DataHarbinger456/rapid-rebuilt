@@ -205,6 +205,14 @@ class PDFGeneratorService
      * An entry earns its removal by having every box either mapped or struck
      * off, not by the map merely growing.
      */
+    /**
+     * What InspectionService stores in inspections.region_number when the
+     * inspector has no region on file: the state, not a region number.
+     *
+     * @see \App\Services\InspectionService::startInspection()
+     */
+    protected const UNSET_REGION_FALLBACK = 'FL';
+
     protected const PARTIALLY_FILLED_FORMS = [
         'HSMV_84490' => 'Only the vehicle, title and inspector details are filled. '
             . 'The parts table, the applicant block, the initials, the sworn '
@@ -799,6 +807,24 @@ class PDFGeneratorService
             // was signed weeks ago.
             'inspector_name' => $inspection?->inspector?->full_name,
             'inspector_signed_date' => ($inspection?->signed_at ?? $inspection?->completed_at)?->format('m/d/Y'),
+            // The 84490's Section V office-use pair, both recorded on the
+            // inspection when InspectionService starts it. Neither is an
+            // attestation; they are our own reference numbers, and a case with
+            // no inspection has neither, which leaves both boxes blank.
+            'audit_number' => $inspection?->audit_number,
+            // InspectionService writes `$inspector->region ?? 'FL'`, so an
+            // inspector with no region on file leaves the literal state code
+            // in a column the form expects a region NUMBER in.
+            //
+            // 'FL' is not an answer to "Region #", and this form is sworn
+            // under penalty of perjury, so it is dropped rather than printed:
+            // a blank box is a question staff can answer by hand, while a
+            // wrong value flattened onto the page looks deliberate and cannot
+            // be corrected. Remove this guard once region is required of every
+            // inspector and the fallback is gone.
+            'region_number' => $inspection?->region_number === self::UNSET_REGION_FALLBACK
+                ? null
+                : $inspection?->region_number,
             // Weight is whatever the title says, not the VIN decoder's GVWR.
             // Client confirmed 5 Aug: every Florida title carries its own
             // weight, out-of-state titles may not, and a blank box is
