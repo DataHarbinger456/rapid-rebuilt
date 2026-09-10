@@ -193,6 +193,26 @@ class PDFGeneratorService
     ];
 
     /**
+     * Forms whose field map covers only part of the page, with what a member
+     * of staff still has to do to the enclosed copy.
+     *
+     * A form listed here is generated and enclosed like any other, so the
+     * caveat is the only thing standing between staff and a sworn declaration
+     * submitted with its attestations blank. GENERATED AND ENCLOSED reads as
+     * "done", and the enclosed copy is flattened, so what is still missing
+     * cannot be typed in — both facts have to reach whoever opens the folder.
+     *
+     * An entry earns its removal by having every box either mapped or struck
+     * off, not by the map merely growing.
+     */
+    protected const PARTIALLY_FILLED_FORMS = [
+        'HSMV_84490' => 'Only the vehicle, title and inspector details are filled. '
+            . 'The parts table, the applicant block, the initials, the sworn '
+            . 'attestations and every signature are blank and must be completed '
+            . 'and signed by hand.',
+    ];
+
+    /**
      * Documents the packet is expected to contain but this service cannot
      * build yet, with the reason the manifest should give.
      */
@@ -436,6 +456,19 @@ class PDFGeneratorService
             foreach ($generated as $formName => $description) {
                 $lines[] = '  ' . str_replace('_', ' ', $formName)
                     . ' — ' . $description;
+
+                // Directly under the form's own line, so it cannot be read as
+                // applying to a neighbour or missed as a footnote.
+                if (isset(self::PARTIALLY_FILLED_FORMS[$formName])) {
+                    $lines[] = '      *** PARTLY FILLED — NOT READY TO SUBMIT ***';
+
+                    foreach (explode("\n", wordwrap(self::PARTIALLY_FILLED_FORMS[$formName], 62)) as $line) {
+                        $lines[] = '      ' . $line;
+                    }
+
+                    $lines[] = '      The enclosed copy is flattened and cannot be typed into.';
+                    $lines[] = '';
+                }
             }
         }
 

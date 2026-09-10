@@ -387,6 +387,64 @@ class DocumentPackageTest extends TestCase
     }
 
     /**
+     * The 84490 is the first form the packet encloses while it is still mostly
+     * blank: 20 of its 134 boxes fill, and the rest wait on questions the
+     * client has not answered.
+     *
+     * Listing it under GENERATED AND ENCLOSED with no caveat would be worse
+     * than not generating it at all. Staff read that heading as "done", and
+     * the enclosed copy is flattened, so the boxes they still have to complete
+     * can no longer be typed into — they would discover both at the counter,
+     * holding a declaration sworn under penalty of perjury with its
+     * attestations empty.
+     */
+    public function test_a_partially_filled_form_says_so_in_the_manifest(): void
+    {
+        Storage::fake('private');
+
+        $path = app(PDFGeneratorService::class)->generateFullPackage($this->passedCase());
+        $manifest = $this->manifestIn($path);
+
+        [, $enclosed] = explode('GENERATED AND ENCLOSED', $manifest, 2);
+
+        $lines = explode("\n", $enclosed);
+
+        // Attribution is the whole point of the warning, and proximity in
+        // characters does not establish it: the forms are listed one per line,
+        // so the caveat belongs on the line IMMEDIATELY after its own form.
+        $at = null;
+
+        foreach ($lines as $i => $line) {
+            if (str_contains($line, 'HSMV 84490')) {
+                $at = $i;
+                break;
+            }
+        }
+
+        $this->assertNotNull($at, 'The 84490 is not listed as enclosed.');
+
+        $this->assertStringContainsString(
+            'PARTLY FILLED',
+            $lines[$at + 1] ?? '',
+            'The 84490 is enclosed mostly blank and the line under it does not say so.'
+        );
+
+        // And it says what is still missing, in words staff can act on.
+        foreach (['sign', 'parts'] as $word) {
+            $this->assertStringContainsString($word, strtolower($enclosed));
+        }
+
+        // No other enclosed form is tarred with it.
+        $this->assertSame(
+            1,
+            substr_count($enclosed, 'PARTLY FILLED'),
+            'Exactly one enclosed form is partly filled, so the warning appears once.'
+        );
+
+        $this->assertStringNotContainsString('PARTLY FILLED', $lines[$at] ?? '');
+    }
+
+    /**
      * An out-of-state vehicle gets the form, and no "not required" heading is
      * printed when nothing was skipped.
      */
